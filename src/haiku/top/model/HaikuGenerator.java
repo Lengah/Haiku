@@ -83,19 +83,19 @@ public class HaikuGenerator {
 			testInit2(); //TEST
 			inited = true;
 		}
-		if(theme != currentTheme){
-			// Update theme
-			updateTheme(theme);
-		}
-		if(newSMSLog){
-			newSMSLog = false;
-			//TODO
-			importSMS();
-			updateLogs();
-		}
-		if(smsLogWords.isEmpty()){
-			// No words found!
-		}
+//		if(theme != currentTheme){
+//			// Update theme
+//			updateTheme(theme);
+//		}
+//		if(newSMSLog){
+//			newSMSLog = false;
+//			//TODO
+//			importSMS();
+//			updateLogs();
+//		}
+//		if(smsLogWords.isEmpty()){
+//			// No words found!
+//		}
 		Haiku haiku = new Haiku(theme);
 		haiku.generate();
 		generatedHaikus.add(haiku);
