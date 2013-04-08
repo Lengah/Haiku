@@ -8,7 +8,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import gen.haiku.R;
+import haiku.top.R;
 import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Theme;
 
