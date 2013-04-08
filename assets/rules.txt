@@ -1,0 +1,36 @@
+<sentence>=2
+<single sentence>
+<single sentence>(conjunction)<single sentence>
+
+<single sentence>=3
+<simple sentence>
+(gerund)<simple sentence>
+(adverb)(gerund)<simple sentence>
+
+<simple sentence>=15
+<noun phrase>(intransitiveverb)
+<noun phrase>(intransitiveverb)(adverb)
+<noun phrase>(intransitiveverb)(preposition)<noun phrase>
+<noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
+(adverb)[,]<noun phrase>(intransitiveverb)
+(adverb)[,]<noun phrase>(intransitiveverb)(adverb)
+(adverb)[,]<noun phrase>(intransitiveverb)(preposition)<noun phrase>
+(adverb)[,]<noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
+<noun phrase>(adverb)(intransitiveverb)
+<noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
+(adverb)[,]<noun phrase>(adverb)(intransitiveverb)
+(adverb)[,]<noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
+<noun phrase>(transitiveverb)<noun phrase>
+<noun phrase>(transitiveverb)<noun phrase>(adverb)
+<noun phrase>(adverb)(transitiveverb)<noun phrase>
+
+<noun phrase>=9
+(pronoun)
+(propernoun)
+(positive-adjective)(propernoun)
+[the](impropernoun)
+[the](positive-adjective)(impropernoun)
+[a/an](singular-noun)
+[a/an](positive-adjective)(singular-noun)
+(plural-noun)
+(positive-adjective)(plural-noun)
