@@ -1,5 +1,5 @@
 package haiku.top.model;
-
+//github test1
 import java.util.ArrayList;
 
 public class Contact {
