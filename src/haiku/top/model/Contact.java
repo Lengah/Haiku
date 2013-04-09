@@ -1,28 +1,45 @@
 package haiku.top.model;
-//github test1
-import java.util.ArrayList;
+
+//import java.util.ArrayList;
 
 public class Contact {
 	private long id;
 	private String name;
-	private ArrayList<SMS> sms = new ArrayList<SMS>();
+//	private ArrayList<SMS> sms = new ArrayList<SMS>();
+	private String number;
 	
-	public Contact(long id, String name){
+	public Contact(long id, String name, String number){
 		this.id = id;
 		this.name = name;
+		this.number = number;
+		if(this.number.contains("+")){
+			this.number = "0" + this.number.substring(3);
+		}
 	}
 	
-	public void addSMS(SMS sms){
-		this.sms.add(sms);
+	public Contact(){
+		
 	}
 	
-	public void removeSMS(int index){
-		this.sms.remove(index);
+	public void setNumber(String number){
+		this.number = number;
 	}
 	
-	public void removeSMS(SMS sms){
-		this.sms.remove(sms);
+	public String getPhoneNumber(){
+		return number;
 	}
+	
+//	public void addSMS(SMS sms){
+//		this.sms.add(sms);
+//	}
+//	
+//	public void removeSMS(int index){
+//		this.sms.remove(index);
+//	}
+//	
+//	public void removeSMS(SMS sms){
+//		this.sms.remove(sms);
+//	}
 	
 	public void setName(String name){
 		this.name = name;
@@ -40,7 +57,11 @@ public class Contact {
 		return id;
 	}
 	
-	public ArrayList<SMS> getSMS(){
-		return sms;
-	}
+//	public ArrayList<SMS> getSMS(){
+//		return sms;
+//	}
+//	
+//	public void setSMS(ArrayList<SMS> sms){
+//		this.sms = sms;
+//	}
 }

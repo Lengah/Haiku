@@ -48,76 +48,89 @@ public class HaikuActivity extends Activity {
     }
     
     public static void initContactsAndSMS(Context context){
-    	String[] contactProjection = new String[] {
-                ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME,
-                ContactsContract.Contacts.HAS_PHONE_NUMBER,
-       };
-       String contactSelection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
-       Cursor c = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, contactProjection, contactSelection, null, null);
+    	
+//    	String[] contactProjection = new String[] {
+//                ContactsContract.Contacts._ID,
+//                ContactsContract.Contacts.DISPLAY_NAME,
+//                ContactsContract.Contacts.HAS_PHONE_NUMBER,
+//                ContactsContract.CommonDataKinds.Phone.NUMBER
+//       };
+//       String contactSelection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
+//       Cursor c = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, contactProjection, contactSelection, null, null);
        String name;
        String contactId;
+       String number;
        
-       while(c.moveToNext()){
-       		 name = c.getString(c.getColumnIndex(PhoneLookup.DISPLAY_NAME));
-       		 contactId = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
-       		 Log.i("Tag", "Name: " + name + ", ID: " + contactId);
-       		 contacts.add(new Contact(Integer.parseInt(contactId), name));
-       	}
+       Cursor phones = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
+	   while (phones.moveToNext()){
+	   	  name=phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+	   	  number = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+	   	  contactId = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+	   	  Log.i("Tag", "Name: " + name + ", number: " + number + ", ID: " + contactId);
+	   	  contacts.add(new Contact(Integer.parseInt(contactId), name, number));
+	   }
+	   phones.close();
        
-       	c.close();
+//       while(c.moveToNext()){
+//       		 name = c.getString(c.getColumnIndexOrThrow(PhoneLookup.DISPLAY_NAME));
+//       		 contactId = c.getString(c.getColumnIndexOrThrow(ContactsContract.Contacts._ID));
+//       		 number = c.getString(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
+//       		 Log.i("Tag", "Name: " + name + ", ID: " + contactId);
+//       		 contacts.add(new Contact(Integer.parseInt(contactId), name, number));
+//       	}
+//       
+//       	c.close();
     	
     	Uri mSmsinboxQueryUri = Uri.parse(ALLBOXES);
-//    	String[] projection = new String[] {ContactsContract.Contacts._ID, "_id", "date", "body"};
-//    	String[] projection = new String[] {"_id", "thread_id", "address", "person", "date", "body", "type" };
     	String[] projection = new String[] {"_id", "address", "date", "body"};
-//    	String selection = ContactsContract.Contacts._ID + "='" + contact.getID() + "'";
-        Cursor cursor1 = context.getContentResolver().query(mSmsinboxQueryUri,
-                    projection, null, null, null);
-//        String[] columns = new String[] { "address", "person", "date", "body","type" };
+        Cursor cursor1 = context.getContentResolver().query(mSmsinboxQueryUri, projection, null, null, null);
         String message;
         String date;
         String address;
         String _id;
-        boolean found;
-        String count = Integer.toString(cursor1.getCount());
-        Log.i("TAG", "Count: " + count);
         
         int c1 = 0;
-        int c2 = 0;
+        int c2 = cursor1.getCount();
         double time1;
         double totalTime = 0;
         double startTime = System.currentTimeMillis();
+//        boolean found;
+        
         while (cursor1.moveToNext()){
         	time1 = System.currentTimeMillis();
-        	found = false;
+//        	found = false;
         	date = cursor1.getString(cursor1.getColumnIndexOrThrow("date"));
             message = cursor1.getString(cursor1.getColumnIndexOrThrow("body"));
             address = cursor1.getString(cursor1.getColumnIndexOrThrow("address"));
+            if(address.contains("+")){
+            	address = "0" + address.substring(3);
+    		}
             _id = cursor1.getString(cursor1.getColumnIndexOrThrow("_id"));
-            name = getContactName(context, address);
         	for(int i = 0; i < contacts.size(); i++){
-        		if(name != null && name.equals(contacts.get(i).getName())){
-        			contacts.get(i).addSMS(new SMS(Integer.parseInt(_id), message, contacts.get(i)));
-        			found = true;
+        		if(address.equals(contacts.get(i).getPhoneNumber())){
+//        			contacts.get(i).addSMS(new SMS(Integer.parseInt(_id), message, contacts.get(i)));
         			c1++;
+//        			found = true;
         			break;
         		}
         	}
-        	if(found){
-        		totalTime += System.currentTimeMillis()-time1;
-        		continue;
-        	}
-        	c2++;
+//        	if(!found){
+//        		name = getContactName(context, address);
+//        		Log.i("TAG","Name: " + name + ", Address: " + address);
+//        	}
         	totalTime += System.currentTimeMillis()-time1;
-//            Log.i("TAG", "Contact not found for message: " + message);
         }
         cursor1.close();
-        Log.i("TAG", "c1: " + c1 + ", c2: " + c2);
+        for(int i = contacts.size()-1; i >= 0; i--){
+//        	if(contacts.get(i).getSMS().isEmpty()){
+//        		contacts.remove(i);
+//        	}
+        }
+        Log.i("TAG", "found: " + c1 + ", not found: " + (c2-c1) + ", total: " + c2);
         Log.i("TAG", "Contacts size: " + contacts.size());
-        Log.i("TAG","Total time: "+ (System.currentTimeMillis()-startTime)/1000 + " s" + ", average time: " + totalTime/(c1+c2) + " ms" + ", loops: " + (c1+c2));
-    }
-    
+        Log.i("TAG","Total time: "+ (System.currentTimeMillis()-startTime) + " ms" + ", average time: " + totalTime/(c2) + " ms" + ", loops: " + (c2));    
+   }
+
     /**
      * Tries to get the contact's display name of the specified phone number.
      * If not found, returns the argument. If there is an error or phoneNumber
