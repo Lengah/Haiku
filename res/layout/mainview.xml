@@ -4,20 +4,10 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/generateButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Generate" />
-
-    <TextView
+    <ListView
+        android:id="@+id/listofcontacts"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/haikuText" />
-    
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/dateText" />"
+        android:layout_height="fill_parent" >
+    </ListView>
 
 </LinearLayout>

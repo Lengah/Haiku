@@ -68,7 +68,7 @@ public class HaikuGenerator {
 				text = text.substring(text.indexOf('|')+1);
 				syllables = text.substring(0, text.indexOf('|'));
 				wordType = text.substring(text.lastIndexOf('|')+1);
-				smsLogWords.add(new Word(word, syllables, wordType));
+//				smsLogWords.add(new Word(word, syllables, wordType));
 			}
 			Log.i("TAG", "words: " + smsLogWords.size());
 		} catch (IOException e) {
@@ -224,7 +224,7 @@ public class HaikuGenerator {
 			while ((text = readerTheme.readLine()) != null) { // or until the word is found
 				if((wordText = text.substring(0,text.indexOf('|'))).equals(word)){
 					text = text.substring(text.indexOf('|')+1);
-					returnWord = new Word(wordText, text.substring(0, text.indexOf('|')),text.substring(text.lastIndexOf('|')+1));
+//					returnWord = new Word(wordText, text.substring(0, text.indexOf('|')),text.substring(text.lastIndexOf('|')+1));
 					break;
 				}
 			}
@@ -295,29 +295,29 @@ public class HaikuGenerator {
 			wordTypes = wordTypes.substring(1);
 		}
 		boolean exists;
-		for(int i = 0; i < smsLogWords.size(); i++){
-			exists = true;
-			for(int t = 0; t < types.size(); t++){
-				if(types.get(t) == 'U' && smsLogWords.get(i).getWordType().indexOf('p') != -1){
-					// needs to be a singular noun, but the word is a plural noun
-					exists = false;
-					break;
-				}
-				if(types.get(t) == 'J' && smsLogWords.get(i).getWordType().indexOf('s') != -1){
-					// needs to be a plural verb, but the word is a singular verb
-					exists = false;
-					break;
-				}
-				if(types.get(t) != 'U' && types.get(t) != 'J'  && smsLogWords.get(i).getWordType().indexOf(types.get(t)) == -1){
-					// U and J does not exist in the dictionaries
-					exists = false;
-					break;
-				}
-			}
-			if(exists){
-				words.add(smsLogWords.get(i));
-			}
-		}
+//		for(int i = 0; i < smsLogWords.size(); i++){
+//			exists = true;
+//			for(int t = 0; t < types.size(); t++){
+//				if(types.get(t) == 'U' && smsLogWords.get(i).getWordType().indexOf('p') != -1){
+//					// needs to be a singular noun, but the word is a plural noun
+//					exists = false;
+//					break;
+//				}
+//				if(types.get(t) == 'J' && smsLogWords.get(i).getWordType().indexOf('s') != -1){
+//					// needs to be a plural verb, but the word is a singular verb
+//					exists = false;
+//					break;
+//				}
+//				if(types.get(t) != 'U' && types.get(t) != 'J'  && smsLogWords.get(i).getWordType().indexOf(types.get(t)) == -1){
+//					// U and J does not exist in the dictionaries
+//					exists = false;
+//					break;
+//				}
+//			}
+//			if(exists){
+//				words.add(smsLogWords.get(i));
+//			}
+//		}
 		if(words.isEmpty()){
 			// finns inget sådant ord
 			return null;
@@ -419,7 +419,7 @@ public class HaikuGenerator {
 			}
 			else{
 				//ord hittat!
-				return word.getWord();
+				return word.getText();
 			}
 		}
 		// just a string with the following structure: [the string]	

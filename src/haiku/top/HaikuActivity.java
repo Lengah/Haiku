@@ -130,6 +130,24 @@ public class HaikuActivity extends Activity {
         Log.i("TAG", "Contacts size: " + contacts.size());
         Log.i("TAG","Total time: "+ (System.currentTimeMillis()-startTime) + " ms" + ", average time: " + totalTime/(c2) + " ms" + ", loops: " + (c2));    
    }
+    
+    public static Cursor getThreads(Context context){
+		Uri uri = Uri.parse(ALLBOXES);
+		Cursor cursor = context.getContentResolver().query(uri, null, "1) GROUP BY (thread_id", null, SORT_ORDER);
+		if(cursor!=null){
+			return cursor;
+		}
+		return null;
+	} 
+	
+	public static Cursor getThread(Context context, int thread_id){
+		Uri uri = Uri.parse(ALLBOXES);
+		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id = '" + thread_id + "'", null, SORT_ORDER_INV);
+		if(cursor!=null){
+			return cursor;
+		}
+		return null;
+	} 
 
     /**
      * Tries to get the contact's display name of the specified phone number.
@@ -159,4 +177,6 @@ public class HaikuActivity extends Activity {
         }
         return res;
     }
+    
+    
 }
