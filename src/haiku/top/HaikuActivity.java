@@ -40,7 +40,7 @@ public class HaikuActivity extends Activity {
         ha = this;
         mainView = new MainView(this);
         setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-        initContactsAndSMS(this);
+//        initContactsAndSMS(this);
     }
     
     public static HaikuActivity getInstance(){

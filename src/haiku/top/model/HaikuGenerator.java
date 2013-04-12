@@ -17,6 +17,7 @@ public class HaikuGenerator {
 	private static ArrayList<String> smsLog = new ArrayList<String>();
 	private static ArrayList<Haiku> generatedHaikus = new ArrayList<Haiku>();
 	private static ArrayList<Haiku> savedHaikus = new ArrayList<Haiku>();
+	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static Theme currentTheme;
 	private static boolean newSMSLog = true;
 	
@@ -31,6 +32,18 @@ public class HaikuGenerator {
 	
 	public static void sortSavedHaikus(SortType sortType){
 		
+	}
+	
+	public static void addTheme(Theme theme){
+		themes.add(theme);
+	}
+	
+	public static void removeTheme(Theme theme){
+		themes.remove(theme);
+	}
+	
+	public static ArrayList<Theme> getThemes(){
+		return themes;
 	}
 	
 	/**
