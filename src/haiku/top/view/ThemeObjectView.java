@@ -1,5 +1,7 @@
 package haiku.top.view;
 
+import java.util.DuplicateFormatFlagsException;
+
 import haiku.top.model.Theme;
 import android.content.Context;
 import android.graphics.Color;
@@ -24,16 +26,15 @@ public class ThemeObjectView extends LinearLayout{
 		this.theme = theme;
 		themeText = new TextView(context);
 		
-		this.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 50));
-		this.addView(themeText);
+		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 75));
+		addView(themeText);
 		themeText.setGravity(Gravity.CENTER);
-		
 		setBackgroundColor(Color.WHITE);
 		
 		themeText.setText(theme.toString());
 		themeText.setTextColor(Color.BLACK);
-		themeText.setTextSize(15);
-		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		themeText.setTextSize(25);
+		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		
 		themeText.setTypeface(null, Typeface.BOLD);
 	}

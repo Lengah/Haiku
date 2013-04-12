@@ -25,17 +25,20 @@ public final class R {
     }
     public static final class id {
         public static final int ContactLayout=0x7f080000;
-        public static final int action_settings=0x7f080007;
+        public static final int action_settings=0x7f080009;
+        public static final int binview=0x7f080007;
         public static final int contactPic=0x7f080001;
         public static final int contactname=0x7f080002;
         public static final int lastmsgcontent=0x7f080003;
-        public static final int listofcontacts=0x7f080006;
-        public static final int themebutton=0x7f080005;
-        public static final int themeview=0x7f080004;
+        public static final int listofcontacts=0x7f080008;
+        public static final int themebutton=0x7f080006;
+        public static final int themelist=0x7f080005;
+        public static final int themename=0x7f080004;
     }
     public static final class layout {
         public static final int item_contact=0x7f030000;
-        public static final int mainview=0x7f030001;
+        public static final int item_theme=0x7f030001;
+        public static final int mainview=0x7f030002;
     }
     public static final class menu {
         public static final int haiku=0x7f070000;

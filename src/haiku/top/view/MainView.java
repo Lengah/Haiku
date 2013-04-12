@@ -33,6 +33,7 @@ import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Theme;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.adapters.ContactListAdapter;
+import haiku.top.view.adapters.ThemeListAdapter;
 
 public class MainView extends LinearLayout implements OnClickListener, OnLongClickListener, OnDragListener{
 	private Context context;
@@ -40,11 +41,13 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	private static final int ANIMATION_TIME_DATE = 300;
 	
 	private Button themeButton;
-	private ScrollView themeView;
+	private ListView themeList;
 	
 	private ListView contactList;
 	
-	private boolean inBinRange = false; // used for drag and drop
+	private LinearLayout haikuBinView;
+	
+	private ThemeListAdapter themeListAdapter;
 	
 	public MainView(Context context) {
 		super(context);
@@ -55,15 +58,31 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		
 		contactList = (ListView)findViewById(R.id.listofcontacts);
 		themeButton = (Button)findViewById(R.id.themebutton);
-		themeView = (ScrollView)findViewById(R.id.themeview);
+		themeList = (ListView)findViewById(R.id.themelist);
+		haikuBinView = (LinearLayout)findViewById(R.id.binview);
+		
+		haikuBinView.setOnDragListener(new HaikuBinDragListener(haikuBinView));
+		haikuBinView.bringToFront();
 		
 		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
+		themeListAdapter = new ThemeListAdapter(context, R.id.themename, new ArrayList<Theme>());
+		
+		themeList.setAdapter(themeListAdapter);
 		
 		themeButton.bringToFront();
-		themeView.bringToFront();
-		themeView.setVisibility(View.GONE);
+		themeList.bringToFront();
+		themeList.setVisibility(View.GONE);
 		
 		themeButton.setOnClickListener(this);
+		themeList.setOnItemClickListener(new OnItemClickListener(){
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				closeThemeView();
+			}
+        });
 	}
 	
 	private TranslateAnimation translateAnimation;
@@ -71,10 +90,10 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	public void openThemeView(){
 		updateThemeView();
 		themeButton.setEnabled(false);
-		themeView.setVisibility(View.VISIBLE);
+		themeList.setVisibility(View.VISIBLE);
 		translateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
 		translateAnimation.setDuration(ANIMATION_TIME_THEME);
-		themeView.startAnimation(translateAnimation);
+		themeList.startAnimation(translateAnimation);
 		translateAnimation.setAnimationListener(new AnimationListener() {
 			@Override
 			public void onAnimationRepeat(Animation animation) {
@@ -94,7 +113,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	public void closeThemeView(){
 		translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
 		translateAnimation.setDuration(ANIMATION_TIME_THEME);
-		themeView.startAnimation(translateAnimation);
+		themeList.startAnimation(translateAnimation);
 		translateAnimation.setAnimationListener(new AnimationListener() {
 			@Override
 			public void onAnimationRepeat(Animation animation) {
@@ -106,14 +125,15 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 			
 			@Override
 			public void onAnimationEnd(Animation animation) {
-				themeView.setVisibility(View.GONE);
+				themeList.setVisibility(View.GONE);
 				themeButton.setEnabled(true);
 			}
 		});
 	}
 	
 	public void updateThemeView(){
-		themeView.removeAllViews();
+		themeListAdapter.clear();
+		
 		ArrayList<Theme> themes;
 //		themes = DatabaseHandler.getAllThemes();
 		themes = new ArrayList<Theme>();
@@ -122,24 +142,22 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		themes.add(Theme.summer);
 		themes.add(Theme.time);
 		
-		themes.removeAll(HaikuGenerator.getThemes()); // remove the themes that already are in the bin
+		themeListAdapter.addAll(themes);
 		
-		LinearLayout list = new LinearLayout(context);
-		list.setOrientation(VERTICAL);
-		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		ThemeObjectView themeObject;
-		for(int i = 0; i < themes.size(); i++){
-			themeObject = new ThemeObjectView(context, themes.get(i));
-			list.addView(themeObject);
-			themeObject.setOnLongClickListener(this);
-			themeObject.setOnDragListener(this);
-		}
-		themeView.addView(list);
-		list.setOnClickListener(new OnClickListener(){
-			public void onClick(View v){
-				closeThemeView();
-			}
-		});
+		themeListAdapter.removeAll(HaikuGenerator.getThemes()); // remove the themes that are already in the bin
+		
+//		ThemeObjectView themeObject;
+//		for(int i = 0; i < themes.size(); i++){
+//			themeObject = new ThemeObjectView(context, themes.get(i));
+//			themeObject.setOnLongClickListener(this);
+//			themeObject.setOnDragListener(this);
+//			themeObject.setDuplicateParentStateEnabled(true);
+//			themeObject.setOnClickListener(new View.OnClickListener(){
+//	            public void onClick(View v){
+//	            	Log.i("TAG","Click! theme");
+//	            }
+//	        });
+//		}
 	}
 
 	@Override
@@ -168,19 +186,19 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	public boolean onDrag(View v, DragEvent event) {
 		final int action = event.getAction();
 		if(action == DragEvent.ACTION_DRAG_STARTED){
-			Log.i("TAG", "Started");
+//			Log.i("TAG", "Started");
 			return true;
 		}
 		else if(action == DragEvent.ACTION_DRAG_ENTERED){
-			Log.i("TAG", "Entered");
+//			Log.i("TAG", "Entered");
 			return true;
 		}
 		else if(action == DragEvent.ACTION_DRAG_LOCATION){
-			Log.i("TAG", "Location");
+//			Log.i("TAG", "Location");
 			return true;
 		}
 		else if(action == DragEvent.ACTION_DRAG_EXITED){
-			Log.i("TAG", "Exited");
+//			Log.i("TAG", "Exited");
 			return true;
 		}
 		else if(action == DragEvent.ACTION_DROP){
@@ -202,7 +220,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 			return true;
 		}
 		else if(action == DragEvent.ACTION_DRAG_ENDED){
-			Log.i("TAG", "Ended");
+//			Log.i("TAG", "Ended");
 //			updateThemeView();
 //		    // Turns off any color tinting
 //            v.clearColorFilter();
