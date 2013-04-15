@@ -17,7 +17,7 @@ import android.widget.LinearLayout.LayoutParams;
 public class HaikuBinDragListener implements OnDragListener{
 	private boolean inBinRange = false; // used for drag and drop
 	private int inBinColor = Color.GREEN;
-	private int notInBinColor = Color.WHITE;
+	private int notInBinColor = Color.rgb(255, 236, 142);
 	
 	private View binView;
 
@@ -39,7 +39,6 @@ public class HaikuBinDragListener implements OnDragListener{
 		int action = event.getAction();
 	    switch (action) {
 	    	case DragEvent.ACTION_DRAG_STARTED:
-	    		// Do nothing
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		inBinRange = true;
@@ -50,25 +49,19 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		updateColor();
 	    		break;
 	    	case DragEvent.ACTION_DROP:
-	    		// Dropped, reassign View to ViewGroup
-	    		View view = (View) event.getLocalState();
 	    		inBinRange = false;
 	    		updateColor();
+	    		View view = MainView.getInstance().getDraggedView();
 	    		if(view instanceof ThemeObjectView){
 	    			HaikuGenerator.addTheme(((ThemeObjectView)view).getTheme());
 	    		}
-	    		else{
-	    			Log.i("TAG", "NOT A THEMEOBJECT!!");
+	    		if(view instanceof ConversationObjectView){
+	    			HaikuGenerator.addThread(((ConversationObjectView)view).getThreadID());
 	    		}
-	    		Log.i("TAG", "size: " + HaikuGenerator.getThemes().size());
-//	    		ViewGroup owner = (ViewGroup) view.getParent();
-//	    		owner.removeView(view);
-//	    		LinearLayout container = (LinearLayout) v;
-//	    		container.addView(view);
-//	    		view.setVisibility(View.VISIBLE);
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENDED:
-//	    		v.setBackgroundDrawable(normalShape);
+	    		MainView.getInstance().updateThemeView();
+	    		MainView.getInstance().updateConversations();
 	    	default:
 	    		break;
 	    }
