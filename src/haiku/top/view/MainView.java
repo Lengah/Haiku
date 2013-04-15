@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.database.Cursor;
 import android.graphics.Color;
 
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnDragListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
@@ -34,7 +36,8 @@ import haiku.top.model.Theme;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.adapters.ContactListAdapter;
 
-public class MainView extends LinearLayout implements OnClickListener, OnLongClickListener, OnDragListener{
+public class MainView extends LinearLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
+	private static MainView mv;
 	private Context context;
 	private static final int ANIMATION_TIME_THEME = 300;
 	private static final int ANIMATION_TIME_DATE = 300;
@@ -42,28 +45,75 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	private Button themeButton;
 	private ScrollView themeView;
 	
-	private ListView contactList;
+	private ScrollView contactScroll;
+	private LinearLayout contactList;
 	
-	private boolean inBinRange = false; // used for drag and drop
+	private LinearLayout haikuBinView;
+	
+	private View viewBeingDragged = null;
+	
+	private ArrayList<ConversationObjectView> conversations = new ArrayList<ConversationObjectView>();
 	
 	public MainView(Context context) {
 		super(context);
 		this.context = context;
+		mv = this;
 		
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		layoutInflater.inflate(R.layout.mainview,this);
 		
-		contactList = (ListView)findViewById(R.id.listofcontacts);
+		contactScroll = (ScrollView)findViewById(R.id.scrollofcontacts);
+		contactList = (LinearLayout)findViewById(R.id.listofcontacts);
 		themeButton = (Button)findViewById(R.id.themebutton);
 		themeView = (ScrollView)findViewById(R.id.themeview);
+		haikuBinView = (LinearLayout)findViewById(R.id.binview);
 		
-		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
+		haikuBinView.setOnDragListener(new HaikuBinDragListener(haikuBinView));
+		haikuBinView.bringToFront();
 		
+//		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
+		
+		Cursor cursor = HaikuActivity.getThreads(context);
+		if (cursor.moveToFirst()) {
+			do{
+				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
+				conversations.get(conversations.size()-1).setOnLongClickListener(this);
+				conversations.get(conversations.size()-1).setOnClickListener(this);
+			}
+			while(cursor.moveToNext());
+		}
+		for(int i = 0; i < conversations.size(); i++){
+			contactList.addView(conversations.get(i));
+		}
+//		contactScroll.addView(contactList);
 		themeButton.bringToFront();
 		themeView.bringToFront();
 		themeView.setVisibility(View.GONE);
-		
 		themeButton.setOnClickListener(this);
+	}
+	
+	public static MainView getInstance(){
+		return mv;
+	}
+	
+	public View getDraggedView(){
+		return viewBeingDragged;
+	}
+	
+	public void updateConversations(){
+		boolean isInGenerator;
+		for(int i = 0; i < conversations.size(); i++){
+			isInGenerator = false;
+			for(int a = 0; a < HaikuGenerator.getThreadIDs().size(); a++){
+				if(conversations.get(i).getThreadID() == HaikuGenerator.getThreadIDs().get(a)){
+					conversations.get(i).setVisibility(GONE);
+					isInGenerator = true;
+				}
+			}
+			if(!isInGenerator){
+				conversations.get(i).setVisibility(VISIBLE);
+			}
+		}
 	}
 	
 	private TranslateAnimation translateAnimation;
@@ -121,25 +171,34 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		themes.add(Theme.sad);
 		themes.add(Theme.summer);
 		themes.add(Theme.time);
+		themes.add(Theme.time);
+		themes.add(Theme.time);
+		themes.add(Theme.time);
+		themes.add(Theme.time);
 		
-		themes.removeAll(HaikuGenerator.getThemes()); // remove the themes that already are in the bin
+		themes.removeAll(HaikuGenerator.getThemes()); // remove the themes that are already in the bin
 		
 		LinearLayout list = new LinearLayout(context);
 		list.setOrientation(VERTICAL);
-		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		ThemeObjectView themeObject;
+		int height = 0;
 		for(int i = 0; i < themes.size(); i++){
 			themeObject = new ThemeObjectView(context, themes.get(i));
 			list.addView(themeObject);
 			themeObject.setOnLongClickListener(this);
-			themeObject.setOnDragListener(this);
+			themeObject.setOnClickListener(this);
+//			themeObject.setOnTouchListener(this); // overrides the scroll function!
+			height += themeObject.getHeightOfView();
 		}
 		themeView.addView(list);
-		list.setOnClickListener(new OnClickListener(){
-			public void onClick(View v){
-				closeThemeView();
-			}
-		});
+		if(themeView.getHeight() > height){
+			// empty space at the end
+			TextView emptySpace = new TextView(context);
+			emptySpace.setHeight(themeView.getHeight()-height);
+			list.addView(emptySpace);
+			emptySpace.setOnClickListener(this);
+		}
 	}
 
 	@Override
@@ -147,78 +206,30 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		if(v.equals(themeButton)){
 			openThemeView();
 		}
+		else if(v instanceof ConversationObjectView){
+			Log.i("TAG", "Click!");
+		}
+		else{
+			// themeObject
+			closeThemeView();
+		}
 	}
 
 	@Override
 	public boolean onLongClick(View v) {
 		v.setVisibility(GONE);
-
-		    // Starts the drag
-
-		            v.startDrag(null,  // the data to be dragged
-		            		new DragShadowBuilder(v),  // the drag shadow builder
-		                        null,      // no need to use local data
-		                        0          // flags (not currently used, set to 0)
-		            );
-
+		viewBeingDragged = v;
+		v.startDrag(null, new DragShadowBuilder(v), null, 0);
 		return false;
 	}
 
 	@Override
-	public boolean onDrag(View v, DragEvent event) {
-		final int action = event.getAction();
-		if(action == DragEvent.ACTION_DRAG_STARTED){
-			Log.i("TAG", "Started");
-			return true;
-		}
-		else if(action == DragEvent.ACTION_DRAG_ENTERED){
-			Log.i("TAG", "Entered");
-			return true;
-		}
-		else if(action == DragEvent.ACTION_DRAG_LOCATION){
-			Log.i("TAG", "Location");
-			return true;
-		}
-		else if(action == DragEvent.ACTION_DRAG_EXITED){
-			Log.i("TAG", "Exited");
-			return true;
-		}
-		else if(action == DragEvent.ACTION_DROP){
-			Log.i("TAG", "Drop");
-//			// Gets the item containing the dragged data
-//            ClipData.Item item = event.getClipData().getItemAt(0);
-//
-//            // Gets the text data from the item.
-//            dragData = item.getText();
-//
-//            // Displays a message containing the dragged data.
-//            Toast.makeText(this, "Dragged data is " + dragData, Toast.LENGTH_LONG);
-//
-//            // Turns off any color tints
-//            v.clearColorFilter();
-//
-//            // Invalidates the view to force a redraw
-//            v.invalidate();
-			return true;
-		}
-		else if(action == DragEvent.ACTION_DRAG_ENDED){
-			Log.i("TAG", "Ended");
-//			updateThemeView();
-//		    // Turns off any color tinting
-//            v.clearColorFilter();
-//
-//            // Invalidates the view to force a redraw
-//            v.invalidate();
-//
-//            // Does a getResult(), and displays what happened.
-//            if (event.getResult()) {
-//                Toast.makeText(this, "The drop was handled.", Toast.LENGTH_LONG);
-//
-//            } else {
-//                Toast.makeText(this, "The drop didn't work.", Toast.LENGTH_LONG);
-//
-//            };
-
+	public boolean onTouch(View v, MotionEvent event) {
+		// overrides the scroll function!
+		if(event.getAction() == MotionEvent.ACTION_MOVE){
+			v.setVisibility(GONE);
+			viewBeingDragged = v;
+			v.startDrag(null, new DragShadowBuilder(v), null, 0);
 			return true;
 		}
 		return false;

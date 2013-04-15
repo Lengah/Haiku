@@ -18,6 +18,7 @@ public class HaikuGenerator {
 	private static ArrayList<Haiku> generatedHaikus = new ArrayList<Haiku>();
 	private static ArrayList<Haiku> savedHaikus = new ArrayList<Haiku>();
 	private static ArrayList<Theme> themes = new ArrayList<Theme>();
+	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static Theme currentTheme;
 	private static boolean newSMSLog = true;
 	
@@ -44,6 +45,18 @@ public class HaikuGenerator {
 	
 	public static ArrayList<Theme> getThemes(){
 		return themes;
+	}
+	
+	public static void addThread(int threadID){
+		thread_ids.add(threadID);
+	}
+	
+	public static void removeThread(int threadID){
+		thread_ids.remove(threadID);
+	}
+	
+	public static ArrayList<Integer> getThreadIDs(){
+		return thread_ids; 
 	}
 	
 	/**

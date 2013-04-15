@@ -19,10 +19,8 @@ public class ContactListAdapter extends CursorAdapter {
 	@Override
 	public void bindView(View view, Context context, Cursor cursor) {
 		TextView contactName = (TextView) view.findViewById(R.id.contactname);
-		TextView lastMsgContent = (TextView) view.findViewById(R.id.lastmsgcontent);
 
 		contactName.setText(HaikuActivity.getContactName(context ,cursor.getString(cursor.getColumnIndex("address"))));
-		lastMsgContent.setText(cursor.getString(cursor.getColumnIndex("body")));
 	}
 
 	@Override
