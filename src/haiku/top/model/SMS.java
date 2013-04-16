@@ -1,10 +1,15 @@
 package haiku.top.model;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 public class SMS {
 	private long id;
 	private String message;
 	private String date;
 	private long contactID;
+	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 	
 	public SMS(long id, String message, String date, long contactID){
 		this.id = id;
@@ -17,8 +22,21 @@ public class SMS {
 		
 	}
 	
+	/**
+	 * 
+	 * @return A long integer
+	 */
 	public String getDate(){
 		return date;
+	}
+	
+	/**
+	 * converts the date to a more readable format
+	 * @return dd/MM/yyyy HH:mm
+	 */
+	public String getFullDate(){
+		Date obj = new Date(Long.parseLong(date));
+		return sdf.format(obj.getTime());
 	}
 	
 	public void setDate(String date){

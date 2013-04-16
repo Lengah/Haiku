@@ -37,6 +37,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
 		int action = event.getAction();
+		View view;
 	    switch (action) {
 	    	case DragEvent.ACTION_DRAG_STARTED:
 	    		break;
@@ -51,17 +52,28 @@ public class HaikuBinDragListener implements OnDragListener{
 	    	case DragEvent.ACTION_DROP:
 	    		inBinRange = false;
 	    		updateColor();
-	    		View view = MainView.getInstance().getDraggedView();
+	    		view = MainView.getInstance().getDraggedView();
 	    		if(view instanceof ThemeObjectView){
 	    			HaikuGenerator.addTheme(((ThemeObjectView)view).getTheme());
 	    		}
 	    		if(view instanceof ConversationObjectView){
 	    			HaikuGenerator.addThread(((ConversationObjectView)view).getThreadID());
 	    		}
+	    		if(view instanceof SMSObjectView){
+	    			HaikuGenerator.addSMS(((SMSObjectView)view).getSMS());
+	    		}
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENDED:
-	    		MainView.getInstance().updateThemeView();
-	    		MainView.getInstance().updateConversations();
+	    		view = MainView.getInstance().getDraggedView();
+	    		if(view instanceof ThemeObjectView){
+	    			MainView.getInstance().updateThemeView();
+	    		}
+	    		if(view instanceof ConversationObjectView){
+	    			MainView.getInstance().updateConversations();
+	    		}
+	    		if(view instanceof SMSObjectView){
+	    			MainView.getInstance().updateSMSView();
+	    		}
 	    	default:
 	    		break;
 	    }

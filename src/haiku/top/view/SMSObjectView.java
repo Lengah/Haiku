@@ -1,14 +1,17 @@
 package haiku.top.view;
 
+import java.util.Date;
 import java.util.DuplicateFormatFlagsException;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
+import haiku.top.model.SMS;
 import haiku.top.model.Theme;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,32 +28,36 @@ public class SMSObjectView extends LinearLayout{
 	private TextView date;
 	private Context context;
 	private boolean sent;
-	private int id;
+	private SMS sms;
 	
 	
-	public SMSObjectView(Context context, boolean sent, SMS sms) {
+	public SMSObjectView(Context context, String sentString, SMS sms) {
 		super(context);
 		this.context = context;
-		this.sent = sent;
-		this.message = message;
-		this.date = date;
-		this.id = id;
+		if (sentString.equals("1")) {
+	        sent = true;
+	    }
+		else {
+	        sent = false;
+	    }
+		this.sms = sms;
 		
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		layoutInflater.inflate(R.layout.item_contact,this);
+		if(sent){
+			layoutInflater.inflate(R.layout.item_msglist_sent,this);
+		}
+		else{
+			layoutInflater.inflate(R.layout.item_msglist_received,this);
+		}
 		
-		setBackgroundResource(android.R.drawable.list_selector_background);
+		message = (TextView)findViewById(R.id.msgtext);
+		date = (TextView)findViewById(R.id.txtDate);
 		
-		image = (TextView)findViewById(R.id.contactPic);
-		nameView = (TextView)findViewById(R.id.contactname);
-		nameView.setText(name);
+		message.setText(sms.getMessage());
+		date.setText(sms.getFullDate());
 	}
 	
-	public int getSMSID(){
-		return id;
-	}
-	
-	public String getName(){
-		return name;
+	public SMS getSMS(){
+		return sms;
 	}
 }

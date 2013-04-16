@@ -32,6 +32,7 @@ import android.widget.TextView;
 import haiku.top.HaikuActivity;
 import haiku.top.R;
 import haiku.top.model.HaikuGenerator;
+import haiku.top.model.SMS;
 import haiku.top.model.Theme;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.adapters.ContactListAdapter;
@@ -48,11 +49,16 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	private ScrollView contactScroll;
 	private LinearLayout contactList;
 	
+	private ScrollView smsScroll;
+	private LinearLayout smsList;
+	
 	private LinearLayout haikuBinView;
 	
 	private View viewBeingDragged = null;
 	
 	private ArrayList<ConversationObjectView> conversations = new ArrayList<ConversationObjectView>();
+	private ArrayList<SMSObjectView> smsObjects = new ArrayList<SMSObjectView>();
+//	private int threadIDInUse; // The conversation the user is currently looking at
 	
 	public MainView(Context context) {
 		super(context);
@@ -64,6 +70,10 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		
 		contactScroll = (ScrollView)findViewById(R.id.scrollofcontacts);
 		contactList = (LinearLayout)findViewById(R.id.listofcontacts);
+		
+		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
+		smsList = (LinearLayout)findViewById(R.id.listofsms);
+		
 		themeButton = (Button)findViewById(R.id.themebutton);
 		themeView = (ScrollView)findViewById(R.id.themeview);
 		haikuBinView = (LinearLayout)findViewById(R.id.binview);
@@ -85,7 +95,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		for(int i = 0; i < conversations.size(); i++){
 			contactList.addView(conversations.get(i));
 		}
-//		contactScroll.addView(contactList);
+		smsScroll.setVisibility(GONE);
 		themeButton.bringToFront();
 		themeView.bringToFront();
 		themeView.setVisibility(View.GONE);
@@ -114,6 +124,45 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 				conversations.get(i).setVisibility(VISIBLE);
 			}
 		}
+	}
+	
+	public void setSMSView(int threadID){
+		contactScroll.setVisibility(GONE);
+		smsScroll.setVisibility(VISIBLE);
+		Cursor cursor = HaikuActivity.getThread(context, threadID);
+		Log.i("TAG", "Count: " + cursor.getCount());
+		if (cursor.moveToFirst()) {
+			do{
+				smsObjects.add(new SMSObjectView(context, cursor.getString(cursor.getColumnIndexOrThrow("type")),new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID)));
+				smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+			}
+			while(cursor.moveToNext());
+		}
+		for(int i = 0; i < smsObjects.size(); i++){
+			smsList.addView(smsObjects.get(i));
+		}
+		updateSMSView();
+	}
+	
+	/**
+	 * Just changes the visibility of the smsObjects
+	 */
+	public void updateSMSView(){
+		for(int i = 0; i < smsObjects.size(); i++){
+			if(HaikuGenerator.getAllAddedSMS().contains(smsObjects.get(i).getSMS())){
+				smsObjects.get(i).setVisibility(GONE);
+			}
+			else{
+				smsObjects.get(i).setVisibility(VISIBLE);
+			}
+		}
+	}
+	
+	public void closeSMSView(){
+		contactScroll.setVisibility(VISIBLE);
+		smsScroll.setVisibility(GONE);
+		smsObjects.clear();
+		smsList.removeAllViews();
 	}
 	
 	private TranslateAnimation translateAnimation;
@@ -207,7 +256,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 			openThemeView();
 		}
 		else if(v instanceof ConversationObjectView){
-			Log.i("TAG", "Click!");
+			setSMSView(((ConversationObjectView)v).getThreadID());
 		}
 		else{
 			// themeObject
