@@ -86,23 +86,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		
-/*		db.execSQL("CREATE TABLE sentence(id INTEGER PRIMARY KEY, text TEXT)");
-        db.execSQL("CREATE TABLE sentenceinsms(id INTEGER PRIMARY KEY, sms INTEGER)");
-        db.execSQL("CREATE TABLE sentenceinhaiku(id INTEGER PRIMARY KEY, position INTEGER, haiku, INTEGER, FOREIGN KEY(haiku) REFERENCES haiku(id)");
-        db.execSQL("CREATE TABLE haiku(id INTEGER PRIMARY KEY, datecreated INTEGER)");
-        db.execSQL("CREATE TABLE partofspeech(id INTEGER PRIMARY KEY, type TEXT)");
-        db.execSQL("CREATE TABLE word_partofspeech(id INTEGER PRIMARY KEY, word INTEGER, partofspeech INTEGER, FOREIGN KEY(word) REFERENCES word(id), FOREIGN KEY(partofspeech) REFERENCES partofspeech(id))");
-        db.execSQL("CREATE TABLE word(id INTEGER PRIMARY KEY, text TEXT, syllables TEXT)");
-        db.execSQL("CREATE TABLE wordinsentence(id INTEGER PRIMARY KEY, position INTEGER, sentence INTEGER, word INTEGER, FOREIGN KEY(sentence) REFERENCES sentence(id), FOREIGN KEY(word) REFERENCES word(id))");
-        db.execSQL("CREATE TABLE wordinsms(id INTEGER PRIMARY KEY, amount INTEGER, sms INTEGER, word INTEGER, FOREIGN KEY(word) REFERENCES word(id))");
-        db.execSQL("CREATE TABLE sentenceinsms_theme(id INTEGER PRIMARY KEY, sentenceinsms INTEGER, theme INTEGER, FOREIGN KEY(sentenceinsms) REFERENCES sentenceinsms(id), FOREIGN KEY(theme) REFERENCES theme(id))");     
-        db.execSQL("CREATE TABLE theme(id INTEGER PRIMARY KEY, name TEXT)");
-        db.execSQL("CREATE TABLE theme_word(id INTEGER PRIMARY KEY word INTEGER, theme INTEGER, FOREIGN KEY(word) REFERENCES word(id), FOREIGN KEY(theme) REFERENCES theme(id))");*/
-	
-        db.execSQL("CREATE TABLE " + TABLE_SENTENCE + "("
-        		+ KEY_SENTENCE_ID + " INTEGER PRIMARY KEY," + KEY_SENTENCE_TEXT + " TEXT" + ")");
-        db.execSQL("CREATE TABLE " + TABLE_SENTENCEINSMS + "(" + KEY_SENTENCEINSMS_ID + " INTEGER PRIMARY KEY, " + KEY_SENTENCEINSMS_SMS + " INTEGER)");
-	
 	}
 
 	@Override
@@ -115,16 +98,11 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		 
 	    ContentValues values = new ContentValues();
 	    
-	    //values.put(KEY_WORD_TEXT, word.getText());
-	    //values.put(KEY_WORD_SYLLABLES, word.getSyllables());
-	    
-	    values.put("text", word.getText());
-	    values.put("syllables", word.getSyllables());	    
-	    
+	    values.put(KEY_WORD_TEXT, word.getText());
+	    values.put(KEY_WORD_SYLLABLES, word.getSyllables());
+	        
 	    // Inserting Row
-	    //db.insert(TABLE_WORD, null, values);
-	    
-	    db.insert("word", null, values);
+	    db.insert(TABLE_WORD, null, values);
 	    
 	    db.close(); // Closing database connection
 	}
@@ -135,9 +113,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    Cursor cursor = db.query(TABLE_WORD, new String[] { KEY_WORD_ID,
 	            KEY_WORD_TEXT, KEY_WORD_SYLLABLES }, KEY_WORD_ID + "=?",
 	            new String[] { String.valueOf(id) }, null, null, null, null);
-	    
-	    //Cursor cursor = db.query("word", new String[] { "id", "text", "syllables" }, "id" + "=?", new String[] { String.valueOf(id) }, null, null, null, null);
-	    
+	    	    
 	    if (cursor != null)
 	        cursor.moveToFirst();  
 	 
