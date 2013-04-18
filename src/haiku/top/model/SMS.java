@@ -66,4 +66,12 @@ public class SMS {
 	public void setContact(long contactID){
 		this.contactID = contactID;
 	}
+	
+	@Override
+	public boolean equals(Object sms){
+		if(sms instanceof SMS && this.id == ((SMS)sms).getID()){
+			return true;
+		}
+		return false;
+	}
 }

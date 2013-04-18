@@ -66,6 +66,7 @@ public class HaikuGenerator {
 	
 	public static void removeSMS(SMS sms){
 		smses.remove(sms);
+		removeThread((int)sms.getContactID());
 	}
 	
 	public static ArrayList<SMS> getAllAddedSMS(){

@@ -7,10 +7,9 @@
 
     <ImageView
         android:id="@+id/contactPic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:adjustViewBounds="true"
-        android:maxWidth="60dip"
         android:src="@drawable/ic_launcher"/>
     
     

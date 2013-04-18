@@ -11,19 +11,10 @@
         android:layout_width="100dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:clickable="true">
+        android:clickable="true"
+        android:rotation="-5">
         
     </ScrollView>
-    
-    <Button 
-        android:id="@+id/themebutton"
-        android:background="#FBCE0D"
-        android:textColor="#FFFFFF"
-        android:layout_height="200dp"
-        android:layout_width="25dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:text="@string/themes"/>
     
     <LinearLayout 
        	android:id="@+id/binview"

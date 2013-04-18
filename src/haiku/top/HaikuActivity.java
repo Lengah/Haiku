@@ -1,6 +1,9 @@
 package haiku.top;
 
+import java.io.InputStream;
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
+import java.util.ResourceBundle.Control;
 
 import haiku.top.R;
 import haiku.top.model.Contact;
@@ -11,9 +14,12 @@ import haiku.top.view.SavedHaikusView;
 import haiku.top.view.ShareView;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -39,8 +45,29 @@ public class HaikuActivity extends Activity {
         super.onCreate(savedInstanceState);
         ha = this;
         mainView = new MainView(this);
-        setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
+        setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 //        initContactsAndSMS(this);
+    }
+    
+    @Override 
+    public void onBackPressed(){
+    	//your stuffs
+    	ArrayList<Integer> states = MainView.getInstance().getViewsShown();
+    	if(states.isEmpty()){
+        	finish();	
+    	}
+    	else{
+    		if(states.get(states.size()-1) == MainView.VIEW_SHOWN_SMS){
+    			MainView.getInstance().closeSMSView();
+    		}
+    		else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_BIN){
+//    			MainView.getInstance().
+    		}
+    		else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_DATE){
+//    			MainView.getInstance().
+    		}
+    		MainView.getInstance().removeLastViewOrderElement();
+    	}
     }
     
     public static HaikuActivity getInstance(){
@@ -178,5 +205,134 @@ public class HaikuActivity extends Activity {
         return res;
     }
     
+    public static Bitmap getContactPhoto(Context ctx, String displayName){
+//    	Log.i("TAG", "get profile picture from contact: " + displayName);
+    	String[] projection = new String[] {
+                ContactsContract.Contacts.PHOTO_ID,
+    			ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Photo.PHOTO_URI,
+//                ContactsContract.CommonDataKinds.Phone.NUMBER,
+              ContactsContract.CommonDataKinds.Photo.PHOTO
+        };
+        ContentResolver cr = ctx.getContentResolver();
+        Cursor contactsCursor = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                projection, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + "='" + displayName + "'", null, null);
+       try{ 
+	       // Try to find a picture by using the contact id
+	       long id;
+	       InputStream input = null;
+	       if(contactsCursor.moveToFirst()){
+			   id = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+		        Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id);
+		        input = ContactsContract.Contacts.openContactPhotoInputStream(cr, uri);
+	       }
+	       if (input != null) {
+	    	   Log.i("TAG","Got pic from contact (contact_id): " + displayName);
+	           return BitmapFactory.decodeStream(input);
+	       }
+	//        long photo_id = cursor.getLong(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
+	//        Uri uri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photo_id);
+	//        Cursor cursor1 = cr.query(uri, new String[] {ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
+	//
+	//        try {
+	//            Bitmap thumbnail = null;
+	//            if (cursor1.moveToFirst()) {
+	//                final byte[] thumbnailBytes = cursor1.getBlob(0);
+	//                if (thumbnailBytes != null) {
+	//                    thumbnail = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length);
+	//                }
+	//            }
+	//            return thumbnail;
+	//        }
+	//        finally {
+	//            cursor1.close();
+	//        }
+	//      
+	       byte[] photoBytes = null;
+	        // try to find a picture by using the picture id
+	       if(contactsCursor.moveToFirst()){
+	    	   long photo_id = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
+	    	   Uri photoUri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photo_id);
+	           Cursor c = cr.query(photoUri, new String[] {ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
+	           try {
+	               if (c.moveToFirst()){
+	            	   photoBytes = c.getBlob(0);
+	//            	   Log.i("TAG", "photobytes! " + (photoBytes==null));
+	               }
+	           } catch (Exception e) {
+	               e.printStackTrace();
+	           } finally {
+	               c.close();
+	           }
+	           if (photoBytes != null){
+	        	   Log.i("TAG","Got pic from contact (photo id): " + displayName);
+	        	   return BitmapFactory.decodeByteArray(photoBytes,0,photoBytes.length);
+	           }
+	       }
+	        
+	        // Try to find a picutre using the picture blob
+	//        byte[] photoBytes = null;
+	        if (contactsCursor.moveToFirst()){
+	        	photoBytes = contactsCursor.getBlob(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO));
+	//            	photoBytes = c.getBlob(0);
+	//            	Log.i("TAG", "photobytes! " + (photoBytes==null));
+	        }
+	        if (photoBytes != null){
+	        	Log.i("TAG","Got pic from contact (photo): " + displayName);
+	            return BitmapFactory.decodeByteArray(photoBytes,0,photoBytes.length);
+	        }
+	        
+	        // facebook
+//	        Uri photoUri = null;
+//	        if (contactsCursor.moveToFirst()) {
+//	            long userId = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+//	            photoUri = ContentUris.withAppendedId(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, userId);
+//	        }
+//	        if (photoUri != null) {
+//	            input = ContactsContract.Contacts.openContactPhotoInputStream(cr, photoUri); // här är felet
+//	            if (input != null) {
+//	                return BitmapFactory.decodeStream(input);
+//	            }
+//	        }
+//	        if(contactsCursor.moveToFirst()){
+//	        	photoUri = contactsCursor.(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO_URI));
+//	        	photoUri = ContentUris.
+//	        }
+	//      Log.i("TAG","Failed to get pic from contact: " + displayName);
+	        return null;
+       }finally{
+    	   contactsCursor.close();    	   
+       }
+    }
     
+    public Bitmap getFacebookPhoto(String phoneNumber) {
+        Uri phoneUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        Uri photoUri = null;
+        ContentResolver cr = this.getContentResolver();
+        Cursor contact = cr.query(phoneUri,
+                new String[] { ContactsContract.Contacts._ID }, null, null, null);
+
+        if (contact.moveToFirst()) {
+            long userId = contact.getLong(contact.getColumnIndex(ContactsContract.Contacts._ID));
+            photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
+
+        }
+        else {
+            Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
+            return defaultPhoto;
+        }
+        if (photoUri != null) {
+            InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(
+                    cr, photoUri);
+            if (input != null) {
+                return BitmapFactory.decodeStream(input);
+            }
+        } else {
+            Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
+            return defaultPhoto;
+        }
+        Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
+        return defaultPhoto;
+    }
 }

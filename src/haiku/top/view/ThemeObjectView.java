@@ -6,6 +6,7 @@ import haiku.top.model.Theme;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,15 +30,21 @@ public class ThemeObjectView extends LinearLayout{
 		
 		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 		addView(themeText);
-		themeText.setGravity(Gravity.CENTER);
+		themeText.setGravity(Gravity.CENTER_VERTICAL);
 		setBackgroundColor(Color.rgb(251, 206, 13));
 		
 		themeText.setText(theme.toString());
 		themeText.setTextColor(Color.WHITE);
-		themeText.setTextSize(25);
-		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		
-		themeText.setTypeface(null, Typeface.BOLD);
+		themeText.setTextSize(30); //TODO dp
+		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//		themeText.setTypeface(null, Typeface.BOLD);
+		themeText.setPadding(5, 0, 0, 0); //TODO dp
+		themeText.setAlpha(MainView.OPACITY_FULL);
+		while(themeText.getWidth() > getWidth()){
+			Log.i("TAG", "Text size before: " + themeText.getTextSize());
+			themeText.setTextSize(themeText.getTextSize()-1);
+			Log.i("TAG", "Text size after: " + themeText.getTextSize());
+		}
 	}
 	
 	public int getHeightOfView(){

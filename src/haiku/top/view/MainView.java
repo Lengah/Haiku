@@ -42,8 +42,14 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	private Context context;
 	private static final int ANIMATION_TIME_THEME = 300;
 	private static final int ANIMATION_TIME_DATE = 300;
+	public static final float OPACITY_USED = (float) 0.3;
+	public static final float OPACITY_DEFAULT = (float) 1; // 0.8 laggar
+	public static final float OPACITY_FULL = 1;
+	public static final int VIEW_SHOWN_SMS = 1;
+	public static final int VIEW_SHOWN_BIN = 2;
+	public static final int VIEW_SHOWN_DATE = 3;
 	
-	private Button themeButton;
+//	private Button themeButton;
 	private ScrollView themeView;
 	
 	private ScrollView contactScroll;
@@ -58,7 +64,13 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	
 	private ArrayList<ConversationObjectView> conversations = new ArrayList<ConversationObjectView>();
 	private ArrayList<SMSObjectView> smsObjects = new ArrayList<SMSObjectView>();
+	private ArrayList<ThemeObjectView> themeObjects = new ArrayList<ThemeObjectView>();
 //	private int threadIDInUse; // The conversation the user is currently looking at
+	
+	/**
+	 * 0 = no view (default main view), 1 = sms view, 2 = bin view, 3 = date open
+	 */
+	private ArrayList<Integer> viewsOpenInOrder = new ArrayList<Integer>();
 	
 	public MainView(Context context) {
 		super(context);
@@ -74,7 +86,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
 		smsList = (LinearLayout)findViewById(R.id.listofsms);
 		
-		themeButton = (Button)findViewById(R.id.themebutton);
+//		themeButton = (Button)findViewById(R.id.themebutton);
 		themeView = (ScrollView)findViewById(R.id.themeview);
 		haikuBinView = (LinearLayout)findViewById(R.id.binview);
 		
@@ -94,16 +106,59 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		}
 		for(int i = 0; i < conversations.size(); i++){
 			contactList.addView(conversations.get(i));
+//			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
 		}
+		ArrayList<Theme> themes;
+//		themes = DatabaseHandler.getAllThemes();
+		themes = new ArrayList<Theme>();
+		themes.add(Theme.happy);
+		themes.add(Theme.sad);
+		themes.add(Theme.summer);
+		themes.add(Theme.time);
+		themes.add(Theme.time);
+		
+		LinearLayout list = new LinearLayout(context);
+		list.setOrientation(VERTICAL);
+		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		ThemeObjectView themeObject;
+//		int height = 0;
+		for(int i = 0; i < themes.size(); i++){
+			themeObject = new ThemeObjectView(context, themes.get(i));
+			themeObjects.add(themeObject);
+			list.addView(themeObject);
+			themeObject.setOnLongClickListener(this);
+			if(HaikuGenerator.getThemes().contains(themes.get(i))){
+				themeObject.setAlpha(OPACITY_USED);
+			}
+			else{
+				themeObject.setAlpha(OPACITY_DEFAULT);
+			}
+//			themeObject.setOnClickListener(this);
+//			themeObject.setOnTouchListener(this); // overrides the scroll function!
+//			height += themeObject.getHeightOfView();
+		}
+		themeView.addView(list);
 		smsScroll.setVisibility(GONE);
-		themeButton.bringToFront();
+//		themeButton.bringToFront();
 		themeView.bringToFront();
-		themeView.setVisibility(View.GONE);
-		themeButton.setOnClickListener(this);
+		themeView.setAlpha(OPACITY_DEFAULT);
+		updateThemeView();
+//		themeView.setVisibility(View.GONE);
+//		themeButton.setOnClickListener(this);
 	}
 	
 	public static MainView getInstance(){
 		return mv;
+	}
+	
+	/**
+	 * if this method returns en empty list, then the program should exit when the user
+	 * presses the back button. Otherwise it should close the last view in the arraylist (when the user presses
+	 * the back button). The view Integers are public constants in the MainView class. VIEW_SHOWN_...
+	 * @return
+	 */
+	public ArrayList<Integer> getViewsShown(){
+		return viewsOpenInOrder;
 	}
 	
 	public View getDraggedView(){
@@ -116,17 +171,21 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 			isInGenerator = false;
 			for(int a = 0; a < HaikuGenerator.getThreadIDs().size(); a++){
 				if(conversations.get(i).getThreadID() == HaikuGenerator.getThreadIDs().get(a)){
-					conversations.get(i).setVisibility(GONE);
+//					conversations.get(i).setVisibility(GONE);
+					conversations.get(i).setAlpha(OPACITY_USED);
 					isInGenerator = true;
 				}
 			}
 			if(!isInGenerator){
-				conversations.get(i).setVisibility(VISIBLE);
+//				conversations.get(i).setVisibility(VISIBLE);
+				conversations.get(i).setAlpha(OPACITY_DEFAULT); // Gör så att det laggar!
+//				conversations.get(i).setAlpha(OPACITY_FULL);
 			}
 		}
 	}
 	
 	public void setSMSView(int threadID){
+		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 		contactScroll.setVisibility(GONE);
 		smsScroll.setVisibility(VISIBLE);
 		Cursor cursor = HaikuActivity.getThread(context, threadID);
@@ -148,125 +207,67 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	 * Just changes the visibility of the smsObjects
 	 */
 	public void updateSMSView(){
+		boolean empty = true;
 		for(int i = 0; i < smsObjects.size(); i++){
 			if(HaikuGenerator.getAllAddedSMS().contains(smsObjects.get(i).getSMS())){
-				smsObjects.get(i).setVisibility(GONE);
+//				smsObjects.get(i).setVisibility(GONE);
+				smsObjects.get(i).setAlpha(OPACITY_USED);
 			}
 			else{
-				smsObjects.get(i).setVisibility(VISIBLE);
+//				smsObjects.get(i).setVisibility(VISIBLE);
+				smsObjects.get(i).setAlpha(OPACITY_DEFAULT);
+				empty = false;
 			}
+		}
+		if(empty && !smsObjects.isEmpty()){
+			HaikuGenerator.addThread((int)smsObjects.get(0).getSMS().getContactID());
 		}
 	}
 	
+	public void removeLastViewOrderElement(){
+		viewsOpenInOrder.remove(viewsOpenInOrder.size()-1);
+	}
+	
 	public void closeSMSView(){
+		updateConversations();
 		contactScroll.setVisibility(VISIBLE);
 		smsScroll.setVisibility(GONE);
 		smsObjects.clear();
 		smsList.removeAllViews();
 	}
 	
-	private TranslateAnimation translateAnimation;
-	
-	public void openThemeView(){
-		updateThemeView();
-		themeButton.setEnabled(false);
-		themeView.setVisibility(View.VISIBLE);
-		translateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
-		translateAnimation.setDuration(ANIMATION_TIME_THEME);
-		themeView.startAnimation(translateAnimation);
-		translateAnimation.setAnimationListener(new AnimationListener() {
-			@Override
-			public void onAnimationRepeat(Animation animation) {
-			}
-
-			@Override
-			public void onAnimationStart(Animation animation) {
-			}
-			
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				
-			}
-		});
-	}
-	
-	public void closeThemeView(){
-		translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
-		translateAnimation.setDuration(ANIMATION_TIME_THEME);
-		themeView.startAnimation(translateAnimation);
-		translateAnimation.setAnimationListener(new AnimationListener() {
-			@Override
-			public void onAnimationRepeat(Animation animation) {
-			}
-
-			@Override
-			public void onAnimationStart(Animation animation) {
-			}
-			
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				themeView.setVisibility(View.GONE);
-				themeButton.setEnabled(true);
-			}
-		});
-	}
-	
 	public void updateThemeView(){
-		themeView.removeAllViews();
-		ArrayList<Theme> themes;
-//		themes = DatabaseHandler.getAllThemes();
-		themes = new ArrayList<Theme>();
-		themes.add(Theme.happy);
-		themes.add(Theme.sad);
-		themes.add(Theme.summer);
-		themes.add(Theme.time);
-		themes.add(Theme.time);
-		themes.add(Theme.time);
-		themes.add(Theme.time);
-		themes.add(Theme.time);
-		
-		themes.removeAll(HaikuGenerator.getThemes()); // remove the themes that are already in the bin
-		
-		LinearLayout list = new LinearLayout(context);
-		list.setOrientation(VERTICAL);
-		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		ThemeObjectView themeObject;
-		int height = 0;
-		for(int i = 0; i < themes.size(); i++){
-			themeObject = new ThemeObjectView(context, themes.get(i));
-			list.addView(themeObject);
-			themeObject.setOnLongClickListener(this);
-			themeObject.setOnClickListener(this);
-//			themeObject.setOnTouchListener(this); // overrides the scroll function!
-			height += themeObject.getHeightOfView();
-		}
-		themeView.addView(list);
-		if(themeView.getHeight() > height){
-			// empty space at the end
-			TextView emptySpace = new TextView(context);
-			emptySpace.setHeight(themeView.getHeight()-height);
-			list.addView(emptySpace);
-			emptySpace.setOnClickListener(this);
+		for(int i = 0; i < themeObjects.size(); i++){
+			if(HaikuGenerator.getThemes().contains(themeObjects.get(i).getTheme())){
+				themeObjects.get(i).setAlpha(OPACITY_USED);
+			}
+			else{
+				themeObjects.get(i).setAlpha(OPACITY_DEFAULT);
+			}
 		}
 	}
 
 	@Override
 	public void onClick(View v) {
-		if(v.equals(themeButton)){
-			openThemeView();
-		}
-		else if(v instanceof ConversationObjectView){
+//		if(v.equals(themeButton)){
+//			openThemeView();
+//		}
+		/*else*/ if(v instanceof ConversationObjectView){
 			setSMSView(((ConversationObjectView)v).getThreadID());
 		}
-		else{
-			// themeObject
-			closeThemeView();
-		}
+//		else{
+//			// themeObject
+//			closeThemeView();
+//		}
 	}
 
 	@Override
 	public boolean onLongClick(View v) {
-		v.setVisibility(GONE);
+		if(v.getAlpha() == OPACITY_USED){
+			// The view is already in the bin
+			return false;
+		}
+		v.setAlpha(OPACITY_USED);
 		viewBeingDragged = v;
 		v.startDrag(null, new DragShadowBuilder(v), null, 0);
 		return false;
@@ -276,11 +277,58 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	public boolean onTouch(View v, MotionEvent event) {
 		// overrides the scroll function!
 		if(event.getAction() == MotionEvent.ACTION_MOVE){
-			v.setVisibility(GONE);
+//			v.setVisibility(GONE);
+			v.setAlpha(OPACITY_USED);
 			viewBeingDragged = v;
 			v.startDrag(null, new DragShadowBuilder(v), null, 0);
 			return true;
 		}
 		return false;
 	}
+	
+//	private TranslateAnimation translateAnimation;
+	
+//	public void openThemeView(){
+//		updateThemeView();
+//		themeButton.setEnabled(false);
+//		themeView.setVisibility(View.VISIBLE);
+//		translateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
+//		translateAnimation.setDuration(ANIMATION_TIME_THEME);
+//		themeView.startAnimation(translateAnimation);
+//		translateAnimation.setAnimationListener(new AnimationListener() {
+//			@Override
+//			public void onAnimationRepeat(Animation animation) {
+//			}
+//
+//			@Override
+//			public void onAnimationStart(Animation animation) {
+//			}
+//			
+//			@Override
+//			public void onAnimationEnd(Animation animation) {
+//				
+//			}
+//		});
+//	}
+//	
+//	public void closeThemeView(){
+//		translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
+//		translateAnimation.setDuration(ANIMATION_TIME_THEME);
+//		themeView.startAnimation(translateAnimation);
+//		translateAnimation.setAnimationListener(new AnimationListener() {
+//			@Override
+//			public void onAnimationRepeat(Animation animation) {
+//			}
+//
+//			@Override
+//			public void onAnimationStart(Animation animation) {
+//			}
+//			
+//			@Override
+//			public void onAnimationEnd(Animation animation) {
+//				themeView.setVisibility(View.GONE);
+//				themeButton.setEnabled(true);
+//			}
+//		});
+//	}
 }
