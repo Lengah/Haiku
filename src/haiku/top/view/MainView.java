@@ -290,9 +290,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 				closeDateView();
 			}
 		}
-		if(v.equals(dateView)){
-			closeDateView();
-		}
 	}
 
 	@Override
@@ -373,48 +370,4 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			}
 		});
 	}
-	
-//	public void openThemeView(){
-//		updateThemeView();
-//		themeButton.setEnabled(false);
-//		themeView.setVisibility(View.VISIBLE);
-//		translateAnimation = new TranslateAnimation(Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
-//		translateAnimation.setDuration(ANIMATION_TIME_THEME);
-//		themeView.startAnimation(translateAnimation);
-//		translateAnimation.setAnimationListener(new AnimationListener() {
-//			@Override
-//			public void onAnimationRepeat(Animation animation) {
-//			}
-//
-//			@Override
-//			public void onAnimationStart(Animation animation) {
-//			}
-//			
-//			@Override
-//			public void onAnimationEnd(Animation animation) {
-//				
-//			}
-//		});
-//	}
-//	
-//	public void closeThemeView(){
-//		translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.ABSOLUTE, (float)(100-25), Animation.RELATIVE_TO_SELF, (float)0, Animation.RELATIVE_TO_SELF, 0);
-//		translateAnimation.setDuration(ANIMATION_TIME_THEME);
-//		themeView.startAnimation(translateAnimation);
-//		translateAnimation.setAnimationListener(new AnimationListener() {
-//			@Override
-//			public void onAnimationRepeat(Animation animation) {
-//			}
-//
-//			@Override
-//			public void onAnimationStart(Animation animation) {
-//			}
-//			
-//			@Override
-//			public void onAnimationEnd(Animation animation) {
-//				themeView.setVisibility(View.GONE);
-//				themeButton.setEnabled(true);
-//			}
-//		});
-//	}
 }

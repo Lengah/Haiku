@@ -20,8 +20,6 @@ import android.view.animation.Transformation;
 import android.widget.LinearLayout.LayoutParams;
 
 public class QuarterCircle extends View{
-	private String text = "";
-	
 	private Paint circlePaint;
     private Paint circleStrokePaint;
     private Paint textPaint;
@@ -33,10 +31,7 @@ public class QuarterCircle extends View{
     private int circleStrokeColor;
     private int circleStartAngle;
     private int circleEndAngle;
-    
-//    private static final int ANIMATION_SPEED_DEFAULT = 100;
-    private int animationSpeed = -1;
-    private int newRadius = -1;
+    private String text = "";
     
 	public QuarterCircle(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -249,14 +244,9 @@ public class QuarterCircle extends View{
      * @return - The animation that will expand the view
      */
     public Animation changeSizeTo(double radiusFactor, int duration) {
-//        v.measure(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-    	
     	measure(MeasureSpec.AT_MOST, MeasureSpec.AT_MOST);
-//        final int targtetHeight = getMeasuredHeight();
     	final int targetRadius = (int)(radiusFactor*circleRadius);
     	final int startRadius = circleRadius;
-//        getLayoutParams().height = 0;
-//        setVisibility(View.VISIBLE);
         Animation a = new Animation(){
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -268,8 +258,7 @@ public class QuarterCircle extends View{
             	else{
             		getLayoutParams().height = interpolatedTime == 1
                             ? targetRadius
-                            : Math.max(startRadius, (int)(targetRadius * interpolatedTime));
-            		//Math.min(circleRadius, startRadius+(int)(targetRadius * interpolatedTime));
+                            : Math.min(targetRadius, startRadius+(int)((targetRadius-startRadius) * interpolatedTime));
             	}
             	getLayoutParams().width = getLayoutParams().height;
                 circleRadius = getLayoutParams().height;
@@ -285,72 +274,6 @@ public class QuarterCircle extends View{
         a.setDuration(duration);
         return a;
     }
-    
-    /**
-     * Creates an animation that will collapse the view to a new size with the radius oldRadius*radiusFactor, with the duration in ms.
-     * Returns the animation to the caller
-     * @param radiusFactor - The new size compared to the current size
-     * @param duration - In ms
-     * 
-     * @return - The animation that will expand the view
-     */
-    public Animation collapseTo(double radiusFactor, int duration) {
-//        v.measure(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-    	
-    	measure(MeasureSpec.AT_MOST, MeasureSpec.AT_MOST);
-//        final int targtetHeight = getMeasuredHeight();
-    	final int targetRadius = (int)radiusFactor*circleRadius;
-    	final int startRadius = circleRadius;
-//        getLayoutParams().height = 0;
-//        setVisibility(View.VISIBLE);
-        Animation a = new Animation(){
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                getLayoutParams().height = interpolatedTime == 1
-                        ? targetRadius
-                        : Math.max(startRadius, (int)(targetRadius * interpolatedTime));
-                getLayoutParams().width = getLayoutParams().height;
-                circleRadius = getLayoutParams().height;
-                updateTextSize();
-                requestLayout();
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-        a.setDuration(duration);
-        return a;
-    }
-    
-//    public void animateSizeChange(Canvas canvas){
-//    	Log.i("TAG", "Animate!");
-//    	while(newRadius != -1){
-//    		// new size!
-//        	if(newRadius < circleRadius){
-//        		circleRadius++;
-//        	}
-//        	else if(newRadius > circleRadius){
-//        		circleRadius++;
-//        	}
-//        	measure(MeasureSpec.AT_MOST, MeasureSpec.AT_MOST);
-//        	updateTextSize();
-//        	if(newRadius == circleRadius){
-//        		// Done animation
-//        		newRadius = -1;
-//        		animationSpeed = -1;
-//        		Log.i("TAG", "end Animate!");
-//        		return;
-//        	}
-//        	canvas.translate(-1, 1);
-//            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circlePaint);
-//            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circleStrokePaint);
-//
-//            canvas.drawText(text, circleRadius/10, 3*circleRadius/4, textPaint);
-//    	}
-//    	
-//    }
 
     private void updateTextSize(){
 		int size = 0;
