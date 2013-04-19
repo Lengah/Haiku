@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:circleview="http://schemas.android.com/apk/res/haiku.top"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF">
@@ -15,6 +16,34 @@
         android:rotation="-5">
         
     </ScrollView>
+    
+    <haiku.top.view.QuarterCircle
+            android:id="@+id/dateview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            circleview:cFillColor="#EA3493"
+            circleview:cStrokeColor="@android:color/white"
+            circleview:cRadius="50"
+            circleview:cAngleStart="0"
+            circleview:cAngleEnd="-90"
+            circleview:text="Time"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            />
+    
+    <haiku.top.view.QuarterCircle
+            android:id="@+id/yearview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            circleview:cFillColor="#EA3493"
+            circleview:cStrokeColor="@android:color/white"
+            circleview:cRadius="100"
+            circleview:cAngleStart="0"
+            circleview:cAngleEnd="-90"
+            circleview:text="2013"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            />
     
     <LinearLayout 
        	android:id="@+id/binview"

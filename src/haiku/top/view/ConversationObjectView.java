@@ -2,6 +2,8 @@ package haiku.top.view;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.DuplicateFormatFlagsException;
 
 import haiku.top.HaikuActivity;
@@ -14,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -56,13 +59,39 @@ public class ConversationObjectView extends LinearLayout{
 		
 		setPadding(5, 2, 5, 2); //TODO dp!
 		
-		picture = HaikuActivity.getContactPhoto(context, name);
+//		picture = HaikuActivity.getContactPhoto(context, name);
+//		picture = HaikuActivity.getImage(context, name);
 //	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, threadID));
 //	    if (input != null) {
 //	    	picture = BitmapFactory.decodeStream(input);
+		
 		if(picture != null){
 	    	image.setImageBitmap(picture);
 		}
+//		else{
+//			long id = HaikuActivity.getIDFromName(context, name);
+//			if(id != -1){
+//				try {
+//				URL img_value = null;
+//				img_value = new URL("http://graph.facebook.com/"+id+"/picture?type=large");
+//				picture = BitmapFactory.decodeStream(img_value.openConnection().getInputStream());
+//				if(picture != null){
+//			    	image.setImageBitmap(picture);
+//				}
+//				} catch (MalformedURLException e) {
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		else{
+//			Uri uri = HaikuActivity.getPhotoUri(context, name);
+//			if(uri != null){
+//				image.setImageURI(uri);
+//			}
+//		}
 //	    }
 //	    try {
 //			input.close();

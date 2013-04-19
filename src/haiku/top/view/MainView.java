@@ -2,6 +2,7 @@ package haiku.top.view;
 
 import java.util.ArrayList;
 
+import android.R.xml;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -27,6 +28,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import haiku.top.HaikuActivity;
@@ -37,7 +39,7 @@ import haiku.top.model.Theme;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.adapters.ContactListAdapter;
 
-public class MainView extends LinearLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
+public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
 	private static MainView mv;
 	private Context context;
 	private static final int ANIMATION_TIME_THEME = 300;
@@ -72,6 +74,10 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 	 */
 	private ArrayList<Integer> viewsOpenInOrder = new ArrayList<Integer>();
 	
+	private QuarterCircle dateButtonView;
+	private QuarterCircle dateView;
+	boolean dateViewClosed = true;
+	
 	public MainView(Context context) {
 		super(context);
 		this.context = context;
@@ -101,6 +107,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
 				conversations.get(conversations.size()-1).setOnLongClickListener(this);
 				conversations.get(conversations.size()-1).setOnClickListener(this);
+				conversations.get(conversations.size()-1).setOnTouchListener(this);
 			}
 			while(cursor.moveToNext());
 		}
@@ -118,7 +125,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		themes.add(Theme.time);
 		
 		LinearLayout list = new LinearLayout(context);
-		list.setOrientation(VERTICAL);
+		list.setOrientation(LinearLayout.VERTICAL);
 		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		ThemeObjectView themeObject;
 //		int height = 0;
@@ -134,7 +141,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 				themeObject.setAlpha(OPACITY_DEFAULT);
 			}
 //			themeObject.setOnClickListener(this);
-//			themeObject.setOnTouchListener(this); // overrides the scroll function!
+			themeObject.setOnTouchListener(this); // overrides the scroll function!
 //			height += themeObject.getHeightOfView();
 		}
 		themeView.addView(list);
@@ -145,6 +152,16 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		updateThemeView();
 //		themeView.setVisibility(View.GONE);
 //		themeButton.setOnClickListener(this);
+		
+		dateButtonView = (QuarterCircle)findViewById(R.id.dateview);
+		dateButtonView.setOnClickListener(this);
+		dateButtonView.bringToFront();
+		dateView = (QuarterCircle)findViewById(R.id.yearview);
+		dateView.bringToFront();
+//		dateView.layout(0, getHeight()-dateView.getYearView().getRadius(), dateView.getYearView().getRadius(), 0);
+//		dateView.setLayoutParams(LayoutParams.)
+		dateView.setVisibility(GONE);
+		dateView.setOnClickListener(this);
 	}
 	
 	public static MainView getInstance(){
@@ -194,6 +211,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 			do{
 				smsObjects.add(new SMSObjectView(context, cursor.getString(cursor.getColumnIndexOrThrow("type")),new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID)));
 				smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+				smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
 			}
 			while(cursor.moveToNext());
 		}
@@ -224,8 +242,12 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		}
 	}
 	
-	public void removeLastViewOrderElement(){
-		viewsOpenInOrder.remove(viewsOpenInOrder.size()-1);
+	public void removeViewElement(int viewType){
+		for(int i = viewsOpenInOrder.size()-1; i >= 0; i--){
+			if(viewsOpenInOrder.get(i) == viewType){
+				viewsOpenInOrder.remove(i);
+			}
+		}
 	}
 	
 	public void closeSMSView(){
@@ -234,6 +256,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		smsScroll.setVisibility(GONE);
 		smsObjects.clear();
 		smsList.removeAllViews();
+		removeViewElement(VIEW_SHOWN_SMS);
 	}
 	
 	public void updateThemeView(){
@@ -246,7 +269,7 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 			}
 		}
 	}
-
+	
 	@Override
 	public void onClick(View v) {
 //		if(v.equals(themeButton)){
@@ -259,6 +282,17 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 //			// themeObject
 //			closeThemeView();
 //		}
+		if(v.equals(dateButtonView)){
+			if(dateViewClosed){
+				openDateView();
+			}
+			else{
+				closeDateView();
+			}
+		}
+		if(v.equals(dateView)){
+			closeDateView();
+		}
 	}
 
 	@Override
@@ -273,20 +307,72 @@ public class MainView extends LinearLayout implements OnClickListener, OnLongCli
 		return false;
 	}
 
+	int startX;
+	int startY;
+	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		if(event.getAction() == MotionEvent.ACTION_DOWN){
+			startX = (int) event.getX();
+			startY = (int) event.getY();
+		}
 		// overrides the scroll function!
 		if(event.getAction() == MotionEvent.ACTION_MOVE){
-//			v.setVisibility(GONE);
-			v.setAlpha(OPACITY_USED);
-			viewBeingDragged = v;
-			v.startDrag(null, new DragShadowBuilder(v), null, 0);
-			return true;
+			if(startX != -1 && Math.abs(startX - ((int) event.getX())) > 5
+					&& 45 > Math.acos(Math.abs(((int) event.getX()) - startX)
+							/Math.sqrt((((int) event.getX()) - startX) * (((int) event.getX()) - startX)
+							+ (((int) event.getY()) - startY) * (((int) event.getY()) - startY)))){
+				v.setAlpha(OPACITY_USED);
+				viewBeingDragged = v;
+				v.startDrag(null, new DragShadowBuilder(v), null, 0);
+				return true;
+			}
 		}
 		return false;
 	}
 	
-//	private TranslateAnimation translateAnimation;
+	private TranslateAnimation translateAnimation;
+	
+	public void openDateView(){
+		dateViewClosed = !dateViewClosed;
+		viewsOpenInOrder.add(VIEW_SHOWN_DATE);
+		dateButtonView.setText("2013");
+		Animation a = dateButtonView.changeSizeTo(2, 300);
+        dateButtonView.startAnimation(a);
+        a.setAnimationListener(new AnimationListener() {
+			
+			@Override
+			public void onAnimationStart(Animation animation) {}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+			
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				
+			}
+		});
+	}
+	
+	public void closeDateView(){
+		dateViewClosed = !dateViewClosed;
+		removeViewElement(VIEW_SHOWN_DATE);
+		Animation a = dateButtonView.changeSizeTo(0.5, 300);
+        dateButtonView.startAnimation(a);
+        a.setAnimationListener(new AnimationListener() {
+			
+			@Override
+			public void onAnimationStart(Animation animation) {}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+			
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				dateButtonView.setText("Time");
+			}
+		});
+	}
 	
 //	public void openThemeView(){
 //		updateThemeView();

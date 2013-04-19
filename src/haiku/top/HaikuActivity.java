@@ -1,5 +1,7 @@
 package haiku.top;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
@@ -8,10 +10,7 @@ import java.util.ResourceBundle.Control;
 import haiku.top.R;
 import haiku.top.model.Contact;
 import haiku.top.model.SMS;
-import haiku.top.view.AboutView;
 import haiku.top.view.MainView;
-import haiku.top.view.SavedHaikusView;
-import haiku.top.view.ShareView;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -33,9 +32,6 @@ import android.view.ViewGroup.LayoutParams;
 public class HaikuActivity extends Activity {
 	private static HaikuActivity ha;
 	private View mainView;
-	private View savedHaikusView;
-	private View aboutView;
-	private View shareView;
 	private static final String ALLBOXES = "content://sms/";
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
@@ -64,9 +60,8 @@ public class HaikuActivity extends Activity {
 //    			MainView.getInstance().
     		}
     		else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_DATE){
-//    			MainView.getInstance().
+    			MainView.getInstance().closeDateView();
     		}
-    		MainView.getInstance().removeLastViewOrderElement();
     	}
     }
     
@@ -286,8 +281,9 @@ public class HaikuActivity extends Activity {
 	        // facebook
 //	        Uri photoUri = null;
 //	        if (contactsCursor.moveToFirst()) {
-//	            long userId = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-//	            photoUri = ContentUris.withAppendedId(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, userId);
+////	            long userId = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+//	        	long photo_id = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
+//	            photoUri = ContentUris.withAppendedId(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, photo_id);
 //	        }
 //	        if (photoUri != null) {
 //	            input = ContactsContract.Contacts.openContactPhotoInputStream(cr, photoUri); // här är felet
@@ -295,15 +291,131 @@ public class HaikuActivity extends Activity {
 //	                return BitmapFactory.decodeStream(input);
 //	            }
 //	        }
-//	        if(contactsCursor.moveToFirst()){
-//	        	photoUri = contactsCursor.(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO_URI));
-//	        	photoUri = ContentUris.
-//	        }
 	//      Log.i("TAG","Failed to get pic from contact: " + displayName);
 	        return null;
        }finally{
     	   contactsCursor.close();    	   
        }
+    }
+    
+    public static Uri getURIFromContact(Context context, String displayName){
+    	String[] projection = new String[] {
+                ContactsContract.Data.PHOTO_ID,
+    			ContactsContract.Data.DISPLAY_NAME,
+                ContactsContract.Data.CONTACT_ID,
+//                ContactsContract.Data.PHOTO_URI,
+//                ContactsContract.CommonDataKinds.Phone.NUMBER,
+//              ContactsContract.CommonDataKinds.Photo.PHOTO
+        };
+        ContentResolver cr = context.getContentResolver();
+        Cursor contactsCursor = cr.query(ContactsContract.Data.CONTENT_URI,
+                projection, ContactsContract.Data.DISPLAY_NAME + "='" + displayName + "'", null, null);
+       try{ 
+    	   	if(contactsCursor.moveToFirst()){
+//	    	   	long photo_id = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Data.PHOTO_ID));
+	    	   	long userId = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Data.CONTACT_ID));
+		    	Uri photoUri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, userId);
+	//	    	Uri photoUri = null;
+	//	        if (contactsCursor.moveToFirst()) {
+	//	//            long userId = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+	//	        	long photo_id = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
+	//	            photoUri = ContentUris.withAppendedId(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, photo_id);
+	//	        }
+		        return photoUri;
+    	   	}
+    	   	return null;
+       }
+       finally{
+    	   contactsCursor.close();
+       }
+    }
+    
+    public static Bitmap getImage(Context ctx, String displayName){
+    	String[] projection = new String[] {
+//              ContactsContract.Data.PHOTO_ID,
+  			ContactsContract.Data.DISPLAY_NAME,
+              ContactsContract.Data.CONTACT_ID,
+//              ContactsContract.Data.PHOTO_URI,
+//              ContactsContract.CommonDataKinds.Phone.NUMBER,
+//            ContactsContract.CommonDataKinds.Photo.PHOTO
+      };
+      ContentResolver cr = ctx.getContentResolver();
+      Cursor contactsCursor = cr.query(ContactsContract.Data.CONTENT_URI,
+              projection, ContactsContract.Data.DISPLAY_NAME + "='" + displayName + "'", null, null);
+      Bitmap my_btmp = null;
+      	try{
+      		if(contactsCursor.moveToFirst()){
+      			long contactID = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Data.CONTACT_ID));
+//      			Uri my_contact_Uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactID));
+      			Uri my_contact_Uri =  ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactID);
+      	        InputStream photo_stream = ContactsContract.Contacts.openContactPhotoInputStream(cr,my_contact_Uri);            
+//      	        BufferedInputStream buf = new BufferedInputStream(photo_stream);
+//      	        Bitmap my_btmp = BitmapFactory.decodeStream(buf);
+      	        if(photo_stream != null){
+      	        	my_btmp = BitmapFactory.decodeStream(photo_stream);
+      	        	photo_stream.close();
+      	        }
+      		}
+      	}catch (IOException e) {
+			e.printStackTrace();
+		}finally{
+      		contactsCursor.close();
+      	}
+      	return my_btmp;
+    }
+    
+    public static long getIDFromName(Context ctx, String displayName){
+    	String[] projection = new String[] {
+//              ContactsContract.Data.PHOTO_ID,
+  			ContactsContract.Data.DISPLAY_NAME,
+              ContactsContract.Data.CONTACT_ID,
+//              ContactsContract.Data.PHOTO_URI,
+//              ContactsContract.CommonDataKinds.Phone.NUMBER,
+//            ContactsContract.CommonDataKinds.Photo.PHOTO
+      };
+      ContentResolver cr = ctx.getContentResolver();
+      Cursor contactsCursor = cr.query(ContactsContract.Data.CONTENT_URI,
+              projection, ContactsContract.Data.DISPLAY_NAME + "='" + displayName + "'", null, null);
+      long contactID = -1;
+      if(contactsCursor.moveToFirst()){
+    	  contactID = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Data.CONTACT_ID));
+      }
+      contactsCursor.close();
+      return contactID;
+    }
+    
+    public static Uri getPhotoUri(Context ctx, String displayName) {
+    	String[] projection = new String[] {
+//                ContactsContract.Data.PHOTO_ID,
+    			ContactsContract.Data.DISPLAY_NAME,
+                ContactsContract.Data.CONTACT_ID,
+//                ContactsContract.Data.PHOTO_URI,
+//                ContactsContract.CommonDataKinds.Phone.NUMBER,
+//              ContactsContract.CommonDataKinds.Photo.PHOTO
+        };
+        ContentResolver cr = ctx.getContentResolver();
+        Cursor contactsCursor = cr.query(ContactsContract.Data.CONTENT_URI,
+                projection, ContactsContract.Data.DISPLAY_NAME + "='" + displayName + "'", null, null);
+        
+        try {
+        	if(contactsCursor.moveToFirst()){
+        		long contactID = contactsCursor.getLong(contactsCursor.getColumnIndexOrThrow(ContactsContract.Data.CONTACT_ID));
+        		Cursor cur = cr.query(ContactsContract.Data.CONTENT_URI,
+                        null,
+                        ContactsContract.Data.CONTACT_ID + "=" + contactID + " AND "
+                                + ContactsContract.Data.MIMETYPE + "='"
+                                + ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE + "'", null, null);
+        		try{
+        			Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactID);
+                    return Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+        		}finally{
+        			cur.close();
+        		}
+        	}
+        	return null;
+        } finally{
+        	contactsCursor.close();
+        }
     }
     
     public Bitmap getFacebookPhoto(String phoneNumber) {
