@@ -24,6 +24,7 @@ import android.view.animation.TranslateAnimation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -42,8 +43,8 @@ import haiku.top.view.adapters.ContactListAdapter;
 public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
 	private static MainView mv;
 	private Context context;
-	private static final int ANIMATION_TIME_THEME = 300;
-	private static final int ANIMATION_TIME_DATE = 300;
+	public static final int ANIMATION_TIME_BIN = 300;
+	public static final int ANIMATION_TIME_DATE = 300;
 	public static final float OPACITY_USED = (float) 0.3;
 	public static final float OPACITY_DEFAULT = (float) 1; // 0.8 laggar
 	public static final float OPACITY_FULL = 1;
@@ -52,7 +53,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final int VIEW_SHOWN_DATE = 3;
 	
 //	private Button themeButton;
-	private ScrollView themeView;
+	private ScrollView themeScroll;
+	private LinearLayout themeList;
 	
 	private ScrollView contactScroll;
 	private LinearLayout contactList;
@@ -60,7 +62,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private ScrollView smsScroll;
 	private LinearLayout smsList;
 	
-	private LinearLayout haikuBinView;
+	private ImageView haikuBinViewSmall;
+	private ImageView haikuBinViewExtended;
 	
 	private View viewBeingDragged = null;
 	
@@ -74,9 +77,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	 */
 	private ArrayList<Integer> viewsOpenInOrder = new ArrayList<Integer>();
 	
-	private QuarterCircle dateButtonView;
-	private QuarterCircle dateView;
+	private QuarterCircle dateView; //TODO
 	boolean dateViewClosed = true;
+	
+//	private DateView dateView2;
 	
 	public MainView(Context context) {
 		super(context);
@@ -93,11 +97,17 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		smsList = (LinearLayout)findViewById(R.id.listofsms);
 		
 //		themeButton = (Button)findViewById(R.id.themebutton);
-		themeView = (ScrollView)findViewById(R.id.themeview);
-		haikuBinView = (LinearLayout)findViewById(R.id.binview);
+		themeScroll = (ScrollView)findViewById(R.id.themeview);
+		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
+		haikuBinViewExtended = (ImageView)findViewById(R.id.binviewextended);
 		
-		haikuBinView.setOnDragListener(new HaikuBinDragListener(haikuBinView));
-		haikuBinView.bringToFront();
+		haikuBinViewSmall.setOnDragListener(new HaikuBinDragListener(haikuBinViewSmall));
+		haikuBinViewSmall.bringToFront();
+		
+		haikuBinViewSmall.setOnClickListener(this);
+		haikuBinViewExtended.setOnClickListener(this);
+		haikuBinViewExtended.bringToFront();
+		haikuBinViewExtended.setVisibility(View.GONE);
 		
 //		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
 		
@@ -124,15 +134,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		themes.add(Theme.time);
 		themes.add(Theme.time);
 		
-		LinearLayout list = new LinearLayout(context);
-		list.setOrientation(LinearLayout.VERTICAL);
-		list.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		themeList = new LinearLayout(context);
+		themeList.setOrientation(LinearLayout.VERTICAL);
+		themeList.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		themeScroll.addView(themeList);
 		ThemeObjectView themeObject;
 //		int height = 0;
 		for(int i = 0; i < themes.size(); i++){
 			themeObject = new ThemeObjectView(context, themes.get(i));
 			themeObjects.add(themeObject);
-			list.addView(themeObject);
+			themeList.addView(themeObject);
 			themeObject.setOnLongClickListener(this);
 			if(HaikuGenerator.getThemes().contains(themes.get(i))){
 				themeObject.setAlpha(OPACITY_USED);
@@ -144,24 +155,30 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			themeObject.setOnTouchListener(this); // overrides the scroll function!
 //			height += themeObject.getHeightOfView();
 		}
-		themeView.addView(list);
 		smsScroll.setVisibility(GONE);
 //		themeButton.bringToFront();
-		themeView.bringToFront();
-		themeView.setAlpha(OPACITY_DEFAULT);
+		themeScroll.bringToFront();
+		themeScroll.setAlpha(OPACITY_DEFAULT);
 		updateThemeView();
 //		themeView.setVisibility(View.GONE);
 //		themeButton.setOnClickListener(this);
 		
-		dateButtonView = (QuarterCircle)findViewById(R.id.dateview);
-		dateButtonView.setOnClickListener(this);
-		dateButtonView.bringToFront();
-		dateView = (QuarterCircle)findViewById(R.id.yearview);
-		dateView.bringToFront();
-//		dateView.layout(0, getHeight()-dateView.getYearView().getRadius(), dateView.getYearView().getRadius(), 0);
-//		dateView.setLayoutParams(LayoutParams.)
-		dateView.setVisibility(GONE);
+		dateView = (QuarterCircle)findViewById(R.id.dateview); //TODO
 		dateView.setOnClickListener(this);
+		dateView.bringToFront();
+		
+		
+//		dateView2 = new DateView(context);
+//		addView(dateView2);
+//		LayoutParams params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+//		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+//		params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		dateView2.setLayoutParams(params1);
+//		dateView2.bringToFront();
+	}
+	
+	public int getThemeScrollViewWidth(){
+		return themeScroll.getWidth();
 	}
 	
 	public static MainView getInstance(){
@@ -250,6 +267,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 	}
 	
+	public void addViewElement(int viewType){
+		viewsOpenInOrder.add(viewType);
+	}
+	
 	public void closeSMSView(){
 		updateConversations();
 		contactScroll.setVisibility(VISIBLE);
@@ -282,13 +303,19 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //			// themeObject
 //			closeThemeView();
 //		}
-		if(v.equals(dateButtonView)){
+		if(v.equals(dateView)){ //TODO
 			if(dateViewClosed){
 				openDateView();
 			}
 			else{
 				closeDateView();
 			}
+		}
+		if(v.equals(haikuBinViewSmall)){
+			openBinView();
+		}
+		if(v.equals(haikuBinViewExtended)){
+			closeBinView();
 		}
 	}
 
@@ -330,12 +357,25 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	private TranslateAnimation translateAnimation;
 	
+	public void openBinView(){
+		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
+		haikuBinViewSmall.setVisibility(GONE);
+		haikuBinViewExtended.setVisibility(VISIBLE);
+	}
+	
+	public void closeBinView(){
+		removeViewElement(VIEW_SHOWN_BIN);
+		haikuBinViewSmall.setVisibility(VISIBLE);
+		haikuBinViewExtended.setVisibility(GONE);
+	}
+	
+	//TODO
 	public void openDateView(){
 		dateViewClosed = !dateViewClosed;
 		viewsOpenInOrder.add(VIEW_SHOWN_DATE);
-		dateButtonView.setText("2013");
-		Animation a = dateButtonView.changeSizeTo(2, 300);
-        dateButtonView.startAnimation(a);
+		dateView.setText("2013");
+		Animation a = dateView.changeSizeTo(2, ANIMATION_TIME_DATE);
+        dateView.startAnimation(a);
         a.setAnimationListener(new AnimationListener() {
 			
 			@Override
@@ -351,11 +391,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		});
 	}
 	
+//	TODO
 	public void closeDateView(){
 		dateViewClosed = !dateViewClosed;
 		removeViewElement(VIEW_SHOWN_DATE);
-		Animation a = dateButtonView.changeSizeTo(0.5, 300);
-        dateButtonView.startAnimation(a);
+		Animation a = dateView.changeSizeTo(0.5, ANIMATION_TIME_DATE);
+        dateView.startAnimation(a);
         a.setAnimationListener(new AnimationListener() {
 			
 			@Override
@@ -366,7 +407,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			
 			@Override
 			public void onAnimationEnd(Animation animation) {
-				dateButtonView.setText("Time");
+				dateView.setText("Time");
 			}
 		});
 	}

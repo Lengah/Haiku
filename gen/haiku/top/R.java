@@ -78,26 +78,27 @@ containing a value of this type.
     public static final class id {
         public static final int ContactLayout=0x7f080000;
         public static final int action_settings=0x7f08000e;
-        public static final int binview=0x7f080009;
+        public static final int binview=0x7f080008;
+        public static final int binviewextended=0x7f080009;
         public static final int contactPic=0x7f080001;
         public static final int contactname=0x7f080002;
-        public static final int dateview=0x7f080007;
+        public static final int dateview=0x7f080006;
         public static final int listofcontacts=0x7f08000b;
         public static final int listofsms=0x7f08000d;
         public static final int msgtext=0x7f080003;
         public static final int scrollofcontacts=0x7f08000a;
         public static final int scrollofsms=0x7f08000c;
         public static final int themename=0x7f080005;
-        public static final int themeview=0x7f080006;
+        public static final int themeview=0x7f080007;
         public static final int txtDate=0x7f080004;
-        public static final int yearview=0x7f080008;
     }
     public static final class layout {
-        public static final int item_contact=0x7f030000;
-        public static final int item_msglist_received=0x7f030001;
-        public static final int item_msglist_sent=0x7f030002;
-        public static final int item_theme=0x7f030003;
-        public static final int mainview=0x7f030004;
+        public static final int date_view=0x7f030000;
+        public static final int item_contact=0x7f030001;
+        public static final int item_msglist_received=0x7f030002;
+        public static final int item_msglist_sent=0x7f030003;
+        public static final int item_theme=0x7f030004;
+        public static final int mainview=0x7f030005;
     }
     public static final class menu {
         public static final int haiku=0x7f070000;

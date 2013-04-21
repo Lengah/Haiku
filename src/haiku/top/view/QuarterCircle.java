@@ -25,6 +25,8 @@ public class QuarterCircle extends View{
     private Paint textPaint;
     private RectF circleArc;
 
+    private int drawOffset = 0;
+    
     // Attrs
     private int circleRadius = 0;
     private int circleFillColor;
@@ -117,6 +119,35 @@ public class QuarterCircle extends View{
         textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
 	}
 	
+	public QuarterCircle(Context context, String text, int radius, int startAngle, int endAngle, int offset) {
+		super(context);
+		circleRadius = radius;
+		this.drawOffset = offset;
+        init(startAngle, endAngle); // Read all attributes
+
+        circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        circlePaint.setStyle(Paint.Style.STROKE);
+        circlePaint.setColor(circleFillColor);
+//        Log.i("TAG", "circleRadius: " + circleRadius + ", drawOffset: " + drawOffset + ", circleRadius-drawOffset: " + (circleRadius-drawOffset));
+        circlePaint.setStrokeWidth(circleRadius-drawOffset);
+//        circlePaint.setStrokeWidth(20);
+        circleStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        circleStrokePaint.setStyle(Paint.Style.STROKE);
+        circleStrokePaint.setStrokeWidth(2);
+        circleStrokePaint.setColor(circleStrokeColor);
+        
+        textPaint = new Paint();
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setColor(Color.BLACK);
+        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        
+        this.text = text;
+        
+        if(this.text.length() > 0){
+        	updateTextSize();
+        }
+	}
+	
 	public void init(AttributeSet attrs){
         // Go through all custom attrs.
         TypedArray attrsArray = getContext().obtainStyledAttributes(attrs, R.styleable.QuarterCircle);
@@ -145,24 +176,61 @@ public class QuarterCircle extends View{
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
 	}
+	
+	public void init(int startAngle, int endAngle){
+        circleFillColor = Color.rgb(234, 52, 147);
+        circleStrokeColor = Color.WHITE;
+        circleStartAngle = startAngle;
+        circleEndAngle = endAngle;
+        text = "";
+        
+        // See the circleRadius value as a dp value and convert it to a px value //TODO funkar det??
+        circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
+        circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
+	}
 
     @Override
-    protected void onDraw(Canvas canvas) {   
-//        if(newRadius != -1){
-//        	animateSizeChange(canvas);
-//        }
-        
-        canvas.translate(-1, 1);
-        canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circlePaint);
-        canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circleStrokePaint);
-
-        canvas.drawText(text, circleRadius/10, 3*circleRadius/4, textPaint);
+    protected void onDraw(Canvas canvas) {
+    	if(circleStartAngle < -90 || circleEndAngle > 0){
+    		// Out of view
+    		return;
+    	}
+    	if(drawOffset == 0){// Year view
+    		canvas.translate(-1, 1);
+            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circlePaint);
+//            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circleStrokePaint);
+            canvas.drawText(text, circleRadius/10, 3*circleRadius/4, textPaint);
+    	}
+    	else{ // Month view
+    		canvas.translate(-1, 1);
+    		
+            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, false, circlePaint);
+    		
+    		// Rotate the text
+        	canvas.save();
+        	double angle = ((-circleEndAngle)*Math.PI/180+(-circleStartAngle)*Math.PI/180)/2;
+        	float xPos = (float)(drawOffset*Math.cos(angle));
+        	float yPos = (float)(drawOffset*Math.sin(angle));
+//            canvas.rotate(circleEndAngle - circleStartAngle, 0, circleRadius);
+        	Log.i("TAG", text + ": " + "Offset: " + drawOffset + ", X: " + xPos + ", Y: " + yPos + ", Angle: " + (angle*180/Math.PI));
+        	canvas.rotate((circleEndAngle + circleStartAngle)/2, xPos, yPos);
+        	canvas.drawText(text, 0, 0, textPaint);
+            canvas.restore();
+    	}
     }
     
     @Override 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
         int measuredWidth = measureWidth(widthMeasureSpec);
-        circleArc.set(-circleRadius, 0, circleRadius, circleRadius*2);
+        if(drawOffset == 0){
+        	circleArc.set(-circleRadius, 0, circleRadius, circleRadius*2);
+        }
+        else{
+        	// smaller height because the drawArc method with a stroke paint paints half on the inside and half on the outside.
+        	// Since I want everything on the inside I have to adjust the height so the center of the arc is in the center of the slice.
+        	// The width also has to be adjusted so it remains a circle.
+        	circleArc.set(-circleRadius + (circleRadius-drawOffset)/2, (circleRadius-drawOffset)/2, circleRadius - (circleRadius-drawOffset)/2, circleRadius*2 - (circleRadius-drawOffset)/2);
+        }
         int measuredHeight = measureHeight(heightMeasureSpec);
         setMeasuredDimension(measuredWidth, measuredHeight);
 //        Log.i("TAG", "measuredHeight =>" + String.valueOf(measuredHeight) + "px measuredWidth => " + String.valueOf(measuredWidth) + "px");
@@ -195,46 +263,8 @@ public class QuarterCircle extends View{
          return result;
     }
     
-    /**
-     * Animates the new size in % compared with the current size, with the given speed (100%/s).
-     * 
-     * For example if radius is set to 200, the view will be dubbled.
-     * If radius is set to 50, the view will be halved.
-     * If the speed is set to 100 in the first example and 50 is the second, both animations
-     * will take one second.
-     * @param radius - The size it will expand/decrease to (in % compared to the current size)
-     * @param speed - The speed of the animation (100%/s)
-     */
-//    public void changeSizeTo(int radius, int speed){
-//    	this.newRadius = radius*circleRadius/100;
-//    	this.animationSpeed = speed;
-//    	Log.i("TAG", "oldRadius: " + circleRadius + ", newRadius: " + newRadius);
-//    	invalidate();
-//    	measure(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-//    	
-//    	measure(MeasureSpec.AT_MOST, MeasureSpec.AT_MOST);
-//        final int targetHeight = getMeasuredHeight();
-//    	Animation a = new Animation(){
-//            @Override
-//            protected void applyTransformation(float interpolatedTime, Transformation t) {
-//                getLayoutParams().height = interpolatedTime == 1
-//                        ? LayoutParams.WRAP_CONTENT
-//                        : (int)(targetHeight * interpolatedTime);
-//                requestLayout();
-//            }
-//
-//            @Override
-//            public boolean willChangeBounds() {
-//                return true;
-//            }
-//        };
-//
-        // 1dp/ms
-//        a.setDuration((int)(targtetHeight / getContext().getResources().getDisplayMetrics().density));
-//        a.setDuration((radius/speed)*1000);
-//    	
-//    }
-    
+    private Animation a;
+  
     /**
      * Creates an animation that will expand the view to a new size with the radius oldRadius*radiusFactor, with the duration in ms.
      * Returns the animation to the caller
@@ -247,13 +277,13 @@ public class QuarterCircle extends View{
     	measure(MeasureSpec.AT_MOST, MeasureSpec.AT_MOST);
     	final int targetRadius = (int)(radiusFactor*circleRadius);
     	final int startRadius = circleRadius;
-        Animation a = new Animation(){
+        a = new Animation(){
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
             	if(startRadius > targetRadius){
             		getLayoutParams().height = interpolatedTime == 1
                             ? targetRadius
-                            : Math.min(startRadius, startRadius-(int)(targetRadius * interpolatedTime));
+                            : Math.max(targetRadius, startRadius-(int)((startRadius - targetRadius) * interpolatedTime));
             	}
             	else{
             		getLayoutParams().height = interpolatedTime == 1
@@ -275,12 +305,18 @@ public class QuarterCircle extends View{
         return a;
     }
 
+    public void changeAngle(int angleChange){
+    	circleStartAngle += angleChange;
+    	circleEndAngle += angleChange;
+    	requestLayout();
+    }
+    
     private void updateTextSize(){
 		int size = 0;
 	    do {
 	    	size++;
 	        textPaint.setTextSize(size);
-	    } while(textPaint.measureText(text) < 2*circleRadius/3);
+	    } while(textPaint.measureText(text) < 2*(circleRadius - drawOffset)/3);
 	}
 	
 	public void setText(String text){
@@ -291,19 +327,6 @@ public class QuarterCircle extends View{
 	public String getText(){
 		return text;
 	}
-	
-//	/**
-//	 * 
-//	 * @param radius in dp
-//	 */
-//	public void setRadius(int radius){
-//		this.circleRadius = radius;
-//		// See the circleRadius value as a dp value and convert it to a px value //TODO funkar det??
-//        circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
-//        measure(MeasureSpec.AT_MOST, MeasureSpec.AT_MOST);
-//        invalidate();
-////        circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
-//	}
 	
 	public int getRadius(){
 		return circleRadius;

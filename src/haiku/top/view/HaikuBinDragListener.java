@@ -26,12 +26,12 @@ public class HaikuBinDragListener implements OnDragListener{
 	}
 	
 	public void updateColor(){
-		if(inBinRange){
-			binView.setBackgroundColor(inBinColor);
-		}
-		else{
-			binView.setBackgroundColor(notInBinColor);
-		}
+//		if(inBinRange){
+//			binView.setBackgroundColor(inBinColor);
+//		}
+//		else{
+//			binView.setBackgroundColor(notInBinColor);
+//		}
 	}
 
 	@Override

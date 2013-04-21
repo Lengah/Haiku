@@ -5,18 +5,6 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
     
-    <ScrollView
-        android:id="@+id/themeview"
-        android:background="#FBCE0D"
-        android:layout_height="200dp"
-        android:layout_width="100dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:clickable="true"
-        android:rotation="-5">
-        
-    </ScrollView>
-    
     <haiku.top.view.QuarterCircle
             android:id="@+id/dateview"
             android:layout_width="wrap_content"
@@ -31,29 +19,34 @@
             android:layout_alignParentLeft="true"
             />
     
-    <haiku.top.view.QuarterCircle
-            android:id="@+id/yearview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            circleview:cFillColor="#EA3493"
-            circleview:cStrokeColor="@android:color/white"
-            circleview:cRadius="100"
-            circleview:cAngleStart="0"
-            circleview:cAngleEnd="-90"
-            circleview:text="2013"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            />
-    
-    <LinearLayout 
-       	android:id="@+id/binview"
-        android:background="#FFEC8E"
-        android:layout_height="100dp"
-        android:layout_width="100dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true">
-        
-    </LinearLayout>
+
+
+	<ScrollView
+	    android:id="@+id/themeview"
+	    android:layout_width="100dp"
+	    android:layout_height="200dp"
+	    android:background="#FBCE0D"
+	    android:rotation="-5"
+	    android:layout_alignParentRight="true"
+	    android:layout_alignParentTop="true"/>
+	
+	<ImageView
+	    android:contentDescription="@string/hello_world"
+	    android:id="@+id/binview"
+	    android:layout_width="100dp"
+	    android:layout_height="match_parent"
+	    android:background="@drawable/haikubin_small"
+	    android:layout_alignParentRight="true"
+	    android:layout_marginTop="200dp"/>
+	
+	<ImageView
+	    android:contentDescription="@string/hello_world"
+	    android:id="@+id/binviewextended"
+	    android:layout_width="300dp"
+	    android:layout_height="match_parent"
+	    android:background="@drawable/haikubin_extended"
+	    android:layout_alignParentRight="true"
+	    android:layout_marginTop="200dp"/>
 
    	<ScrollView
        	android:id="@+id/scrollofcontacts"
@@ -62,7 +55,7 @@
        	
    	     <LinearLayout 
       		android:id="@+id/listofcontacts"
-       		android:layout_height="match_parent"
+       		android:layout_height="wrap_content"
 	        android:layout_width="match_parent"
        		android:orientation="vertical">
        
@@ -76,7 +69,7 @@
        	
    	     <LinearLayout 
       		android:id="@+id/listofsms"
-       		android:layout_height="match_parent"
+       		android:layout_height="wrap_content"
 	        android:layout_width="match_parent"
        		android:orientation="vertical">
        
