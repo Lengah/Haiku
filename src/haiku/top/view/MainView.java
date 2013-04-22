@@ -52,6 +52,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final int VIEW_SHOWN_BIN = 2;
 	public static final int VIEW_SHOWN_DATE = 3;
 	
+	public static final double LONG_CLICK_TIME = 1000; //In ms
+	public static final double MOVE_TO_DRAG_RANGE = 15;
+	
 //	private Button themeButton;
 	private ScrollView themeScroll;
 	private LinearLayout themeList;
@@ -77,10 +80,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	 */
 	private ArrayList<Integer> viewsOpenInOrder = new ArrayList<Integer>();
 	
-	private QuarterCircle dateView; //TODO
+//	private QuarterCircle dateView; //TODO
 	boolean dateViewClosed = true;
 	
-//	private DateView dateView2;
+	private DateView dateView2;
 	
 	public MainView(Context context) {
 		super(context);
@@ -106,7 +109,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		haikuBinViewSmall.setOnClickListener(this);
 		haikuBinViewExtended.setOnClickListener(this);
-		haikuBinViewExtended.bringToFront();
 		haikuBinViewExtended.setVisibility(View.GONE);
 		
 //		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
@@ -163,18 +165,21 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		themeView.setVisibility(View.GONE);
 //		themeButton.setOnClickListener(this);
 		
-		dateView = (QuarterCircle)findViewById(R.id.dateview); //TODO
-		dateView.setOnClickListener(this);
-		dateView.bringToFront();
+//		dateView = (QuarterCircle)findViewById(R.id.dateview); //TODO
+//		dateView.setOnClickListener(this);
+//		dateView.bringToFront();
+//		
 		
+		dateView2 = new DateView(context);
+		addView(dateView2);
+		LayoutParams params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		dateView2.setLayoutParams(params1);
+		dateView2.bringToFront();
 		
-//		dateView2 = new DateView(context);
-//		addView(dateView2);
-//		LayoutParams params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-//		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-//		params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-//		dateView2.setLayoutParams(params1);
-//		dateView2.bringToFront();
+
+		haikuBinViewExtended.bringToFront();
 	}
 	
 	public int getThemeScrollViewWidth(){
@@ -197,6 +202,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public View getDraggedView(){
 		return viewBeingDragged;
+	}
+	
+	public void setDraggedView(View v){
+		viewBeingDragged = v;
 	}
 	
 	public void updateConversations(){
@@ -303,14 +312,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //			// themeObject
 //			closeThemeView();
 //		}
-		if(v.equals(dateView)){ //TODO
-			if(dateViewClosed){
-				openDateView();
-			}
-			else{
-				closeDateView();
-			}
-		}
+//		if(v.equals(dateView)){ //TODO
+//			if(dateViewClosed){
+//				openDateView();
+//			}
+//			else{
+//				closeDateView();
+//			}
+//		}
 		if(v.equals(haikuBinViewSmall)){
 			openBinView();
 		}
@@ -342,7 +351,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 		// overrides the scroll function!
 		if(event.getAction() == MotionEvent.ACTION_MOVE){
-			if(startX != -1 && Math.abs(startX - ((int) event.getX())) > 5
+			if(startX != -1 && Math.abs(startX - ((int) event.getX())) > MOVE_TO_DRAG_RANGE
 					&& 45 > Math.acos(Math.abs(((int) event.getX()) - startX)
 							/Math.sqrt((((int) event.getX()) - startX) * (((int) event.getX()) - startX)
 							+ (((int) event.getY()) - startY) * (((int) event.getY()) - startY)))){
@@ -355,12 +364,13 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return false;
 	}
 	
-	private TranslateAnimation translateAnimation;
-	
 	public void openBinView(){
 		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(GONE);
 		haikuBinViewExtended.setVisibility(VISIBLE);
+		if(!dateViewClosed){
+//			closeDateView(); //TODO
+		}
 	}
 	
 	public void closeBinView(){
@@ -370,45 +380,45 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 	
 	//TODO
-	public void openDateView(){
-		dateViewClosed = !dateViewClosed;
-		viewsOpenInOrder.add(VIEW_SHOWN_DATE);
-		dateView.setText("2013");
-		Animation a = dateView.changeSizeTo(2, ANIMATION_TIME_DATE);
-        dateView.startAnimation(a);
-        a.setAnimationListener(new AnimationListener() {
-			
-			@Override
-			public void onAnimationStart(Animation animation) {}
-			
-			@Override
-			public void onAnimationRepeat(Animation animation) {}
-			
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				
-			}
-		});
-	}
-	
-//	TODO
-	public void closeDateView(){
-		dateViewClosed = !dateViewClosed;
-		removeViewElement(VIEW_SHOWN_DATE);
-		Animation a = dateView.changeSizeTo(0.5, ANIMATION_TIME_DATE);
-        dateView.startAnimation(a);
-        a.setAnimationListener(new AnimationListener() {
-			
-			@Override
-			public void onAnimationStart(Animation animation) {}
-			
-			@Override
-			public void onAnimationRepeat(Animation animation) {}
-			
-			@Override
-			public void onAnimationEnd(Animation animation) {
-				dateView.setText("Time");
-			}
-		});
-	}
+//	public void openDateView(){
+//		dateViewClosed = !dateViewClosed;
+//		viewsOpenInOrder.add(VIEW_SHOWN_DATE);
+//		dateView.setText("2013");
+//		Animation a = dateView.changeSizeTo(2, ANIMATION_TIME_DATE);
+//        dateView.startAnimation(a);
+//        a.setAnimationListener(new AnimationListener() {
+//			
+//			@Override
+//			public void onAnimationStart(Animation animation) {}
+//			
+//			@Override
+//			public void onAnimationRepeat(Animation animation) {}
+//			
+//			@Override
+//			public void onAnimationEnd(Animation animation) {
+//				
+//			}
+//		});
+//	}
+//	
+////	TODO
+//	public void closeDateView(){
+//		dateViewClosed = !dateViewClosed;
+//		removeViewElement(VIEW_SHOWN_DATE);
+//		Animation a = dateView.changeSizeTo(0.5, ANIMATION_TIME_DATE);
+//        dateView.startAnimation(a);
+//        a.setAnimationListener(new AnimationListener() {
+//			
+//			@Override
+//			public void onAnimationStart(Animation animation) {}
+//			
+//			@Override
+//			public void onAnimationRepeat(Animation animation) {}
+//			
+//			@Override
+//			public void onAnimationEnd(Animation animation) {
+//				dateView.setText("Time");
+//			}
+//		});
+//	}
 }

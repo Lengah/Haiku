@@ -17,6 +17,7 @@
             circleview:text="Time"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
+            android:visibility="gone"
             />
     
 
@@ -42,11 +43,10 @@
 	<ImageView
 	    android:contentDescription="@string/hello_world"
 	    android:id="@+id/binviewextended"
-	    android:layout_width="300dp"
+	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:background="@drawable/haikubin_extended"
-	    android:layout_alignParentRight="true"
-	    android:layout_marginTop="200dp"/>
+	    android:layout_alignParentRight="true"/>
 
    	<ScrollView
        	android:id="@+id/scrollofcontacts"
