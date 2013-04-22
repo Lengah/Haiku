@@ -21,10 +21,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -36,6 +38,8 @@ public class HaikuActivity extends Activity {
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
     private static ArrayList<Contact> contacts = new ArrayList<Contact>();
+    
+	private Vibrator vibe;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,10 +47,22 @@ public class HaikuActivity extends Activity {
         mainView = new MainView(this);
         setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 //        initContactsAndSMS(this);
+        vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
     }
     
+    @Override
+    public boolean onKeyDown(int keycode, KeyEvent event ) {
+     if (keycode == KeyEvent.KEYCODE_MENU) {
+    	 startActivity(new Intent(this, CreateSamplesActivity.class));
+    	 return true;
+     }
+     else
+    	 return super.onKeyDown(keycode, event); 
+    } 
+    
     @Override 
-    public void onBackPressed(){
+    public void onBackPressed() {
+    	
     	//your stuffs
     	ArrayList<Integer> states = MainView.getInstance().getViewsShown();
     	if(states.isEmpty()){
