@@ -39,13 +39,17 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBarChangeListener, OnClickListener {
+public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSeekBarChangeListener, OnClickListener {
+	private Context context;
+
 	private ProgressDialog progressDialog;
 	private Vibrator vibe;
 	
@@ -66,47 +70,27 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
 	private boolean samplesExist; //has samples been generated/loaded
 	
 	private SharedPreferences mPrefs;
-	private final String SAMPLES_EXIST_KEY = "SampleContactSMS_samplesExist";
-	private final String EXPORT_CONTACT_KEY = "SampleContactSMS_exportContact";
-	private final String EXPORT_SMS_KEY = "SampleContactSMS_exportSMS";
+	public static final String SAMPLES_EXIST_KEY = "SampleContactSMS_samplesExist";
+	public static final String EXPORT_CONTACT_KEY = "SampleContactSMS_exportContact";
+	public static final String EXPORT_SMS_KEY = "SampleContactSMS_exportSMS";
 	
-	private final long ONE_MINUTE = 60000L;
-	private final long ONE_HOUR = 60*ONE_MINUTE;
-	private final long ONE_DAY = 24*ONE_HOUR;
-	private final long ONE_MONTH = 30*ONE_DAY;
-	private final long ONE_YEAR = 31557600000L;
-	private final long NOW = Calendar.getInstance().getTimeInMillis();
-	private final long TWO_YEARS_BACK = (long)(NOW - (ONE_YEAR*2));
+	public static final long ONE_MINUTE = 60000L;
+	public static final long ONE_HOUR = 60*ONE_MINUTE;
+	public static final long ONE_DAY = 24*ONE_HOUR;
+	public static final long ONE_MONTH = 30*ONE_DAY;
+	public static final long ONE_YEAR = 31557600000L;
+	public static final long NOW = Calendar.getInstance().getTimeInMillis();
+	public static final long TWO_YEARS_BACK = (long)(NOW - (ONE_YEAR*2));
 	
-    protected void onPause() { //save data between sessions
-        super.onPause();
-        SharedPreferences.Editor ed = mPrefs.edit();
-        ed.putBoolean(SAMPLES_EXIST_KEY, samplesExist);
-        
-        if (samplesExist) { //if samples were created during session, save contacts
-	        Set<String> exportContact = new HashSet<String>();
-	        for (Contact contact : contacts)
-	        	exportContact.add(contact.name + "·*$" + contact.phoneNumber); //token separator    
-	        ed.putStringSet(EXPORT_CONTACT_KEY, exportContact);
-	        
-	        Set<String> exportSMS = new HashSet<String>(sms);
-	        ed.putStringSet(EXPORT_SMS_KEY, exportSMS);
-        }
-        ed.commit();
-    }
-
-    @Override 
-    public void onBackPressed() {
-    	startActivity(new Intent(this, HaikuActivity.class));
-    }
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.create_samples);
+	public CreateSamplesActivity(Context context) {
+		super(context);
+		this.context = context;
+		
+		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		layoutInflater.inflate(R.layout.create_samples,this);
 		
 		//import saved data
-		mPrefs = getPreferences(MODE_PRIVATE);
+		mPrefs = getPreferences(Context.MODE_PRIVATE);
         samplesExist = mPrefs.getBoolean(SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
         
         //if so, load contacts
@@ -127,10 +111,10 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
         
         vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         
-        Typeface adobeGaramondProRegular = Typeface.createFromAsset(getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
-        Typeface adobeGaramondProBold = Typeface.createFromAsset(getAssets(), "fonts/AGARAMONDPRO-BOLD.OTF");
-        Typeface adobeGaramondProItalic = Typeface.createFromAsset(getAssets(), "fonts/AGARAMONDPRO-ITALIC.OTF");
-        Typeface adobeGaramondProBoldItalic = Typeface.createFromAsset(getAssets(), "fonts/AGARAMONDPRO-BOLDITALIC.OTF");
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        Typeface adobeGaramondProBold = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-BOLD.OTF");
+        Typeface adobeGaramondProItalic = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-ITALIC.OTF");
+        Typeface adobeGaramondProBoldItalic = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-BOLDITALIC.OTF");
         
         ((TextView)findViewById(R.id.text1)).setTypeface(adobeGaramondProBold);
         ((TextView)findViewById(R.id.text2)).setTypeface(adobeGaramondProRegular);
@@ -167,6 +151,23 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
 		contactSlide.setOnSeekBarChangeListener(this);
 		smsSlide.setOnSeekBarChangeListener(this);
 	}
+	
+    protected void onPause() { //save data between sessions
+        super.onPause();
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putBoolean(SAMPLES_EXIST_KEY, samplesExist);
+        
+        if (samplesExist) { //if samples were created during session, save contacts
+	        Set<String> exportContact = new HashSet<String>();
+	        for (Contact contact : contacts)
+	        	exportContact.add(contact.name + "·*$" + contact.phoneNumber); //token separator    
+	        ed.putStringSet(EXPORT_CONTACT_KEY, exportContact);
+	        
+	        Set<String> exportSMS = new HashSet<String>(sms);
+	        ed.putStringSet(EXPORT_SMS_KEY, exportSMS);
+        }
+        ed.commit();
+    }
 	
 	@Override
 	public void onClick(View v) {
@@ -249,7 +250,7 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
                  .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
                  .withValue(ContactsContract.CommonDataKinds.Photo.DATA15, b).build());
 		 
-		 try { getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops); } 
+		 try { context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops); } 
 		 catch (RemoteException e) {} catch (OperationApplicationException e) {}
 	}
 	
@@ -279,9 +280,9 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
 		values.put("read", 1);
 		values.put("body", text);
 		if (inbox) //add to inbox
-			sms.add(Long.toString(ContentUris.parseId(getContentResolver().insert(Uri.parse("content://sms/inbox"), values))));
+			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/inbox"), values))));
 		else //else add to outbox
-			sms.add(Long.toString(ContentUris.parseId(getContentResolver().insert(Uri.parse("content://sms/sent"), values))));
+			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/sent"), values))));
 	}
  
     private void deleteSMS(Context context, String id) {
@@ -297,7 +298,7 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
     	
 		@Override
 		protected void onPreExecute() {	
-            progressDialog = new ProgressDialog(CreateSamplesActivity.this);  
+            progressDialog = new ProgressDialog(context);  
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);    
             progressDialog.setTitle("Processing...");
             if (loadOrRemove) //load
@@ -324,26 +325,26 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
 							
 				try {
 					//addSampleContacts
-					BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("namelist.txt")));
+					BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open("namelist.txt")));
 					for (int i=0; i<(numberOfContactsToAdd-5); i++) { //5 manual entries
-						addContact(CreateSamplesActivity.this, reader.readLine(), "+4670000" + (1000 + i)); //fictional persons
+						addContact(context, reader.readLine(), "+4670000" + (1000 + i)); //fictional persons
 						publishProgress((int)((++progress)*progressValue));
 					}
 					reader.close();
 					//manual entries (real persons) = 5
-					addContact(CreateSamplesActivity.this, "Fredrik Hagnell", "+41736000000");
+					addContact(context, "Fredrik Hagnell", "+41736000000");
 					publishProgress((int)((++progress)*progressValue));
-					addContact(CreateSamplesActivity.this, "Karl-Axel Zander", "+41736000001");
+					addContact(context, "Karl-Axel Zander", "+41736000001");
 					publishProgress((int)((++progress)*progressValue));
-					addContact(CreateSamplesActivity.this, "Pedro Ferreria", "+41736000002");
+					addContact(context, "Pedro Ferreria", "+41736000002");
 					publishProgress((int)((++progress)*progressValue));
-					addContact(CreateSamplesActivity.this, "Vygandas Simbelis", "+41736000003");
+					addContact(context, "Vygandas Simbelis", "+41736000003");
 					publishProgress((int)((++progress)*progressValue));
-					addContact(CreateSamplesActivity.this, "Elsa Vaara", "+41736000004");
+					addContact(context, "Elsa Vaara", "+41736000004");
 					publishProgress((int)((++progress)*progressValue));
 					
 					//addSampleSMS
-					reader = new BufferedReader(new InputStreamReader(getAssets().open("sms-conversations.txt")));		
+					reader = new BufferedReader(new InputStreamReader(context.getAssets().open("sms-conversations.txt")));		
 					String address = "";
 					String date = "";
 					String text = "";
@@ -408,12 +409,12 @@ public class CreateSamplesActivity extends Activity implements SeekBar.OnSeekBar
 				int progress = 0;
 				
 				for (Contact contact : contacts) { //delete all loaded contacts from this app
-					deleteContact(CreateSamplesActivity.this, contact.name, contact.phoneNumber);
+					deleteContact(context, contact.name, contact.phoneNumber);
 					publishProgress((int)((++progress)*progressValue));
 				}
 				contacts.clear();
 				for (int i=0; i<sms.size(); i++) { //delete all loaded sms from this app
-					deleteSMS(CreateSamplesActivity.this, sms.get(i));
+					deleteSMS(context, sms.get(i));
 				}
 				sms.clear();
 			}		

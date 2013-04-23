@@ -34,6 +34,7 @@ import android.view.ViewGroup.LayoutParams;
 public class HaikuActivity extends Activity {
 	private static HaikuActivity ha;
 	private View mainView;
+	private View sampleView;
 	private static final String ALLBOXES = "content://sms/";
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
@@ -45,6 +46,7 @@ public class HaikuActivity extends Activity {
         super.onCreate(savedInstanceState);
         ha = this;
         mainView = new MainView(this);
+        sampleView = new CreateSamplesActivity(this);
         setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 //        initContactsAndSMS(this);
         vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
@@ -53,32 +55,31 @@ public class HaikuActivity extends Activity {
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event ) {
      if (keycode == KeyEvent.KEYCODE_MENU) {
+    	 setContentView(sampleView);
     	 startActivity(new Intent(this, CreateSamplesActivity.class));
     	 return true;
      }
+     else if(keycode == KeyEvent.KEYCODE_BACK){
+    	 Log.i("TAG", "BACK!");
+		ArrayList<Integer> states = MainView.getInstance().getViewsShown();
+		if(states.isEmpty()){
+		 	finish();	
+		}
+		else{
+			if(states.get(states.size()-1) == MainView.VIEW_SHOWN_SMS){
+				MainView.getInstance().closeSMSView();
+			}
+			else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_BIN){
+				MainView.getInstance().closeBinView();
+			}
+			else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_DATE){
+		//     			MainView.getInstance().closeDateView();
+			}
+		}
+     	return true;
+     }
      else
     	 return super.onKeyDown(keycode, event); 
-    } 
-    
-    @Override 
-    public void onBackPressed() {
-    	
-    	//your stuffs
-    	ArrayList<Integer> states = MainView.getInstance().getViewsShown();
-    	if(states.isEmpty()){
-        	finish();	
-    	}
-    	else{
-    		if(states.get(states.size()-1) == MainView.VIEW_SHOWN_SMS){
-    			MainView.getInstance().closeSMSView();
-    		}
-    		else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_BIN){
-    			MainView.getInstance().closeBinView();
-    		}
-    		else if(states.get(states.size()-1) == MainView.VIEW_SHOWN_DATE){
-//    			MainView.getInstance().closeDateView();
-    		}
-    	}
     }
     
     public static HaikuActivity getInstance(){
