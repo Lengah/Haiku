@@ -57,7 +57,6 @@ public class HaikuActivity extends Activity {
         
         //if so, load contacts
         if (((CreateSamplesView)createSamplesView).samplesExist) {
-        	Log.i("test", "loading");
         	Set<String> importContact = new HashSet<String>();
         	importContact = mPrefs.getStringSet(CreateSamplesView.EXPORT_CONTACT_KEY, null);
 
@@ -70,14 +69,12 @@ public class HaikuActivity extends Activity {
 	        Set<String> importSMS = new HashSet<String>();
 	        importSMS = mPrefs.getStringSet(CreateSamplesView.EXPORT_SMS_KEY, null);
 	        ((CreateSamplesView)createSamplesView).sms.addAll(importSMS);
-	        
-	        ((CreateSamplesView)createSamplesView).updateAfterImport();
         }
+        ((CreateSamplesView)createSamplesView).updateAfterImport();
     }
     
     protected void onPause() { //save data between sessions
         super.onPause();
-        Log.i("test", "pausing");
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, ((CreateSamplesView)createSamplesView).samplesExist);
         
