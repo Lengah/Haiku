@@ -1,4 +1,10 @@
-package haiku.top;
+package haiku.top.view;
+
+import haiku.top.HaikuActivity;
+import haiku.top.R;
+import haiku.top.R.id;
+import haiku.top.R.layout;
+import haiku.top.model.CreateSamplesContact;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -47,11 +53,9 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSeekBarChangeListener, OnClickListener {
+public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBarChangeListener, OnClickListener {
 	private Context context;
-
 	private ProgressDialog progressDialog;
-	private Vibrator vibe;
 	
 	private Button loadButton;
 	private Button removeButton;
@@ -62,55 +66,31 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 	private SeekBar contactSlide;
 	private SeekBar smsSlide;
 	
-	private int numberOfContactsToAdd = 10; //min 10, max 100
-	private int numberOfSMSToAdd = 10; //min 10, max 23
+	private int numberOfContactsToAdd = 6; //min 6, max 100
+	private int numberOfSMSToAdd = 2; //min 2, max 23
 	
-	private ArrayList<Contact> contacts = new ArrayList<Contact>();
-	private ArrayList<String> sms = new ArrayList<String>();
-	private boolean samplesExist; //has samples been generated/loaded
+	public ArrayList<CreateSamplesContact> contacts = new ArrayList<CreateSamplesContact>();
+	public ArrayList<String> sms = new ArrayList<String>();
+	public boolean samplesExist; //has samples been generated/loaded
 	
-	private SharedPreferences mPrefs;
-	public static final String SAMPLES_EXIST_KEY = "SampleContactSMS_samplesExist";
-	public static final String EXPORT_CONTACT_KEY = "SampleContactSMS_exportContact";
-	public static final String EXPORT_SMS_KEY = "SampleContactSMS_exportSMS";
+	public static final String SAMPLES_EXIST_KEY = "DeleteByHaiku_samplesExist";
+	public static final String EXPORT_CONTACT_KEY = "DeleteByHaiku_exportContact";
+	public static final String EXPORT_SMS_KEY = "DeleteByHaiku_exportSMS";
 	
-	public static final long ONE_MINUTE = 60000L;
-	public static final long ONE_HOUR = 60*ONE_MINUTE;
-	public static final long ONE_DAY = 24*ONE_HOUR;
-	public static final long ONE_MONTH = 30*ONE_DAY;
-	public static final long ONE_YEAR = 31557600000L;
-	public static final long NOW = Calendar.getInstance().getTimeInMillis();
-	public static final long TWO_YEARS_BACK = (long)(NOW - (ONE_YEAR*2));
+	private final long ONE_MINUTE = 60000L;
+	private final long ONE_HOUR = 60*ONE_MINUTE;
+	private final long ONE_DAY = 24*ONE_HOUR;
+	private final long ONE_MONTH = 30*ONE_DAY;
+	private final long ONE_YEAR = 31557600000L;
+	private final long NOW = Calendar.getInstance().getTimeInMillis();
+	private final long TWO_YEARS_BACK = (long)(NOW - (ONE_YEAR*2));
 	
-	public CreateSamplesActivity(Context context) {
+	public CreateSamplesView(Context context) {
 		super(context);
 		this.context = context;
-		
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		layoutInflater.inflate(R.layout.create_samples,this);
+		layoutInflater.inflate(R.layout.create_samples_view,this);
 		
-		//import saved data
-		mPrefs = getPreferences(Context.MODE_PRIVATE);
-        samplesExist = mPrefs.getBoolean(SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
-        
-        //if so, load contacts
-        if (samplesExist) {
-        	Set<String> importContact = new HashSet<String>();
-        	importContact = mPrefs.getStringSet(EXPORT_CONTACT_KEY, null);
-
-	        ArrayList<String> contactsToArray = new ArrayList<String>(importContact);
-	        for (int i=0; i < contactsToArray.size(); i++)
-	        		contacts.add(new Contact(contactsToArray.get(i).
-	        		substring(0, contactsToArray.get(i).indexOf("·*$")), contactsToArray.get(i). 
-	        		substring(contactsToArray.get(i).indexOf("·*$") + 3, contactsToArray.get(i).length())));
-	        
-	        Set<String> importSMS = new HashSet<String>();
-	        importSMS = mPrefs.getStringSet(EXPORT_SMS_KEY, null);
-	        sms.addAll(importSMS);
-        }
-        
-        vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-        
         Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
         Typeface adobeGaramondProBold = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-BOLD.OTF");
         Typeface adobeGaramondProItalic = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-ITALIC.OTF");
@@ -136,6 +116,13 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 		contactSlide = (SeekBar)findViewById(R.id.contactSlide2);
 		smsSlide = (SeekBar)findViewById(R.id.smsSlide);
 		
+		loadButton.setOnClickListener(this);
+		removeButton.setOnClickListener(this);
+		contactSlide.setOnSeekBarChangeListener(this);
+		smsSlide.setOnSeekBarChangeListener(this);
+	}
+	
+	public void updateAfterImport() {
 		if (samplesExist) {
 			loadButton.setEnabled(false);
 			log.setText("Samples already loaded");
@@ -145,34 +132,12 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 			log.setText("No samples loaded");
 			warning.setVisibility(View.INVISIBLE);
 		}
-
-		loadButton.setOnClickListener(this);
-		removeButton.setOnClickListener(this);
-		contactSlide.setOnSeekBarChangeListener(this);
-		smsSlide.setOnSeekBarChangeListener(this);
 	}
-	
-    protected void onPause() { //save data between sessions
-        super.onPause();
-        SharedPreferences.Editor ed = mPrefs.edit();
-        ed.putBoolean(SAMPLES_EXIST_KEY, samplesExist);
-        
-        if (samplesExist) { //if samples were created during session, save contacts
-	        Set<String> exportContact = new HashSet<String>();
-	        for (Contact contact : contacts)
-	        	exportContact.add(contact.name + "·*$" + contact.phoneNumber); //token separator    
-	        ed.putStringSet(EXPORT_CONTACT_KEY, exportContact);
-	        
-	        Set<String> exportSMS = new HashSet<String>(sms);
-	        ed.putStringSet(EXPORT_SMS_KEY, exportSMS);
-        }
-        ed.commit();
-    }
-	
+		
 	@Override
 	public void onClick(View v) {
 		if(v.equals(loadButton)){
-			vibe.vibrate(70);
+			HaikuActivity.vibe.vibrate(70);
 			new LoadTask(true).execute(); 		
 			samplesExist = true;
 			loadButton.setEnabled(false);
@@ -182,7 +147,7 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 		}
 		
 		if(v.equals(removeButton)) {
-			vibe.vibrate(70);
+			HaikuActivity.vibe.vibrate(70);
 			new LoadTask(false).execute(); 			
 			samplesExist = false;
 			loadButton.setEnabled(true);
@@ -197,12 +162,12 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
         //  Notify that the progress level has changed.
     	if (seekBar.getId() == R.id.contactSlide2)
     	{
-    		numberOfContactsToAdd = (progress < 10) ? 10 : progress;
+    		numberOfContactsToAdd = (progress < 6) ? 6 : progress;
     		numberOfContacts.setText("" + numberOfContactsToAdd);
     	}
     	else if (seekBar.getId() == R.id.smsSlide)
     	{
-    		numberOfSMSToAdd = (progress < 10) ? 10 : progress;
+    		numberOfSMSToAdd = (progress < 2) ? 2 : progress;
     		numberOfSMS.setText("" + numberOfSMSToAdd);
     	}
     }
@@ -216,8 +181,8 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
         // Notify that the user has finished a touch gesture.
     }
 	
-    private void addContact(Context context, String name, String phoneNumber) {
-		contacts.add(new Contact(name, phoneNumber));
+    private void addContact(Context ctx, String name, String phoneNumber) {
+		contacts.add(new CreateSamplesContact(name, phoneNumber));
 		//add contact to phone's database
 		 ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 		 int rawContactInsertIndex = ops.size();
@@ -237,7 +202,7 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
                 .withValue(Phone.NUMBER, phoneNumber) //phone number
                 .withValue(Phone.TYPE, Phone.TYPE_MOBILE).build()); //type of mobile number
 		 
-		 AssetManager assetManager = context.getAssets();
+		 AssetManager assetManager = ctx.getAssets();
 		 InputStream istr;
 		 Bitmap bitmap = null;
 		 try { istr = assetManager.open("sample-avatar.png"); bitmap = BitmapFactory.decodeStream(istr); } catch (IOException e) {}
@@ -250,7 +215,7 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
                  .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
                  .withValue(ContactsContract.CommonDataKinds.Photo.DATA15, b).build());
 		 
-		 try { context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops); } 
+		 try { ctx.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops); } 
 		 catch (RemoteException e) {} catch (OperationApplicationException e) {}
 	}
 	
@@ -285,8 +250,8 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/sent"), values))));
 	}
  
-    private void deleteSMS(Context context, String id) {
-    	context.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null);
+    private void deleteSMS(Context ctx, String id) {
+    	ctx.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null);
 	}
     
     private class LoadTask extends AsyncTask<Void, Integer, Void> {
@@ -311,8 +276,7 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
             	progressDialog.setMax(contacts.size() + sms.size());
             }
             progressDialog.setCancelable(false);  
-            progressDialog.setIndeterminate(false);   
-
+            progressDialog.setIndeterminate(false);
             progressDialog.setProgress(0);  
             progressDialog.show(); 
 		}
@@ -408,7 +372,7 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 				final double progressValue = 100.0/(contacts.size() + sms.size()); 
 				int progress = 0;
 				
-				for (Contact contact : contacts) { //delete all loaded contacts from this app
+				for (CreateSamplesContact contact : contacts) { //delete all loaded contacts from this app
 					deleteContact(context, contact.name, contact.phoneNumber);
 					publishProgress((int)((++progress)*progressValue));
 				}
@@ -422,8 +386,7 @@ public class CreateSamplesActivity extends LinearLayout implements SeekBar.OnSee
 		}
 		
         @Override  
-        protected void onProgressUpdate(Integer... values)  
-        {  
+        protected void onProgressUpdate(Integer... values) {  
             //set the current progress of the progress dialog  
             progressDialog.setProgress(values[0]);  
         }  
