@@ -25,6 +25,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,6 +129,20 @@ public class HaikuActivity extends Activity {
     
     public static HaikuActivity getInstance(){
     	return ha;
+    }
+    
+    public int getWindowHeight(){
+		Display display = getWindowManager().getDefaultDisplay();
+		android.graphics.Point size = new android.graphics.Point();
+		display.getSize(size);
+		return size.y;
+	}
+    
+    public int getWindowWidth(){
+    	Display display = getWindowManager().getDefaultDisplay();
+		android.graphics.Point size = new android.graphics.Point();
+		display.getSize(size);
+		return size.x;
     }
     
     public static void initContactsAndSMS(Context context){

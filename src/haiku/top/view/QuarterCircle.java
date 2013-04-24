@@ -1,6 +1,7 @@
 package haiku.top.view;
 
 import haiku.top.R;
+import haiku.top.model.Month;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -45,6 +46,7 @@ public class QuarterCircle extends View{
     private int circleStartAngle;
     private int circleEndAngle;
     private String text = "";
+    private Month month;
     
 	public QuarterCircle(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -130,7 +132,7 @@ public class QuarterCircle extends View{
         textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
 	}
 	
-	public QuarterCircle(Context context, String text, int radius, int startAngle, int endAngle, int offset) {
+	public QuarterCircle(Context context, Month month, int radius, int startAngle, int endAngle, int offset) {
 		super(context);
 		circleRadius = radius;
 		this.drawOffset = offset;
@@ -141,7 +143,6 @@ public class QuarterCircle extends View{
         circlePaint.setColor(circleFillColor);
 //        Log.i("TAG", "circleRadius: " + circleRadius + ", drawOffset: " + drawOffset + ", circleRadius-drawOffset: " + (circleRadius-drawOffset));
         circlePaint.setStrokeWidth(circleRadius-drawOffset);
-//        circlePaint.setStrokeWidth(20);
         circleStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circleStrokePaint.setStyle(Paint.Style.STROKE);
         circleStrokePaint.setStrokeWidth(2);
@@ -152,7 +153,8 @@ public class QuarterCircle extends View{
         textPaint.setColor(Color.BLACK);
         textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
         
-        this.text = text;
+        this.month = month;
+        this.text = month.toString();
         
         if(this.text.length() > 0){
         	updateTextSize();
@@ -210,20 +212,20 @@ public class QuarterCircle extends View{
     	}
     	if(drawOffset == 0){// Year view
     		canvas.translate(-1, 1);
-            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circlePaint);
-            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, true, circleStrokePaint);
+            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle - circleStartAngle, true, circlePaint);
+            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle - circleStartAngle, true, circleStrokePaint);
             canvas.drawText(text, circleRadius/10, 3*circleRadius/4, textPaint);
     	}
     	else{ // Month view
     		canvas.translate(-1, 1);
     		
-            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle, false, circlePaint);
+            canvas.drawArc(circleArc, circleStartAngle, circleEndAngle - circleStartAngle, false, circlePaint);
             
-            canvas.drawArc(circleOuterArc, circleStartAngle, circleEndAngle, false, circleStrokePaint);
-            canvas.drawArc(circleInnerArc, circleStartAngle, circleEndAngle, false, circleStrokePaint);
+            canvas.drawArc(circleOuterArc, circleStartAngle, circleEndAngle - circleStartAngle, false, circleStrokePaint);
+            canvas.drawArc(circleInnerArc, circleStartAngle, circleEndAngle - circleStartAngle, false, circleStrokePaint);
             
-            canvas.drawLine(leftBottom.getXPos(), leftBottom.getYPos(), leftTop.getXPos(), leftTop.getYPos(), circleStrokePaint);
-            canvas.drawLine(rightBottom.getXPos(), rightBottom.getYPos(), rightTop.getXPos(), rightTop.getYPos(), circleStrokePaint);
+            canvas.drawLine(leftBottom.getXPos(), circleRadius-leftBottom.getYPos(), leftTop.getXPos(), circleRadius-leftTop.getYPos(), circleStrokePaint);
+            canvas.drawLine(rightBottom.getXPos(), circleRadius-rightBottom.getYPos(), rightTop.getXPos(), circleRadius-rightTop.getYPos(), circleStrokePaint);
             
     		// Rotate the text
         	canvas.save();
@@ -266,10 +268,10 @@ public class QuarterCircle extends View{
             float angle = (float)((-circleEndAngle)*Math.PI/180+(-circleStartAngle)*Math.PI/180)/2;
             
             leftBottom.setXPos((float)(drawOffset*Math.cos((-circleEndAngle)*Math.PI/180)));
-            leftBottom.setYPos(circleRadius-(float)(drawOffset*Math.sin((-circleEndAngle)*Math.PI/180)));
+            leftBottom.setYPos((float)(drawOffset*Math.sin((-circleEndAngle)*Math.PI/180)));
             
             leftTop.setXPos((float)(circleRadius*Math.cos((-circleEndAngle)*Math.PI/180)));
-            leftTop.setYPos(circleRadius-(float)(circleRadius*Math.sin((-circleEndAngle)*Math.PI/180)));
+            leftTop.setYPos((float)(circleRadius*Math.sin((-circleEndAngle)*Math.PI/180)));
             
             middleBottom.setXPos((float) (drawOffset*Math.cos(angle)));
             middleBottom.setYPos((float) (drawOffset*Math.sin(angle)));
@@ -278,13 +280,14 @@ public class QuarterCircle extends View{
             middleTop.setYPos((float) (circleRadius*Math.sin(angle)));
             
             rightBottom.setXPos((float)(drawOffset*Math.cos((-circleStartAngle)*Math.PI/180)));
-            rightBottom.setYPos(circleRadius-(float)(drawOffset*Math.sin((-circleStartAngle)*Math.PI/180)));
+            rightBottom.setYPos((float)(drawOffset*Math.sin((-circleStartAngle)*Math.PI/180)));
             
             rightTop.setXPos((float)(circleRadius*Math.cos((-circleStartAngle)*Math.PI/180)));
-            rightTop.setYPos(circleRadius-(float)(circleRadius*Math.sin((-circleStartAngle)*Math.PI/180)));
+            rightTop.setYPos((float)(circleRadius*Math.sin((-circleStartAngle)*Math.PI/180)));
         }
         int measuredHeight = measureHeight(heightMeasureSpec);
         setMeasuredDimension(measuredWidth, measuredHeight);
+//        setMeasuredDimension((int)(Math.max(rightTop.getXPos(), middleTop.getXPos()) - leftBottom.getXPos()), (int)(Math.max(leftTop.getYPos(), middleTop.getYPos()) - rightBottom.getYPos()));
 //        Log.i("TAG", "measuredHeight =>" + String.valueOf(measuredHeight) + "px measuredWidth => " + String.valueOf(measuredWidth) + "px");
     }
 
@@ -315,7 +318,17 @@ public class QuarterCircle extends View{
          return result;
     }
     
-    public boolean isPosInView(Position pos){
+    public Position getMiddleBottom(){
+    	return middleBottom;
+    }
+    
+    public Position getMiddleTop(){
+    	return middleTop;
+    }
+    
+    public boolean isPosInView(int x, int y){
+    	Position pos = new Position(x, circleRadius-y);
+//    	Log.i("TAG", "X: " + pos.getXPos() + ", Y: " + pos.getYPos());
 //    	Log.i("TAG", getText() + ": " + "LB: (" + leftBottom.getXPos() + ", " + leftBottom.getYPos() + "), " +
 //    			"LT: (" + leftTop.getXPos() + ", " + leftTop.getYPos() + "), " +
 //    					"RB: (" + rightBottom.getXPos() + ", " + rightBottom.getYPos() + "), " +
@@ -324,17 +337,17 @@ public class QuarterCircle extends View{
 //    											"MT: (" + middleTop.getXPos() + ", " + middleTop.getYPos() + ")");
     	if(pos.getXPos() >= leftBottom.getXPos()
     			&& pos.getXPos() <= Math.max(rightTop.getXPos(), middleTop.getXPos())
-    			&& pos.getYPos() < rightBottom.getYPos()
-    	    	&& pos.getYPos() >= Math.min(leftTop.getYPos(), middleTop.getYPos())){
-    		Log.i("TAG", getText());
-    		float kRight = -1/((rightTop.getYPos()-rightBottom.getYPos())/(rightTop.getXPos()-rightTop.getXPos()));
+    			&& pos.getYPos() >= rightBottom.getYPos()
+    	    	&& pos.getYPos() <= Math.max(leftTop.getYPos(), middleTop.getYPos())){
+//    		Log.i("TAG", getText());
+    		float kRight = ((rightTop.getYPos()-rightBottom.getYPos())/(rightTop.getXPos()-rightBottom.getXPos()));
     		if(pos.getYPos() < kRight*pos.getXPos()){
-    			Log.i("TAG", "false 1: KRight = " + kRight);
+//    			Log.i("TAG", "false 1: KRight = " + kRight);
     			return false;
     		}
-    		float kLeft = -1/((leftTop.getYPos()-leftBottom.getYPos())/(leftTop.getXPos()-leftTop.getXPos()));
+    		float kLeft = ((leftTop.getYPos()-leftBottom.getYPos())/(leftTop.getXPos()-leftBottom.getXPos()));
     		if(pos.getYPos() > kLeft*pos.getXPos()){
-    			Log.i("TAG", "false 2: KLeft = " + kLeft);
+//    			Log.i("TAG", "false 2: KLeft = " + kLeft);
     			return false;
     		}
     		return true;
@@ -387,7 +400,7 @@ public class QuarterCircle extends View{
     public void changeAngle(int angleChange){
     	circleStartAngle += angleChange;
     	circleEndAngle += angleChange;
-    	requestLayout();
+//    	requestLayout();
     }
     
     private void updateTextSize(){
@@ -441,5 +454,9 @@ public class QuarterCircle extends View{
 	
 	public int getEndAngle(){
 		return circleEndAngle;
+	}
+	
+	public Month getMonth(){
+		return month;
 	}
 }

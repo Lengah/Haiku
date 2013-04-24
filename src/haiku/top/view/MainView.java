@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 
 import android.util.Log;
+import android.view.Display;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,14 +47,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final int ANIMATION_TIME_BIN = 300;
 	public static final int ANIMATION_TIME_DATE = 300;
 	public static final float OPACITY_USED = (float) 0.3;
+	public static final float OPACITY_USED_DATE = (float) 0.1;
 	public static final float OPACITY_DEFAULT = (float) 1; // 0.8 laggar
 	public static final float OPACITY_FULL = 1;
 	public static final int VIEW_SHOWN_SMS = 1;
 	public static final int VIEW_SHOWN_BIN = 2;
 	public static final int VIEW_SHOWN_DATE = 3;
 	
-	public static final double LONG_CLICK_TIME = 1000; //In ms
-	public static final double MOVE_TO_DRAG_RANGE = 15;
+	public static final double LONG_CLICK_TIME = 1000; // In ms
+	public static final double CLICK_TIME = 300; // In ms
+	public static final double MOVE_TO_DRAG_RANGE = 5;
 	
 //	private Button themeButton;
 	private ScrollView themeScroll;
@@ -169,15 +172,15 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		dateView.setOnClickListener(this);
 //		dateView.bringToFront();
 //		
-		
 		dateView2 = new DateView(context);
 		addView(dateView2);
-		LayoutParams params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		LayoutParams params1 = new RelativeLayout.LayoutParams(dateView2.getRadius(), dateView2.getRadius());
 		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 		dateView2.setLayoutParams(params1);
 		dateView2.bringToFront();
 		
+//		dateView2.setOnTouchListener(this);
 
 		haikuBinViewExtended.bringToFront();
 	}
@@ -377,6 +380,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		removeViewElement(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(VISIBLE);
 		haikuBinViewExtended.setVisibility(GONE);
+	}
+	
+	public void updateDateView(){
+		dateView2.update();
+	}
+	
+	public int getSelectedYear(){
+		return dateView2.getSelectedYear();
 	}
 	
 	//TODO
