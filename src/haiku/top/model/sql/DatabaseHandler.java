@@ -25,15 +25,12 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
     // Table names
     private static final String TABLE_SENTENCE = "sentence";
-    private static final String TABLE_SENTENCEINSMS = "sentenceinsms";
-    private static final String TABLE_SENTENCEINHAIKU = "sentenceinhaiku";
-    private static final String TABLE_HAIKU = "haiku";
     private static final String TABLE_PARTOFSPEECH = "partofspeech";
     private static final String TABLE_WORDPARTOFSPEECH = "word_partofspeech";   
     private static final String TABLE_WORD = "word";
     private static final String TABLE_WORDINSENTENCE = "wordinsentence";
-    private static final String TABLE_WORDINSMS = "wordinsms";
-    private static final String TABLE_SENTENCEINSMSTHEME = "sentenceinsms_theme";    
+    private static final String TABLE_SMSWORD = "sms_word";
+    private static final String TABLE_SENTENCETHEME = "sentence_theme";    
     private static final String TABLE_THEME = "theme";
     private static final String TABLE_THEMEWORD = "theme_word";
 
@@ -41,16 +38,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String KEY_SENTENCE_ID = "id";
     private static final String KEY_SENTENCE_TEXT = "text";
     
-    private static final String KEY_SENTENCEINSMS_ID = "id";
-    private static final String KEY_SENTENCEINSMS_SMS = "sms"; //foreign key
-    
-    private static final String KEY_SENTENCEINHAIKU_ID = "id";
-    private static final String KEY_SENTENCEINHAIKU_POSITION = "position";
-    private static final String KEY_SENTENCEINHAIKU_HAIKU = "haiku";
-    
-    private static final String KEY_HAIKU_ID = "id";
-    private static final String KEY_HAIKU_DATECREATED = "dateCreated";
-
     private static final String KEY_PARTOFSPEECH_ID = "id";
     private static final String KEY_PARTOFSPEECH_TYPE = "type";
     
@@ -66,17 +53,12 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String KEY_WORDINSENTENCE_POSITION = "position";
     private static final String KEY_WORDINSENTENCE_SENTENCE = "sentence";
     private static final String KEY_WORDINSENTENCE_WORD = "word";    
-    
-    private static final String KEY_WORDINSMS_ID = "id";
-    private static final String KEY_WORDINSMS_AMOUNT = "amount";
-    private static final String KEY_WORDINSMS_SMS = "sms"; //foreign key
-    private static final String KEY_WORDINSMS_WORD = "word";    
- 
-    private static final String KEY_SENTENCEINSMSTHEME_ID = "id";
-    private static final String KEY_SENTENCEINSMSTHEME_SENTENCEINSMS = "sentenceinsms";
-    private static final String KEY_SENTENCEINSMSTHEME_THEME = "theme";
 
-    private static final String KEY_THEME_ID = "id";
+    private static final String KEY_SENTENCETHEME_ID = "id";
+    private static final String KEY_SENTENCETHEME_SENTENCEID = "sentenceid";
+    private static final String KEY_SENTENCETHEME_THEMEID = "themeid";
+
+    private static final String KEY_THEME_ID = "id"; //gör om logisk diagram ffs
     private static final String KEY_THEME_NAME = "name";
 
     private static final String KEY_THEMEWORD_ID = "id";

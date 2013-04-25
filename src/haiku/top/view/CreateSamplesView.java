@@ -44,6 +44,7 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -91,6 +92,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 		this.context = context;
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		layoutInflater.inflate(R.layout.create_samples_view,this);
+		setBackgroundColor(Color.WHITE);
 		
         Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
         Typeface adobeGaramondProBold = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-BOLD.OTF");
@@ -126,10 +128,12 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 	public void updateAfterImport() {
 		if (samplesExist) {
 			loadButton.setEnabled(false);
+			loadButton.setTextColor(Color.GRAY);
 			log.setText("Samples already loaded");
 		}
 		else {
 			removeButton.setEnabled(false);
+			removeButton.setTextColor(Color.GRAY);
 			log.setText("No samples loaded");
 			warning.setVisibility(View.INVISIBLE);
 		}
@@ -138,21 +142,25 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 	@Override
 	public void onClick(View v) {
 		if(v.equals(loadButton)){
-			HaikuActivity.vibe.vibrate(70);
+			HaikuActivity.vibe.vibrate(40);
 			new LoadTask(true).execute(); 		
 			samplesExist = true;
 			loadButton.setEnabled(false);
+			loadButton.setTextColor(Color.GRAY);
 			removeButton.setEnabled(true);
+			removeButton.setTextColor(Color.BLACK);
 			log.setText("Samples loaded");
 			warning.setVisibility(View.VISIBLE);
 		}
 		
 		if(v.equals(removeButton)) {
-			HaikuActivity.vibe.vibrate(70);
+			HaikuActivity.vibe.vibrate(40);
 			new LoadTask(false).execute(); 			
 			samplesExist = false;
 			loadButton.setEnabled(true);
+			loadButton.setTextColor(Color.BLACK);
 			removeButton.setEnabled(false);
+			removeButton.setTextColor(Color.GRAY);
 			log.setText("Samples removed");
 			warning.setVisibility(View.INVISIBLE);
 		}
