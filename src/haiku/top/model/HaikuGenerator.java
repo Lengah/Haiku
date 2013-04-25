@@ -20,6 +20,7 @@ public class HaikuGenerator {
 	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
+	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
 	private static Theme currentTheme;
 	private static boolean newSMSLog = true;
 	
@@ -72,6 +73,19 @@ public class HaikuGenerator {
 	public static ArrayList<SMS> getAllAddedSMS(){
 		return smses;
 	}
+	
+	public static void addDate(YearMonth date){
+		dates.add(date);
+	}
+	
+	public static void removeDate(YearMonth date){
+		dates.remove(date);
+	}
+	
+	public static ArrayList<YearMonth> getDates(){
+		return dates;
+	}
+	
 	
 	/**
 	 * Just a test. Creates sms logs

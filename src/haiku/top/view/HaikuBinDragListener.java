@@ -3,6 +3,7 @@ package haiku.top.view;
 import haiku.top.R;
 import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Theme;
+import haiku.top.model.YearMonth;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -62,6 +63,9 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		if(view instanceof SMSObjectView){
 	    			HaikuGenerator.addSMS(((SMSObjectView)view).getSMS());
 	    		}
+	    		if(view instanceof QuarterCircle){
+	    			HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()));
+	    		}
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENDED:
 	    		view = MainView.getInstance().getDraggedView();
@@ -73,6 +77,9 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		}
 	    		if(view instanceof SMSObjectView){
 	    			MainView.getInstance().updateSMSView();
+	    		}
+	    		if(view instanceof QuarterCircle){
+	    			MainView.getInstance().updateDateView();
 	    		}
 	    	default:
 	    		break;

@@ -14,7 +14,7 @@
 
     <application
         android:icon="@drawable/delete_by_haiku_logo"
-        android:label="Delete by Haiku" >
+        android:label="@string/app_name" >
         <activity
             android:theme="@android:style/Theme.NoTitleBar"
             android:label="@string/app_name"
