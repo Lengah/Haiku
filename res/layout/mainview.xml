@@ -51,7 +51,8 @@
    	<ScrollView
        	android:id="@+id/scrollofcontacts"
        	android:layout_width="match_parent"
-       	android:layout_height="match_parent" >
+       	android:layout_height="match_parent" 
+       	android:layout_marginRight="110dp">
        	
    	     <LinearLayout 
       		android:id="@+id/listofcontacts"
@@ -65,7 +66,8 @@
    	<ScrollView
        	android:id="@+id/scrollofsms"
        	android:layout_width="match_parent"
-       	android:layout_height="match_parent" >
+       	android:layout_height="match_parent" 
+       	android:layout_marginRight="10dp">
        	
    	     <LinearLayout 
       		android:id="@+id/listofsms"

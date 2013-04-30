@@ -1,5 +1,7 @@
 package haiku.top.view;
 
+import java.util.ArrayList;
+
 import haiku.top.R;
 import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Theme;
@@ -64,7 +66,19 @@ public class HaikuBinDragListener implements OnDragListener{
 	    			HaikuGenerator.addSMS(((SMSObjectView)view).getSMS());
 	    		}
 	    		if(view instanceof QuarterCircle){
-	    			HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()));
+	    			if(((QuarterCircle) view).isYearView()){
+	    				ArrayList<YearMonth> yearMonths = HaikuGenerator.getDates();
+	    				YearMonth yearMonth;
+	    				for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+	    					yearMonth = new YearMonth(MainView.getInstance().getSelectedYear(), DateView.MONTHS_NAME[i]);
+	    					if(!yearMonths.contains(yearMonth)){
+	    						HaikuGenerator.addDate(yearMonth);
+	    					}
+	    				}
+	    			}
+	    			else{
+	    				HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()));
+		    		}
 	    		}
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENDED:

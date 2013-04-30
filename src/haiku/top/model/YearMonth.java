@@ -16,4 +16,12 @@ public class YearMonth {
 	public Month getMonth(){
 		return month;
 	}
+	
+	@Override
+	public boolean equals(Object yearMonth){
+		if(yearMonth instanceof YearMonth && this.year == ((YearMonth)yearMonth).getYear() && this.month == ((YearMonth)yearMonth).getMonth()){
+			return true;
+		}
+		return false;
+	}
 }

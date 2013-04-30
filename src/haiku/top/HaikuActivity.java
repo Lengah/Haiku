@@ -117,7 +117,7 @@ public class HaikuActivity extends Activity {
 				MainView.getInstance().closeBinView();
 			}
 			else if (states.get(states.size()-1) == MainView.VIEW_SHOWN_DATE) {
-		//     			MainView.getInstance().closeDateView();
+		     	MainView.getInstance().closeDateView();
 			}
 			
 		}
