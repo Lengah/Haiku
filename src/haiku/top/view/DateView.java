@@ -1,5 +1,7 @@
 package haiku.top.view;
 
+// OnLongClick and onTouch doesn't seem to work at the same time
+
 import haiku.top.HaikuActivity;
 import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Month;
@@ -25,7 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class DateView extends RelativeLayout implements OnTouchListener, OnLongClickListener, OnClickListener{
+public class DateView extends RelativeLayout implements OnTouchListener, OnClickListener{//, OnLongClickListener{
 	private Context context;
 	private QuarterCircle yearView;
 	
@@ -58,9 +60,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnLongC
 			months.get(i).setLayoutParams(params1);
 			addView(months.get(i));
 //			months.get(i).setOnTouchListener(this);
-//			if(i == 0 || i == 1 || i == 2 || i == 4){
-//				months.get(i).setVisibility(GONE);
-//			}
+//			months.get(i).setOnLongClickListener(this);
 		}
 		params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -74,7 +74,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnLongC
 //		setOnTouchListener(this);
 		yearView.setOnClickListener(this);
 		months.get(0).setOnTouchListener(this);
-		setOnLongClickListener(this);
+//		months.get(0).setOnLongClickListener(this);
 		update();
 //		closeDateView();
 	}
@@ -410,8 +410,8 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnLongC
 								}
 							}
 							pressedDownOn.setAlpha(MainView.OPACITY_USED_DATE);
-							MainView.getInstance().setDraggedView(pressedDownOn);
-							v.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);
+							dragMonth(pressedDownOn);
+//							v.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);
 							return true;
 						}
 					}
@@ -511,25 +511,41 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnLongC
         startAnimation(a);
 	}
 
-	@Override
-	public boolean onLongClick(View v) {
-		Log.i("TAG", "OnLongClick, " + (pressedDownOn==null));
-		if(pressedDownOn == null || isScrolling){
-			return false;
-		}
-		if(pressedDownOn.getAlpha() == MainView.OPACITY_USED_DATE){
-			// The view is already in the bin
-			return false;
-		}
-		Log.i("TAG", "Start drag " + ((QuarterCircle)pressedDownOn).getText());
-		if(!v.equals(yearView)){
-			pressedDownOn.setAlpha(MainView.OPACITY_USED_DATE);
-		}
-		MainView.getInstance().setDraggedView(pressedDownOn);
-		DragShadowBuilder shadow = new DragShadowBuilder(pressedDownOn);// TODO funkar inte
-		shadow.onProvideShadowMetrics(new Point(pressedDownOn.getRadius(), pressedDownOn.getRadius()), new Point((int)(pressedDownOn.getMiddleTop().getXPos()+pressedDownOn.getMiddleBottom().getXPos())/2, (int)(pressedDownOn.getMiddleTop().getYPos()+pressedDownOn.getMiddleBottom().getYPos())/2));
-		pressedDownOn.startDrag(null, shadow, null, 0);
-		return false;
+//	@Override
+//	public boolean onLongClick(View v) {
+//		Log.i("TAG", "OnLongClick, " + (pressedDownOn==null));
+//		if(pressedDownOn == null || isScrolling){
+//			return false;
+//		}
+//		if(pressedDownOn.getAlpha() == MainView.OPACITY_USED_DATE){
+//			// The view is already in the bin
+//			return false;
+//		}
+//		Log.i("TAG", "Start drag " + ((QuarterCircle)pressedDownOn).getText());
+//		if(v.equals(yearView)){
+//			MainView.getInstance().setDraggedView(pressedDownOn);
+//			v.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);
+//		}
+//		else{
+//			pressedDownOn.setAlpha(MainView.OPACITY_USED_DATE);
+//			dragMonth(pressedDownOn);
+//		}
+//		return false;
+//	}
+	
+	public void dragMonth(final QuarterCircle v){
+		MainView.getInstance().setDraggedView(v);
+		DragShadowBuilder shadow = new DragShadowBuilder(v){
+			
+			@Override
+			public void onProvideShadowMetrics(Point shadowSize, Point touchPoint){
+				int xpos = (int)((v.getMiddleTop().getXPos() + v.getMiddleBottom().getXPos())/2);
+				int ypos = (int)(((v.getRadius() - v.getMiddleTop().getYPos()) + (v.getRadius() - v.getMiddleBottom().getYPos()))/2);
+				touchPoint.set(xpos, ypos);
+				shadowSize.set(v.getRadius(), v.getRadius());
+			}
+		};
+		v.startDrag(null, shadow, null, 0);
 	}
 
 	@Override

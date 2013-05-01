@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -28,6 +29,7 @@ public class QuarterCircle extends View{
     private RectF circleArc;
     private RectF circleOuterArc;
     private RectF circleInnerArc;
+    private Rect textRect;
 
     private int drawOffset = 0;
     
@@ -172,7 +174,7 @@ public class QuarterCircle extends View{
         circleEndAngle = attrsArray.getInteger(R.styleable.QuarterCircle_cAngleEnd, 360);
         text = attrsArray.getString(R.styleable.QuarterCircle_text);
         
-        // See the circleRadius value as a dp value and convert it to a px value //TODO funkar det??
+        // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
         // Google tells us to call recycle.
@@ -186,7 +188,7 @@ public class QuarterCircle extends View{
         circleEndAngle = -90;
         text = "";
         
-        // See the circleRadius value as a dp value and convert it to a px value //TODO funkar det??
+        // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
 	}
@@ -198,7 +200,7 @@ public class QuarterCircle extends View{
         circleEndAngle = endAngle;
         text = "";
         
-        // See the circleRadius value as a dp value and convert it to a px value //TODO funkar det??
+        // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
         circleOuterArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
@@ -235,15 +237,16 @@ public class QuarterCircle extends View{
         	double angle = ((-circleEndAngle)*Math.PI/180+(-circleStartAngle)*Math.PI/180)/2;
         	// Angle gives where the center of the text should be, but drawText draws bottom-up
         	// Adjust the angle so it gives where the bottom of the text is
-//        	Log.i("TAG", "Angle 1: " + angle);
-//        	Log.i("TAG", "l: " + Math.sqrt((x1-x3)*(x1-x3)+(y1-y3)*(y1-y3)));
-        	//TODO
-//        	angle = angle - ((-circleEndAngle)-(-circleStartAngle))*textPaint.getTextSize()/(2*Math.sqrt((x1-x3)*(x1-x3)+(y1-y3)*(y1-y3)));
-//        	Log.i("TAG", "Angle 2: " + angle);
-        	float xPos = (float)((drawOffset+(circleRadius-drawOffset)/7)*Math.cos(angle));
-        	float yPos = circleRadius - (float)((drawOffset+(circleRadius-drawOffset)/7)*Math.sin(angle));
+        	float radius = (drawOffset+(circleRadius-drawOffset)/7);
+        	double diffAngle = (360 * textRect.height()/2)/(2*Math.PI*radius);
+        	diffAngle = diffAngle * Math.PI/180; // convert it to radians
+        	angle = angle - diffAngle;
+        	float xPos = (float)(radius*Math.cos(angle));
+        	float yPos = circleRadius - (float)(radius*Math.sin(angle));
+//        	yPos = yPos - textRect.height()/2;
 //        	Log.i("TAG", text + ": " + "Offset: " + drawOffset + ", X: " + xPos + ", Y: " + yPos + ", Angle: " + (angle*180/Math.PI));
         	canvas.rotate((circleEndAngle + circleStartAngle)/2, xPos, yPos);
+        	
         	canvas.drawText(text, xPos, yPos, textPaint);
             canvas.restore();
     	}
@@ -422,6 +425,8 @@ public class QuarterCircle extends View{
 	    	size++;
 	        textPaint.setTextSize(size);
 	    } while(textPaint.measureText(text) < 2*(circleRadius - drawOffset)/3);
+	    textRect = new Rect();
+    	textPaint.getTextBounds(text, 0, text.length(), textRect);
 	}
 	
 	public void setText(String text){
