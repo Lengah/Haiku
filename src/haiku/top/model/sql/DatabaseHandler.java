@@ -17,7 +17,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	
 
     private static final int DATABASE_VERSION = 1; // Database Version
-    private static final String DATABASE_NAME = "haiku_db"; // Database Name
+    private static final String DATABASE_NAME = "deletebyhaiku_db"; // Database Name
  
 	public DatabaseHandler(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,44 +35,54 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String TABLE_THEMEWORD = "theme_word";
 
     // Column names
-    private static final String KEY_SENTENCE_ID = "id";
+    private static final String KEY_SENTENCE_ID = "_id";
     private static final String KEY_SENTENCE_TEXT = "text";
+    private static final String KEY_SENTENCE_SMSID = "smsid";
     
-    private static final String KEY_PARTOFSPEECH_ID = "id";
+    private static final String KEY_PARTOFSPEECH_ID = "_id";
     private static final String KEY_PARTOFSPEECH_TYPE = "type";
     
-    private static final String KEY_WORDPARTOFSPEECH_ID = "id";
-    private static final String KEY_WORDPARTOFSPEECH_WORD = "word";
-    private static final String KEY_WORDPARTOFSPEECH_PARTOFSPEECH = "partofspeech";
+    private static final String KEY_WORDPARTOFSPEECH_ID = "_id";
+    private static final String KEY_WORDPARTOFSPEECH_WORDID = "wordid";
+    private static final String KEY_WORDPARTOFSPEECH_PARTOFSPEECHID = "partofspeechid";
 
-    private static final String KEY_WORD_ID = "id";
+    private static final String KEY_WORD_ID = "_id";
     private static final String KEY_WORD_TEXT = "text";
     private static final String KEY_WORD_SYLLABLES = "syllables";
 
-    private static final String KEY_WORDINSENTENCE_ID = "id";
+    private static final String KEY_WORDINSENTENCE_ID = "_id";
     private static final String KEY_WORDINSENTENCE_POSITION = "position";
-    private static final String KEY_WORDINSENTENCE_SENTENCE = "sentence";
-    private static final String KEY_WORDINSENTENCE_WORD = "word";    
+    private static final String KEY_WORDINSENTENCE_SENTENCEID = "sentenceid";
+    private static final String KEY_WORDINSENTENCE_WORDID = "wordid";
+    
+    private static final String KEY_SMSWORD_ID = "_id";
+    private static final String KEY_SMSWORD_SMSID = "smsid";
+    private static final String KEY_SMSWORD_WORDID = "wordid";
 
-    private static final String KEY_SENTENCETHEME_ID = "id";
+    private static final String KEY_SENTENCETHEME_ID = "_id";
     private static final String KEY_SENTENCETHEME_SENTENCEID = "sentenceid";
     private static final String KEY_SENTENCETHEME_THEMEID = "themeid";
 
-    private static final String KEY_THEME_ID = "id"; //gör om logisk diagram ffs
+    private static final String KEY_THEME_ID = "_id"; 
     private static final String KEY_THEME_NAME = "name";
 
-    private static final String KEY_THEMEWORD_ID = "id";
-    private static final String KEY_THEMEWORD_WORD = "word";
-    private static final String KEY_THEMEWORD_THEME = "theme"; 
+    private static final String KEY_THEMEWORD_ID = "_id";
+    private static final String KEY_THEMEWORD_THEMEID = "themeid"; 
+    private static final String KEY_THEMEWORD_WORDID = "wordid";
+
 	
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		
+		db.execSQL("CREATE TABLE " + TABLE_SENTENCE + "(" + KEY_SENTENCE_ID + " INTEGER PRIMARY KEY," + KEY_SENTENCE_TEXT + " TEXT," + KEY_SENTENCE_SMSID + " INTEGER)");
+		db.execSQL("CREATE TABLE " + TABLE_PARTOFSPEECH + "(" + KEY_PARTOFSPEECH_ID + " INTEGER PRIMARY KEY," + KEY_PARTOFSPEECH_TYPE + " TEXT)");
+		db.execSQL("CREATE TABLE " + TABLE_WORDPARTOFSPEECH + "(" + KEY_WORDPARTOFSPEECH_ID + " INTEGER PRIMARY KEY," + KEY_WORDPARTOFSPEECH_WORDID + " INTEGER," + KEY_WORDPARTOFSPEECH_PARTOFSPEECHID + " INTEGER, " +
+				"FOREIGN KEY(" + KEY_WORDPARTOFSPEECH_WORDID + ") REFERENCES " + TABLE_WORD + "(" + KEY_WORD_ID + ")," +
+				"FOREIGN KEY(" + KEY_WORDPARTOFSPEECH_PARTOFSPEECHID + ") REFERENCES " + TABLE_WORDPARTOFSPEECH + "(" + KEY_PARTOFSPEECH_ID + "))");
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		//do nothing
+		//do nothing	
 	}
 	
 	public void addWord(Word word) {
