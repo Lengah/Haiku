@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="@drawable/haikubin_extended">
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        
+        <TextView 
+            android:id="@+id/contactname"
+            android:text="Insert name here"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"/>"
+        
+        <ScrollView 
+	        android:id="@+id/textScroll"
+	        android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            
+            <LinearLayout 
+	      		android:id="@+id/listoftext"
+	       		android:layout_height="wrap_content"
+		        android:layout_width="match_parent"
+	       		android:orientation="vertical">
+	       
+	   		</LinearLayout>
+	        
+	    </ScrollView>
+    </LinearLayout>
+
+    <ScrollView 
+        android:id="@+id/themeScroll"
+        android:layout_width="150dp"
+    	android:layout_height="50dp"
+    	android:layout_alignParentTop="true"
+    	android:layout_alignParentLeft="true"
+    	android:layout_marginLeft="130dp"
+    	android:layout_marginTop="100dp">
+        <LinearLayout 
+		    android:id="@+id/listofthemes"
+		    android:layout_height="wrap_content"
+		    android:layout_width="match_parent"
+		    android:orientation="horizontal">
+   		</LinearLayout>
+    </ScrollView>
+    
+    <ScrollView 
+        android:id="@+id/dateScroll"
+        android:layout_width="75dp"
+    	android:layout_height="150dp"
+    	android:layout_alignParentBottom="true"
+    	android:layout_alignParentLeft="true"
+    	android:layout_marginLeft="80dp"
+    	android:layout_marginBottom="50dp">
+        <LinearLayout 
+		    android:id="@+id/listofdates"
+		    android:layout_height="wrap_content"
+		    android:layout_width="match_parent"
+		    android:orientation="vertical">
+   		</LinearLayout>
+    </ScrollView>
+    
+</RelativeLayout>

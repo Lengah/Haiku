@@ -111,4 +111,8 @@ public class ConversationObjectView extends LinearLayout{
 	public String getName(){
 		return name;
 	}
+	
+	public Bitmap getPicture(){
+		return picture;
+	}
 }

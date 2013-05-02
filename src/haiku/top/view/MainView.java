@@ -9,8 +9,10 @@ import android.database.Cursor;
 import android.graphics.Color;
 
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,6 +60,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final double CLICK_TIME = 100; // In ms
 	public static final double MOVE_TO_DRAG_RANGE = 10;
 	
+	public static final int THEME_ROTATION = -5;
+	
 //	private Button themeButton;
 	private ScrollView themeScroll;
 	private LinearLayout themeList;
@@ -65,6 +69,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private ScrollView contactScroll;
 	private LinearLayout contactList;
 	
+	private LinearLayout smslayout;
+	private ImageView contactPic;
+	private TextView contactName;
+	private ConversationObjectView chosenContact;
 	private ScrollView smsScroll;
 	private LinearLayout smsList;
 	
@@ -99,6 +107,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		contactScroll = (ScrollView)findViewById(R.id.scrollofcontacts);
 		contactList = (LinearLayout)findViewById(R.id.listofcontacts);
 		
+		smslayout = (LinearLayout)findViewById(R.id.smslayout);
+		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
+		contactName = (TextView)findViewById(R.id.pickedcontactname);
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
 		smsList = (LinearLayout)findViewById(R.id.listofsms);
 		
@@ -106,6 +117,30 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		themeScroll = (ScrollView)findViewById(R.id.themeview);
 		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
 		haikuBinViewExtended = (ImageView)findViewById(R.id.binviewextended);
+		themeScroll.setRotation(THEME_ROTATION);
+		
+		//TODO
+		ImageView yellowBackground = new ImageView(context);
+		yellowBackground.setBackgroundColor(Color.rgb(251, 206, 13));
+		
+		int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2*100, getResources().getDisplayMetrics());
+        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics());
+        
+		LayoutParams fillParams = new RelativeLayout.LayoutParams(width, height);
+		fillParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		fillParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		yellowBackground.setLayoutParams(fillParams);
+		
+		yellowBackground.setScrollY(-height/2);
+		yellowBackground.setScrollX(width/2);
+//		yellowBackground.offsetTopAndBottom(-height/2);
+		yellowBackground.setRotation(THEME_ROTATION);
+		addView(yellowBackground);
+//		yellowBackground.bringToFront();
+		themeScroll.bringToFront();
+		yellowBackground.setVisibility(GONE);
+
+		
 		
 		haikuBinViewSmall.setOnDragListener(new HaikuBinDragListener(haikuBinViewSmall));
 		haikuBinViewSmall.bringToFront();
@@ -160,7 +195,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			themeObject.setOnTouchListener(this); // overrides the scroll function!
 //			height += themeObject.getHeightOfView();
 		}
-		smsScroll.setVisibility(GONE);
+//		smsScroll.setVisibility(GONE); //TODO
+		smslayout.setVisibility(GONE);
 //		themeButton.bringToFront();
 		themeScroll.bringToFront();
 		themeScroll.setAlpha(OPACITY_DEFAULT);
@@ -177,10 +213,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		dateView.bringToFront();
 
 		haikuBinViewExtended.bringToFront();
-	}
-	
-	public int getThemeScrollViewWidth(){
-		return themeScroll.getWidth();
 	}
 	
 	public static MainView getInstance(){
@@ -227,8 +259,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public void setSMSView(int threadID){
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 		contactScroll.setVisibility(GONE);
-		smsScroll.setVisibility(VISIBLE);
+//		smsScroll.setVisibility(VISIBLE); // TODO
+		smslayout.setVisibility(VISIBLE);
 		Cursor cursor = HaikuActivity.getThread(context, threadID);
+		if(chosenContact.getPicture() != null){
+			contactPic.setImageBitmap(chosenContact.getPicture());
+		}
+		else{
+//			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
+		}
+		contactName.setText(chosenContact.getName());
 		Log.i("TAG", "Count: " + cursor.getCount());
 		if (cursor.moveToFirst()) {
 			do{
@@ -280,7 +320,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public void closeSMSView(){
 		updateConversations();
 		contactScroll.setVisibility(VISIBLE);
-		smsScroll.setVisibility(GONE);
+//		smsScroll.setVisibility(GONE); //TODO
+		smslayout.setVisibility(GONE);
 		smsObjects.clear();
 		smsList.removeAllViews();
 		removeViewElement(VIEW_SHOWN_SMS);
@@ -303,6 +344,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //			openThemeView();
 //		}
 		/*else*/ if(v instanceof ConversationObjectView){
+			chosenContact = (ConversationObjectView) v;
 			setSMSView(((ConversationObjectView)v).getThreadID());
 		}
 //		else{
