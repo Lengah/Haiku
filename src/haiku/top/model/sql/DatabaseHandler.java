@@ -35,40 +35,40 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String TABLE_THEMEWORD = "theme_word";
 
     // Column names
-    private static final String KEY_SENTENCE_ID = "_id";
-    private static final String KEY_SENTENCE_TEXT = "text";
-    private static final String KEY_SENTENCE_SMSID = "smsid";
+    private static final String KEY_SENTENCE_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_SENTENCE_TEXT = "text"; //TEXT
+    private static final String KEY_SENTENCE_SMSID = "smsid"; //INTEGER (foreign key to predefined table "SMS")
     
-    private static final String KEY_PARTOFSPEECH_ID = "_id";
-    private static final String KEY_PARTOFSPEECH_TYPE = "type";
+    private static final String KEY_PARTOFSPEECH_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_PARTOFSPEECH_TYPE = "type"; //TEXT
     
-    private static final String KEY_WORDPARTOFSPEECH_ID = "_id";
-    private static final String KEY_WORDPARTOFSPEECH_WORDID = "wordid";
-    private static final String KEY_WORDPARTOFSPEECH_PARTOFSPEECHID = "partofspeechid";
+    private static final String KEY_WORDPARTOFSPEECH_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_WORDPARTOFSPEECH_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
+    private static final String KEY_WORDPARTOFSPEECH_PARTOFSPEECHID = "partofspeechid"; //INTEGER, Foreign key partofspeech(_id)
 
-    private static final String KEY_WORD_ID = "_id";
-    private static final String KEY_WORD_TEXT = "text";
-    private static final String KEY_WORD_SYLLABLES = "syllables";
+    private static final String KEY_WORD_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_WORD_TEXT = "text"; //TEXT
+    private static final String KEY_WORD_SYLLABLES = "syllables"; //TEXT
 
-    private static final String KEY_WORDINSENTENCE_ID = "_id";
-    private static final String KEY_WORDINSENTENCE_POSITION = "position";
-    private static final String KEY_WORDINSENTENCE_SENTENCEID = "sentenceid";
-    private static final String KEY_WORDINSENTENCE_WORDID = "wordid";
+    private static final String KEY_WORDINSENTENCE_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_WORDINSENTENCE_POSITION = "position"; //INTEGER
+    private static final String KEY_WORDINSENTENCE_SENTENCEID = "sentenceid"; //INTEGER, Foreign key sentence(_id)
+    private static final String KEY_WORDINSENTENCE_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
     
-    private static final String KEY_SMSWORD_ID = "_id";
-    private static final String KEY_SMSWORD_SMSID = "smsid";
-    private static final String KEY_SMSWORD_WORDID = "wordid";
+    private static final String KEY_SMSWORD_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_SMSWORD_SMSID = "smsid"; //foreign key to predefined table "SMS"
+    private static final String KEY_SMSWORD_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
 
-    private static final String KEY_SENTENCETHEME_ID = "_id";
-    private static final String KEY_SENTENCETHEME_SENTENCEID = "sentenceid";
-    private static final String KEY_SENTENCETHEME_THEMEID = "themeid";
+    private static final String KEY_SENTENCETHEME_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_SENTENCETHEME_SENTENCEID = "sentenceid"; //INTEGER, Foreign key sentence(_id)
+    private static final String KEY_SENTENCETHEME_THEMEID = "themeid"; //INTEGER, Foreign key theme(_id)
 
-    private static final String KEY_THEME_ID = "_id"; 
-    private static final String KEY_THEME_NAME = "name";
+    private static final String KEY_THEME_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_THEME_NAME = "name"; //TEXT
 
-    private static final String KEY_THEMEWORD_ID = "_id";
-    private static final String KEY_THEMEWORD_THEMEID = "themeid"; 
-    private static final String KEY_THEMEWORD_WORDID = "wordid";
+    private static final String KEY_THEMEWORD_ID = "_id"; //INTEGER PRIMARY KEY
+    private static final String KEY_THEMEWORD_THEMEID = "themeid"; //INTEGER, Foreign key theme(_id)
+    private static final String KEY_THEMEWORD_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
 
 	
 	@Override
@@ -77,24 +77,40 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		db.execSQL("CREATE TABLE " + TABLE_PARTOFSPEECH + "(" + KEY_PARTOFSPEECH_ID + " INTEGER PRIMARY KEY," + KEY_PARTOFSPEECH_TYPE + " TEXT)");
 		db.execSQL("CREATE TABLE " + TABLE_WORDPARTOFSPEECH + "(" + KEY_WORDPARTOFSPEECH_ID + " INTEGER PRIMARY KEY," + KEY_WORDPARTOFSPEECH_WORDID + " INTEGER," + KEY_WORDPARTOFSPEECH_PARTOFSPEECHID + " INTEGER, " +
 				"FOREIGN KEY(" + KEY_WORDPARTOFSPEECH_WORDID + ") REFERENCES " + TABLE_WORD + "(" + KEY_WORD_ID + ")," +
-				"FOREIGN KEY(" + KEY_WORDPARTOFSPEECH_PARTOFSPEECHID + ") REFERENCES " + TABLE_WORDPARTOFSPEECH + "(" + KEY_PARTOFSPEECH_ID + "))");
+				"FOREIGN KEY(" + KEY_WORDPARTOFSPEECH_PARTOFSPEECHID + ") REFERENCES " + TABLE_PARTOFSPEECH + "(" + KEY_PARTOFSPEECH_ID + "))");
+		db.execSQL("CREATE TABLE " + TABLE_WORD + "(" + KEY_WORD_ID + " INTEGER PRIMARY KEY," + KEY_WORD_TEXT + " TEXT," + KEY_WORD_SYLLABLES + " TEXT)");	
+		db.execSQL("CREATE TABLE " + TABLE_WORDINSENTENCE + "(" + KEY_WORDINSENTENCE_ID + " INTEGER PRIMARY KEY," + KEY_WORDINSENTENCE_POSITION + " INTEGER," + KEY_WORDINSENTENCE_SENTENCEID + " INTEGER, " + KEY_WORDINSENTENCE_WORDID + " INTEGER, " +
+				"FOREIGN KEY(" +  KEY_WORDINSENTENCE_SENTENCEID + ") REFERENCES " + TABLE_SENTENCE + "(" + KEY_SENTENCE_ID + ")," +
+				"FOREIGN KEY(" + KEY_WORDINSENTENCE_WORDID + ") REFERENCES " + TABLE_WORD + "(" + KEY_WORD_ID + "))");
+		db.execSQL("CREATE TABLE " + TABLE_SMSWORD + "(" + KEY_SMSWORD_ID + " INTEGER PRIMARY KEY," + KEY_SMSWORD_SMSID + " INTEGER, " + KEY_SMSWORD_WORDID + " INTEGER, " +
+				"FOREIGN KEY(" + KEY_SMSWORD_WORDID + ") REFERENCES " + TABLE_WORD + "(" + KEY_WORD_ID + "))");
+		db.execSQL("CREATE TABLE " + TABLE_SENTENCETHEME + "(" + KEY_SENTENCETHEME_ID + " INTEGER PRIMARY KEY," + KEY_SENTENCETHEME_SENTENCEID + " INTEGER, " + KEY_SENTENCETHEME_THEMEID + " INTEGER, " +
+				"FOREIGN KEY(" +  KEY_SENTENCETHEME_SENTENCEID + ") REFERENCES " + TABLE_SENTENCE + "(" + KEY_SENTENCE_ID + ")," +
+				"FOREIGN KEY(" + KEY_SENTENCETHEME_THEMEID + ") REFERENCES " + TABLE_THEME + "(" + KEY_THEME_ID + "))");
+		db.execSQL("CREATE TABLE " + TABLE_THEME + "(" + KEY_THEME_ID + " INTEGER PRIMARY KEY," + KEY_THEME_NAME + " TEXT)");
+		db.execSQL("CREATE TABLE " + TABLE_THEMEWORD + "(" + KEY_THEMEWORD_ID + " INTEGER PRIMARY KEY," + KEY_THEMEWORD_THEMEID + " INTEGER, " + KEY_THEMEWORD_WORDID + " INTEGER, " +
+				"FOREIGN KEY(" +  KEY_THEMEWORD_THEMEID + ") REFERENCES " + TABLE_THEME + "(" + KEY_THEME_ID + ")," +
+				"FOREIGN KEY(" + KEY_THEMEWORD_WORDID + ") REFERENCES " + TABLE_WORD + "(" + KEY_WORD_ID + "))");
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		//do nothing	
 	}
 	
 	public void addWord(Word word) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		 
-	    ContentValues values = new ContentValues();
+	    ContentValues valuesWord = new ContentValues();
 	    
-	    values.put(KEY_WORD_TEXT, word.getText());
-	    values.put(KEY_WORD_SYLLABLES, word.getSyllables());
-	        
-	    // Inserting Row
-	    db.insert(TABLE_WORD, null, values);
+	    valuesWord.put(KEY_WORD_TEXT, word.getText());
+	    valuesWord.put(KEY_WORD_SYLLABLES, word.getSyllables());
+	    db.insert(TABLE_WORD, null, valuesWord);
+	    
+	    //update all foreign tables
+	    //serach through all sms
+	    
+	    //ContentValues valuesWord_partofspeech = new ContentValues();
+	    //valuesWord_partofspeech.put(KEY_WORD_TEXT, word.text);
+	    //db.insert(TABLE_WORDPARTOFSPEECH, null, valuesWord_partofspeech);
 	    
 	    db.close(); // Closing database connection
 	}
@@ -109,56 +125,31 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    if (cursor != null)
 	        cursor.moveToFirst();  
 	 
-	    Word word = new Word(cursor.getString(0), cursor.getString(1));
+	    String text = cursor.getString(0);
+	    String syllables = cursor.getString(1);
+	    String wordtypes = "";
+	    
+	    Word word = new Word(text, syllables, wordtypes);
 	    return word;
 	}
 	 
-	public ArrayList<Word> getAllWords() {
-		ArrayList<Word> wordList = new ArrayList<Word>();
-	    // Select All Query
-	    String selectQuery = "SELECT  * FROM " + TABLE_WORD;
-	 
-	    SQLiteDatabase db = this.getWritableDatabase();
-	    Cursor cursor = db.rawQuery(selectQuery, null);
-	 
-	    // looping through all rows and adding to list
-	    if (cursor.moveToFirst()) {
-	        do {
-	        	Word word = new Word();
-	            word.setID(Integer.parseInt(cursor.getString(0)));
-	            word.setText(cursor.getString(1));
-	            word.setSyllables(cursor.getString(2));
-	            wordList.add(word);
-	        } while (cursor.moveToNext());
-	    }
-	 
-	    return wordList;
-	}
-	 
-	public int getWordsCount() {
-		String countQuery = "SELECT  * FROM " + TABLE_WORD;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-        cursor.close();
-        return cursor.getCount();
-	}
-	
-	public int updateWord(Word word) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		 
-	    ContentValues values = new ContentValues();
-	    values.put(KEY_WORD_TEXT, word.getText());
-	    values.put(KEY_WORD_SYLLABLES, word.getSyllables());
-	 
-	    // updating row
-	    return db.update(TABLE_WORD, values, KEY_WORD_ID + " = ?",
-	            new String[] { String.valueOf(word.getID()) });
-	}
-	 
-	public void deleteWord(Word word) {
-		SQLiteDatabase db = this.getWritableDatabase();
-	    db.delete(TABLE_WORD, KEY_WORD_ID + " = ?",
-	            new String[] { String.valueOf(word.getID()) });
-	    db.close();
-	}
+//	public ArrayList<Word> getAllWords() {
+//		ArrayList<Word> wordList = new ArrayList<Word>();
+//	    String selectQuery = "SELECT  * FROM " + TABLE_WORD; // Select All Query
+//	    SQLiteDatabase db = this.getWritableDatabase();
+//	    Cursor cursor = db.rawQuery(selectQuery, null);
+//	 
+//	    // looping through all rows and adding to list
+//	    if (cursor.moveToFirst()) {
+//	        do {
+//	        	Word word = new Word();
+//	            word.setID(Integer.parseInt(cursor.getString(0)));
+//	            word.setText(cursor.getString(1));
+//	            word.setSyllables(cursor.getString(2));
+//	            wordList.add(word);
+//	        } while (cursor.moveToNext());
+//	    }
+//	 
+//	    return wordList;
+//	}
 }

@@ -72,8 +72,13 @@ containing a value of this type.
     }
     public static final class drawable {
         public static final int delete_by_haiku_logo=0x7f020000;
-        public static final int haikubin_extended=0x7f020001;
-        public static final int haikubin_small=0x7f020002;
+        public static final int haiku_demomode=0x7f020001;
+        public static final int haikubin_extended=0x7f020002;
+        public static final int haikubin_small=0x7f020003;
+        public static final int save_button=0x7f020004;
+        public static final int save_button_press=0x7f020005;
+        public static final int slider_dot=0x7f020006;
+        public static final int slider_line=0x7f020007;
     }
     public static final class id {
         public static final int ContactLayout=0x7f08000c;

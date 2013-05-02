@@ -1,91 +1,43 @@
 package haiku.top.model;
 
 public class Word {
-	private long id;
 	private String text;
 	private String syllables;
-//	private int numberOfSyllables;
-//	private String wordType;
+	private String wordTypes;
 	
-//	public Word(String word, String syllables, String wordType){
-//		this.word = word;
-//		this.syllables = syllables;
-//		this.wordType = wordType;
-//		countSyllables();
-//	}
-	
-//	/**
-//	 * The String must be: word|syllables|wordtype(s)
-//	 * @param text - String|String|String
-//	 */
-//	public Word(String text){
-//		word = text.substring(0, text.indexOf('|'));
-//		text = text.substring(text.indexOf('|')+1);
-//		syllables = text.substring(0, text.indexOf('|'));
-//		wordType = text.substring(text.lastIndexOf('|')+1);
-//		countSyllables();
-//	}
-	
-	public Word(){}
-	
-	public Word(String text, String syllables){
-		this.text = text;
-		this.syllables = syllables;
+	public Word(String dicLine) { 
+		//FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
+		text = dicLine.substring(0, dicLine.indexOf('|'));
+		dicLine = dicLine.substring(text.length()+1);
+		syllables = dicLine.substring(0, dicLine.indexOf('|'));
+		wordTypes = dicLine.substring(syllables.length()+1);
 	}
 	
-	public int countSyllables(){
+	public Word(String text, String syllables, String wordTypes) { 
+		this.text = text;
+		this.syllables = syllables;
+		this.wordTypes = wordTypes;
+	}
+	
+	public int getNumberOfSyllables() {
 		int pos;
 		String temp = syllables;
 		int counter = 0;
-		while((pos = temp.indexOf('·')) != -1){
+		while((pos = temp.indexOf('·')) != -1) {
 			counter++;
 			temp = temp.substring(pos+1);
 		}
 		return counter;
-//		this.numberOfSyllables = counter;
 	}
 	
-	public void setID(long id){
-		this.id = id;
-	}
-	
-	public long getID(){
-		return id;
-	}
-	
-	public void setText(String text){
-		this.text = text;
-	}
-	
-	public String getText(){
+	public String getText() {
 		return text;
 	}
-	
-	public void setSyllables(String syllables){
-		this.syllables = syllables;
-	}
-	
-	public String getSyllables(){
+	public String getSyllables() {
 		return syllables;
 	}
-	
-//	public int getNumberOfSyllables(){
-//		return numberOfSyllables;
-//	}
-	
-//	public String getWordType(){
-//		return wordType;
-//	}
-
-//	public String toString(){
-//		return word + "|" + syllables + "|" + wordType;
-//	}
-//	
-//	public boolean equals(Word word){
-//		if(this.word == word.getWord() && this.numberOfSyllables == word.getNumberOfSyllables() && this.wordType == word.getWordType()){
-//			return true;
-//		}
-//		return false;
-//	}
+	public String getwordTypes() {
+		return wordTypes;
+	}
 }
 
