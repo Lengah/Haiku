@@ -153,7 +153,7 @@ public class QuarterCircle extends View{
         
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
-        textPaint.setColor(Color.BLACK);
+        textPaint.setColor(Color.WHITE);
         textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
         
         this.month = month;

@@ -10,7 +10,7 @@
         android:orientation="vertical">
         
         <TextView 
-            android:id="@+id/contactname"
+            android:id="@+id/bincontactname"
             android:text="Insert name here"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,6 +30,12 @@
 	   		</LinearLayout>
 	        
 	    </ScrollView>
+	    
+        <ImageButton 
+            android:id="@+id/saveButton"
+	       	android:layout_height="wrap_content"
+		    android:layout_width="wrap_content"
+		    android:layout_gravity="right"/>
     </LinearLayout>
 
     <ScrollView 
