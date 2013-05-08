@@ -24,13 +24,19 @@ public class ThemeObjectView extends LinearLayout{
 	private int height = (int)(50 * this.getResources().getDisplayMetrics().density + 0.5f);
 	
 	
-	public ThemeObjectView(Context context, Theme theme) {
+	public ThemeObjectView(Context context, Theme theme, boolean bin) {
 		super(context);
 		this.context = context;
 		this.theme = theme;
 		themeText = new TextView(context);
 		
-		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+		if(bin){
+			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		}
+		else{
+			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+		}
+		
 		addView(themeText);
 		themeText.setGravity(Gravity.CENTER_VERTICAL);
 		setBackgroundColor(Color.rgb(251, 206, 13));
@@ -43,20 +49,26 @@ public class ThemeObjectView extends LinearLayout{
 		themeText.setTextColor(Color.WHITE);
 		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		themeText.setTypeface(Typeface.DEFAULT);
-		themeText.setPadding((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, 0, 0); //TODO dp
+		
 //		themeText.setAlpha(MainView.OPACITY_FULL);
-		
-		
-		//TODO 100 siffran är tagen från mainview.xml under theme scrollviewen. Om den ändras ska även det här värdet ändras!
-        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics()) - (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
-        width = 9*width/10;
 		int maxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics());
-		int size = 0;
-	    do {
-	    	size++;
-	        themeText.setTextSize(size);
-	    } while(themeText.getPaint().measureText("" + themeText.getText()) < width
-	    		&& size < maxSize);
+		if(bin){
+			themeText.setTextSize(2*maxSize/3);
+			themeText.setPadding((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0);
+		}
+		else{
+			themeText.setPadding((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, 0, 0);
+			//TODO 100 siffran är tagen från mainview.xml under theme scrollviewen. Om den ändras ska även det här värdet ändras!
+	        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics()) - (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+	        width = 9*width/10;
+			
+			int size = 0;
+		    do {
+		    	size++;
+		        themeText.setTextSize(size);
+		    } while(themeText.getPaint().measureText("" + themeText.getText()) < width
+		    		&& size < maxSize);
+		}
 	}
 	
 	public int getHeightOfView(){

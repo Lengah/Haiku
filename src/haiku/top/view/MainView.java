@@ -77,7 +77,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LinearLayout smsList;
 	
 	private ImageView haikuBinViewSmall;
-	private ImageView haikuBinViewExtended;
+//	private ImageView haikuBinViewExtended;
+	private BinView haikuBinViewExtended;
 	
 	private View viewBeingDragged = null;
 	
@@ -116,7 +117,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		themeButton = (Button)findViewById(R.id.themebutton);
 		themeScroll = (ScrollView)findViewById(R.id.themeview);
 		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
-		haikuBinViewExtended = (ImageView)findViewById(R.id.binviewextended);
 		themeScroll.setRotation(THEME_ROTATION);
 		
 		//TODO
@@ -145,8 +145,13 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		haikuBinViewSmall.setOnDragListener(new HaikuBinDragListener(haikuBinViewSmall));
 		haikuBinViewSmall.bringToFront();
 		
+		haikuBinViewExtended = new BinView(context);
+		
+		addView(haikuBinViewExtended);
+		haikuBinViewExtended.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		
 		haikuBinViewSmall.setOnClickListener(this);
-		haikuBinViewExtended.setOnClickListener(this);
+//		haikuBinViewExtended.setOnClickListener(this);
 		haikuBinViewExtended.setVisibility(View.GONE);
 		
 //		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
@@ -181,7 +186,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		ThemeObjectView themeObject;
 //		int height = 0;
 		for(int i = 0; i < themes.size(); i++){
-			themeObject = new ThemeObjectView(context, themes.get(i));
+			themeObject = new ThemeObjectView(context, themes.get(i), false);
 			themeObjects.add(themeObject);
 			themeList.addView(themeObject);
 			themeObject.setOnLongClickListener(this);
@@ -355,9 +360,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		if(v.equals(haikuBinViewSmall)){
 			openBinView();
 		}
-		if(v.equals(haikuBinViewExtended)){
-			closeBinView();
-		}
+//		if(v.equals(haikuBinViewExtended)){
+//			closeBinView();
+//		}
 	}
 
 	@Override
@@ -397,6 +402,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 	
 	public void openBinView(){
+		haikuBinViewExtended.update();
 		binViewClosed = false;
 		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(GONE);

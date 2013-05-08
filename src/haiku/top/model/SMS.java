@@ -1,5 +1,7 @@
 package haiku.top.model;
 
+import haiku.top.view.DateView;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,6 +39,14 @@ public class SMS {
 	public String getFullDate(){
 		Date obj = new Date(Long.parseLong(date));
 		return sdf.format(obj.getTime());
+	}
+	
+	public YearMonth getYearMonth(){
+		String dateString = getFullDate();
+		int monthPos = Integer.parseInt(dateString.substring(dateString.indexOf('/')+1, dateString.lastIndexOf('/')));
+		Month month = DateView.MONTHS_NAME[monthPos-1];
+		int year = Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1, dateString.indexOf(' ')));
+		return new YearMonth(year, month);
 	}
 	
 	public void setDate(String date){

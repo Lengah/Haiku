@@ -1,6 +1,9 @@
 package haiku.top.model;
 
 import haiku.top.HaikuActivity;
+import haiku.top.view.ConversationObjectView;
+import haiku.top.view.MainView;
+import haiku.top.view.SMSObjectView;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -10,6 +13,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 public class HaikuGenerator {
@@ -51,6 +56,19 @@ public class HaikuGenerator {
 	
 	public static void addThread(int threadID){
 		thread_ids.add(threadID);
+		Cursor cursor = HaikuActivity.getThread(MainView.getInstance().getContext(), threadID);
+		ArrayList<SMS> threadSMS = new ArrayList<SMS>();
+		if (cursor.moveToFirst()) {
+			do{
+				threadSMS.add(new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID));
+			}
+			while(cursor.moveToNext());
+		}
+		for(int i = 0; i < threadSMS.size(); i++){
+			if(!smses.contains(threadSMS.get(i))){
+				smses.add(threadSMS.get(i));
+			}
+		}
 	}
 	
 	public static void removeThread(int threadID){
@@ -76,10 +94,31 @@ public class HaikuGenerator {
 	
 	public static void addDate(YearMonth date){
 		dates.add(date);
+		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
+		SMS tempSMS;
+		if (cursor.moveToFirst()) {
+			do{
+				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")));
+				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
+					smses.add(tempSMS);
+				}
+			}
+			while(cursor.moveToNext());
+		}
+		
 	}
 	
 	public static void removeDate(YearMonth date){
 		dates.remove(date);
+		for(int i = smses.size()-1; i >= 0; i--){
+			if(smses.get(i).getYearMonth().equals(date)){
+				smses.remove(i);
+			}
+		}
 	}
 	
 	public static ArrayList<YearMonth> getDates(){

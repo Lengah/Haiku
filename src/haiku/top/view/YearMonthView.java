@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -20,23 +21,22 @@ public class YearMonthView extends View{
 	private Paint monthPaint;
 	private Paint yearPaint;
 	
-	private static final double PROPORTIONAL_HEIGHT_OF_MONTH_TEXT = 0.6; // 0.6 = 60%. The rest is the padding and the year text. This is so they don't overlap
+	private static final double PROPORTIONAL_HEIGHT_OF_MONTH_TEXT = 0.5; // 0.6 = 60%. The rest is the padding and the year text. This is so they don't overlap
 	private static final double SIZE_OF_TEXT_PADDING_TOP = 0.1;
-	private static final double SIZE_OF_TEXT_PADDING_BETWEEN = 0.05;
+	private static final double SIZE_OF_TEXT_PADDING_BETWEEN = 0.2;
 	private static final double SIZE_OF_MONTH_TEXT_PADDING_LEFT = 0.1;
 	private static final double SIZE_OF_MONTH_TEXT_PADDING_RIGHT = 0.1;
-	private static final double SIZE_OF_YEAR_TEXT_PADDING_LEFT = 0.5;
 	private static final double SIZE_OF_YEAR_TEXT_PADDING_RIGHT = 0.05;
+	private static final double SIZE_OF_YEAR_TEXT_PADDING_BOTTOM = 0.05;
+	
+	private Rect yearRect;
+	private Rect monthRect;
 	
 	public YearMonthView(Context context, YearMonth yearMonth, int width, int height) {
 		super(context);
 		this.yearMonth = yearMonth;
-		
-		// See the input width and height as dp values and convert them to px values
-		this.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width, getResources().getDisplayMetrics());
-		this.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, getResources().getDisplayMetrics());
-//		this.width = width;
-//		this.height = height;
+		this.width = width;
+		this.height = height;
 		rect = new Rect(0, 0, width, height);
 		
 		backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -60,15 +60,26 @@ public class YearMonthView extends View{
 		
 		updateMonthTextSize();
 		updateYearTextSize();
+		
+		setWillNotDraw(false);
 	}
 	
 	@Override
     protected void onDraw(Canvas canvas) {
+		Log.i("TAG", "DRAW!");
 		canvas.drawRect(rect, backgroundPaint);
 		canvas.drawRect(rect, framePaint);
 		canvas.drawText(yearMonth.getMonth().toString(), (float)(width*SIZE_OF_MONTH_TEXT_PADDING_LEFT), (float)(height*(SIZE_OF_TEXT_PADDING_TOP + PROPORTIONAL_HEIGHT_OF_MONTH_TEXT)), monthPaint);
-		canvas.drawText("" + yearMonth.getYear(), (float)(width*SIZE_OF_YEAR_TEXT_PADDING_LEFT), (float)(height*(SIZE_OF_TEXT_PADDING_TOP + PROPORTIONAL_HEIGHT_OF_MONTH_TEXT + SIZE_OF_TEXT_PADDING_BETWEEN)), yearPaint);
+//		canvas.drawText("" + yearMonth.getYear(), (float)(width*SIZE_OF_YEAR_TEXT_PADDING_LEFT), (float)(height*(SIZE_OF_TEXT_PADDING_TOP + PROPORTIONAL_HEIGHT_OF_MONTH_TEXT + SIZE_OF_TEXT_PADDING_BETWEEN)), yearPaint);
+		canvas.drawText("" + yearMonth.getYear(), (float)(width - width*SIZE_OF_YEAR_TEXT_PADDING_RIGHT - yearRect.width()), (float) (height - height * SIZE_OF_YEAR_TEXT_PADDING_BOTTOM), yearPaint);
 	}
+	
+    @Override 
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
+        int measuredWidth = width;
+        int measuredHeight = height;
+        setMeasuredDimension(measuredWidth, measuredHeight);
+    }
 	
 	public void setYearMonth(YearMonth yearMonth){
 		this.yearMonth = yearMonth;
@@ -80,7 +91,6 @@ public class YearMonthView extends View{
 	
 	private void updateMonthTextSize(){
 		int size = 0;
-		Rect monthRect;
 		String text = yearMonth.getMonth().toString();
 	    do {
 	    	size++;
@@ -93,14 +103,13 @@ public class YearMonthView extends View{
 	
 	private void updateYearTextSize(){
 		int size = 0;
-		Rect yearRect;
 		String text = "" + yearMonth.getYear();
 	    do {
 	    	size++;
 	        yearPaint.setTextSize(size);
 	        yearRect = new Rect();
 	        yearPaint.getTextBounds(text, 0, text.length(), yearRect);
-	    } while(yearPaint.measureText(text) < width*(1-SIZE_OF_YEAR_TEXT_PADDING_LEFT - SIZE_OF_YEAR_TEXT_PADDING_RIGHT)
+	    } while(yearPaint.measureText(text) < width*(1 - SIZE_OF_YEAR_TEXT_PADDING_RIGHT)
 	    		&& yearRect.height() <= height*(1-PROPORTIONAL_HEIGHT_OF_MONTH_TEXT - SIZE_OF_TEXT_PADDING_TOP - SIZE_OF_TEXT_PADDING_BETWEEN));
 	}
 

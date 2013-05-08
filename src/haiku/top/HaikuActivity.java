@@ -36,7 +36,7 @@ public class HaikuActivity extends Activity {
 	private View mainView;
 	private View createSamplesView;
 	private boolean inCreateSamplesView;
-	private static final String ALLBOXES = "content://sms/";
+	public static final String ALLBOXES = "content://sms/";
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
     private static ArrayList<Contact> contacts = new ArrayList<Contact>();

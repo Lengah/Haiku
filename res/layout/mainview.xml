@@ -22,14 +22,6 @@
 	    android:background="@drawable/haikubin_small"
 	    android:layout_alignParentRight="true"
 	    android:layout_marginTop="200dp"/>
-	
-	<ImageView
-	    android:contentDescription="@string/hello_world"
-	    android:id="@+id/binviewextended"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:background="@drawable/haikubin_extended"
-	    android:layout_alignParentRight="true"/>
 
    	<ScrollView
        	android:id="@+id/scrollofcontacts"

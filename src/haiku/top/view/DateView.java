@@ -84,7 +84,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	}
 	
 	public void updateMonthWithIndex(int index){
-		if(HaikuGenerator.getDates().contains(months.get(index))){
+		if(HaikuGenerator.getDates().contains(new YearMonth(yearSelected, months.get(index).getMonth()))){
 			months.get(index).setAlpha(MainView.OPACITY_USED_DATE);
 		}
 		else{
@@ -93,29 +93,39 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	}
 	
 	public void update(){
-		for(int a = 0; a < months.size(); a++){
-			months.get(a).setAlpha(MainView.OPACITY_FULL);
-		}
+//		for(int a = 0; a < months.size(); a++){
+//			months.get(a).setAlpha(MainView.OPACITY_FULL);
+//		}
 		ArrayList<YearMonth> dates = HaikuGenerator.getDates();
-		int counter = 0;
-		for(int i = 0; i < dates.size(); i++){
-			if(dates.get(i).getYear() == yearSelected){
-				for(int a = 0; a < months.size(); a++){
-					if(dates.get(i).getMonth() == months.get(a).getMonth()){
-						months.get(a).setAlpha(MainView.OPACITY_USED_DATE);
-						counter++;
-					}
-				}
+		YearMonth ym;
+		for(int i = 0; i < months.size(); i++){
+			ym = new YearMonth(yearSelected, months.get(i).getMonth());
+			if(dates.contains(ym)){
+				months.get(i).setAlpha(MainView.OPACITY_USED_DATE);
+			}
+			else{
+				months.get(i).setAlpha(MainView.OPACITY_FULL);
 			}
 		}
-		if(counter == months.size()){
-			// All used
-//			yearView.setAlpha(MainView.OPACITY_USED_DATE);
-			yearView.setAlpha(MainView.OPACITY_FULL);
-		}
-		else{
-			yearView.setAlpha(MainView.OPACITY_FULL);
-		}
+//		int counter = 0;
+//		for(int i = 0; i < dates.size(); i++){
+//			if(dates.get(i).getYear() == yearSelected){
+//				for(int a = 0; a < months.size(); a++){
+//					if(dates.get(i).getMonth() == months.get(a).getMonth()){
+//						months.get(a).setAlpha(MainView.OPACITY_USED_DATE);
+//						counter++;
+//					}
+//				}
+//			}
+//		}
+//		if(counter == months.size()){
+//			// All used
+////			yearView.setAlpha(MainView.OPACITY_USED_DATE);
+//			yearView.setAlpha(MainView.OPACITY_FULL);
+//		}
+//		else{
+//			yearView.setAlpha(MainView.OPACITY_FULL);
+//		}
 	}
 	
 	public int getSelectedYear(){

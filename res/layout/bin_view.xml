@@ -6,7 +6,11 @@
     
     <LinearLayout 
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="130dp"
+        android:layout_marginTop="140dp"
+        android:layout_marginBottom="100dp"
         android:orientation="vertical">
         
         <TextView 
@@ -14,12 +18,14 @@
             android:text="Insert name here"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"/>"
+            android:gravity="center"
+            android:textColor="@android:color/black"/>
         
         <ScrollView 
 	        android:id="@+id/textScroll"
 	        android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
             
             <LinearLayout 
 	      		android:id="@+id/listoftext"
@@ -30,13 +36,17 @@
 	   		</LinearLayout>
 	        
 	    </ScrollView>
-	    
-        <ImageButton 
-            android:id="@+id/saveButton"
-	       	android:layout_height="wrap_content"
-		    android:layout_width="wrap_content"
-		    android:layout_gravity="right"/>
     </LinearLayout>
+    
+    <ImageButton 
+            android:id="@+id/saveButton"
+	       	android:layout_height="75dp"
+		    android:layout_width="75dp"
+		    android:layout_gravity="right"
+		    android:layout_alignParentRight="true"
+		    android:layout_alignParentBottom="true"
+		    android:layout_marginBottom="70dp"
+		    android:background="@drawable/save_button_default"/>
 
     <ScrollView 
         android:id="@+id/themeScroll"
@@ -45,7 +55,7 @@
     	android:layout_alignParentTop="true"
     	android:layout_alignParentLeft="true"
     	android:layout_marginLeft="130dp"
-    	android:layout_marginTop="100dp">
+    	android:layout_marginTop="90dp">
         <LinearLayout 
 		    android:id="@+id/listofthemes"
 		    android:layout_height="wrap_content"
