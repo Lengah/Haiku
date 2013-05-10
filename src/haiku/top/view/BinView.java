@@ -59,7 +59,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private ArrayList<Theme> themes;
 	
 	private ArrayList<YearMonthView> datesView = new ArrayList<YearMonthView>();
-	//TODO sms view, extenda textview?
+	private ArrayList<BinSMSView> smsView = new ArrayList<BinSMSView>();
 	private ArrayList<ThemeObjectView> themesView = new ArrayList<ThemeObjectView>();
 	
 //	private static final int DATE_WIDTH = 75; //in dp
@@ -105,6 +105,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int THEME_WIDTH = 200;
 //	private static final int THEME_HEIGHT = 100;
 	private static final int THEME_ROTATION = 0;
+	
+	private View viewBeingDragged = null;
 	
 	public BinView(Context context) {
 		super(context);
@@ -281,6 +283,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		
 		datesView.clear();
 		themesView.clear();
+		smsView.clear();
 		
 		YearMonthView ymv;
 		for(int i = 0; i < dates.size(); i++){
@@ -296,7 +299,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			themeList.addView(tob);
 		}
 		
-		
 		long threadID = -1;
 		if(sms.isEmpty()){
 			onlyOneContact = false;
@@ -308,11 +310,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		LayoutParams textParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 		textParams.setMargins(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()), 0, 0);
 		
-		TextView tv;
+		BinSMSView tv;
 		for(int i = 0; i < sms.size(); i++){
-			tv = new TextView(context);
-			tv.setTextColor(Color.BLACK);
-			tv.setText(sms.get(i).getMessage());
+			tv = new BinSMSView(context, sms.get(i));
 			
 			tv.setPadding(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
 //			tv.setLayoutParams(textParams);
@@ -342,9 +342,24 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		//TODO
 		saveButton.setVisibility(VISIBLE);
 	}
+	
+	public View getDraggedView(){
+		return viewBeingDragged;
+	}
+	
+	public void setDraggedView(View v){
+		viewBeingDragged = v;
+	}
+	
+	int startX;
+	int startY;
 
 	@Override
-	public boolean onTouch(View arg0, MotionEvent arg1) {
+	public boolean onTouch(View v, MotionEvent event) {
+		if(event.getAction() == MotionEvent.ACTION_DOWN){
+			startX = (int) event.getX();
+			startY = (int) event.getY();
+		}
 		return false;
 	}
 
