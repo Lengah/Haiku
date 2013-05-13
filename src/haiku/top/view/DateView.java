@@ -145,6 +145,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 		if(animating || opened){
 			return;
 		}
+		update();
 		opened = true;
 		animating = true;
 		dateViewClosed = !dateViewClosed;

@@ -66,7 +66,6 @@ public class YearMonthView extends View{
 	
 	@Override
     protected void onDraw(Canvas canvas) {
-		Log.i("TAG", "DRAW!");
 		canvas.drawRect(rect, backgroundPaint);
 		canvas.drawRect(rect, framePaint);
 		canvas.drawText(yearMonth.getMonth().toString(), (float)(width*SIZE_OF_MONTH_TEXT_PADDING_LEFT), (float)(height*(SIZE_OF_TEXT_PADDING_TOP + PROPORTIONAL_HEIGHT_OF_MONTH_TEXT)), monthPaint);

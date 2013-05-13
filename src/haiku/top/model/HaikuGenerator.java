@@ -72,7 +72,10 @@ public class HaikuGenerator {
 	}
 	
 	public static void removeThread(int threadID){
-		thread_ids.remove(threadID);
+		Integer thread_id = threadID;
+		if(thread_ids.remove(thread_id)){
+			MainView.getInstance().updateConversations();
+		}
 	}
 	
 	public static ArrayList<Integer> getThreadIDs(){
@@ -85,7 +88,7 @@ public class HaikuGenerator {
 	
 	public static void removeSMS(SMS sms){
 		smses.remove(sms);
-		removeThread((int)sms.getContactID());
+		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
 	}
 	
 	public static ArrayList<SMS> getAllAddedSMS(){

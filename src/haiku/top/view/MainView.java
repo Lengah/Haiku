@@ -62,6 +62,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public static final int THEME_ROTATION = -5;
 	
+	public static final int BACKGROUND_COLOR_DEFAULT = Color.WHITE;
+	public static final int BACKGROUND_COLOR_BIN_REMOVE = Color.RED;
+	
 //	private Button themeButton;
 	private ScrollView themeScroll;
 	private LinearLayout themeList;
@@ -101,6 +104,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		super(context);
 		this.context = context;
 		mv = this;
+		
+		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
 		
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		layoutInflater.inflate(R.layout.mainview,this);
@@ -341,6 +346,22 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 				themeObjects.get(i).setAlpha(OPACITY_DEFAULT);
 			}
 		}
+	}
+	
+	private boolean isBinColor = false;
+	
+	public void setBinColor(){
+		setBackgroundColor(BACKGROUND_COLOR_BIN_REMOVE);
+		isBinColor = true;
+	}
+	
+	public void resetBinColor(){
+		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
+		isBinColor = false;
+	}
+	
+	public boolean isBinColor(){
+		return isBinColor;
 	}
 	
 	@Override

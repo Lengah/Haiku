@@ -93,13 +93,13 @@ public class BinSMSView extends LinearLayout{
 		message = "<font color='black'>" + sms.getMessage() + "</font>";
 		textView.setText(Html.fromHtml(message), TextView.BufferType.SPANNABLE);
 		//TODO test!!
-		if(words.size() > 5){
-			setUsedWordAtPos(5);
-		}
-		
-		if(words.size() > 7){
-			setUsedWordAtPos(7);
-		}
+//		if(words.size() > 5){
+//			setUsedWordAtPos(5);
+//		}
+//		
+//		if(words.size() > 7){
+//			setUsedWordAtPos(7);
+//		}
 		// /test
 	}
 	
@@ -133,6 +133,10 @@ public class BinSMSView extends LinearLayout{
 			}
 		}
 		updateMessage();
+	}
+	
+	public SMS getSMS(){
+		return sms;
 	}
 
 }

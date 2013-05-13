@@ -27,15 +27,6 @@ public class HaikuBinDragListener implements OnDragListener{
 	public HaikuBinDragListener(View binView) {
 		this.binView = binView;
 	}
-	
-	public void updateColor(){
-//		if(inBinRange){
-//			binView.setBackgroundColor(inBinColor);
-//		}
-//		else{
-//			binView.setBackgroundColor(notInBinColor);
-//		}
-	}
 
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
@@ -46,15 +37,12 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		inBinRange = true;
-	    		updateColor();
 	    		break;
 	    	case DragEvent.ACTION_DRAG_EXITED:        
 	    		inBinRange = false;
-	    		updateColor();
 	    		break;
 	    	case DragEvent.ACTION_DROP:
 	    		inBinRange = false;
-	    		updateColor();
 	    		view = MainView.getInstance().getDraggedView();
 	    		if(view instanceof ThemeObjectView){
 	    			HaikuGenerator.addTheme(((ThemeObjectView)view).getTheme());
