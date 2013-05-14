@@ -69,7 +69,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 	private SeekBar smsSlide;
 	
 	private int numberOfContactsToAdd = 6; //min 6, max 100
-	private int numberOfSMSToAdd = 2; //min 2, max 23
+	private int numberOfSMSToAdd = 2; //min 2, max 740
 	
 	public ArrayList<CreateSamplesContact> contacts = new ArrayList<CreateSamplesContact>();
 	public ArrayList<String> sms = new ArrayList<String>();
@@ -292,32 +292,31 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			int progress = 0;
+			
 			if (loadOrRemove) { //load
-				final double progressValue = 100.0/(numberOfContactsToAdd + numberOfSMSToAdd); 
-				int progress = 0;
-							
 				try {
 					//addSampleContacts
 					BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open("namelist.txt")));
 					for (int i=0; i<(numberOfContactsToAdd-5); i++) { //5 manual entries
 						addContact(context, reader.readLine(), "+4670000" + (1000 + i)); //fictional persons
-						publishProgress((int)((++progress)*progressValue));
+						publishProgress(++progress);
 					}
 					reader.close();
 					//manual entries (real persons) = 5
 					addContact(context, "Fredrik Hagnell", "+41736000000");
-					publishProgress((int)((++progress)*progressValue));
+					publishProgress(++progress);
 					addContact(context, "Karl-Axel Zander", "+41736000001");
-					publishProgress((int)((++progress)*progressValue));
+					publishProgress(++progress);
 					addContact(context, "Pedro Ferreria", "+41736000002");
-					publishProgress((int)((++progress)*progressValue));
+					publishProgress(++progress);
 					addContact(context, "Vygandas Simbelis", "+41736000003");
-					publishProgress((int)((++progress)*progressValue));
+					publishProgress(++progress);
 					addContact(context, "Elsa Vaara", "+41736000004");
-					publishProgress((int)((++progress)*progressValue));
+					publishProgress(++progress);
 					
 					//addSampleSMS
-					reader = new BufferedReader(new InputStreamReader(context.getAssets().open("sms-conversations.txt")));		
+					reader = new BufferedReader(new InputStreamReader(context.getAssets().open("sms-conversations.txt"), "ISO-8859-1"));		
 					String address = "";
 					String date = "";
 					String text = "";
@@ -358,7 +357,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 								}
 								else { //randomize SMS date to something close after last SMS in this thread 
 									long randomTime = Long.parseLong(date);
-									Date d = new Date(randomTime + 10000 + ((long)(Math.random()*(ONE_HOUR/2)))); //some time between 10 seconds and half an hour
+									Date d = new Date(randomTime + 10000 + ((long)(Math.random()*(ONE_HOUR/4)))); //some time between 10 seconds and 15 minutes
 									date = Long.toString(d.getTime());
 								}
 							}
@@ -369,7 +368,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 							
 							text = input.substring(1, input.length());
 							addSMS(address, date, text, inboxOrSent);
-							publishProgress((int)((++progress)*progressValue));
+							publishProgress(++progress);
 							i++;
 						}		
 					}
@@ -377,19 +376,18 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 				} catch (IOException e) {}
 			}
 			
-			else { //remove
-				final double progressValue = 100.0/(contacts.size() + sms.size()); 
-				int progress = 0;
-				
+			else { //remove	
 				for (CreateSamplesContact contact : contacts) { //delete all loaded contacts from this app
 					deleteContact(context, contact.name, contact.phoneNumber);
-					publishProgress((int)((++progress)*progressValue));
+					publishProgress(++progress);
 				}
 				contacts.clear();
 				for (int i=0; i<sms.size(); i++) { //delete all loaded sms from this app
 					deleteSMS(context, sms.get(i));
+					publishProgress(++progress);
 				}
 				sms.clear();
+				
 			}		
 			return null;
 		}
