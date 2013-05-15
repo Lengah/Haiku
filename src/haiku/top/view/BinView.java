@@ -45,6 +45,7 @@ import android.widget.RelativeLayout.LayoutParams;
 
 public class BinView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener, OnDragListener{
 	private Context context;
+	private static BinView binView;
 	
 	private HaikuProgressBar progressBar;
 	
@@ -58,10 +59,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private LinearLayout textList;
 	
 	private ImageButton saveButton;
-	
-	private ArrayList<YearMonth> dates;
-	private ArrayList<SMS> sms;
-	private ArrayList<Theme> themes;
 	
 	private ArrayList<YearMonthView> datesView = new ArrayList<YearMonthView>();
 	private ArrayList<BinSMSView> smsView = new ArrayList<BinSMSView>();
@@ -182,11 +179,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private View viewBeingDragged = null;
 	
-	private int smsCounter = 0; // used to know if the sms bin is empty (when an sms is removed it is just removed visualy)
-	
 	public BinView(Context context) {
 		super(context);
 		this.context = context;
+		binView = this;
 		setBackgroundResource(R.drawable.haikubin_extended);
 		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -238,6 +234,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		contactName.setTextColor(Color.BLACK);
 		contactName.setGravity(Gravity.CENTER);
 		contactName.setTypeface(null, Typeface.BOLD);
+		contactName.setVisibility(GONE);
 		textList.setOrientation(LinearLayout.VERTICAL);
 		LayoutParams textParams = new RelativeLayout.LayoutParams(textWidth, textHeight);
 		textParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
@@ -400,92 +397,133 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		setOnDragListener(this);
 	}
 	
-	public void update(){
-		dates = HaikuGenerator.getDates();
-		sms = HaikuGenerator.getAllAddedSMS();
-		
-		boolean onlyOneContact = true; // if there only is one contact in the bin its name will be shown
-		
-		dateList.removeAllViews();
-		textList.removeAllViews();
-		
-		datesView.clear();
-		smsView.clear();
-		
-		YearMonthView ymv;
-		for(int i = 0; i < dates.size(); i++){
-			ymv = new YearMonthView(context, dates.get(i), dateWidth, dateObjectHeight);
-			datesView.add(ymv);
-			dateList.addView(ymv);
-			ymv.setOnTouchListener(this);
-		}
-
-		updateTheme();
-		
-		long threadID = -1;
-		if(sms.isEmpty()){
-			onlyOneContact = false;
-		}
-		else{
-			threadID = sms.get(0).getContactID();
-		}
-		
-		LayoutParams textParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-		textParams.setMargins(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics()), 0, 0);
-		smsCounter = 0;
-		BinSMSView tv;
-		for(int i = 0; i < sms.size(); i++){
-			tv = new BinSMSView(context, sms.get(i));
-			
-			tv.setPadding(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
-//			tv.setLayoutParams(textParams);
-			textList.addView(tv);
-			if(sms.get(i).getContactID() != threadID){
-				onlyOneContact = false;
-			}
-			tv.setOnTouchListener(this);
-			smsView.add(tv);
-			smsCounter++;
-		}
-		if(onlyOneContact){
-			Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-			Cursor cursor = context.getContentResolver().query(uri, null, "thread_id='" + threadID + "'", null, null);
-			if(cursor.moveToFirst()){
-				String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
-				contactName.setText(HaikuActivity.getContactName(context, address));
-			}
-			else{
-				contactName.setText("Name not found");
-			}
-			contactName.setVisibility(VISIBLE);
-		}
-		else{
+	public static BinView getInstance(){
+		return binView;
+	}
+	
+	public void addDate(YearMonth ym){
+		YearMonthView ymv = new YearMonthView(context, ym, dateWidth, dateObjectHeight);
+		datesView.add(ymv);
+		dateList.addView(ymv);
+		ymv.setOnTouchListener(this);
+	}
+	
+	public void removeDate(YearMonthView ymv){
+		dateList.removeView(ymv);
+		datesView.remove(ymv);
+		return;
+	}
+	
+	private boolean showingContactName = false;
+	private long contactID;
+	
+	public void addSMS(SMS sms){
+		BinSMSView tv = new BinSMSView(context, sms);
+		tv.setPadding(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
+		textList.addView(tv);
+		tv.setOnTouchListener(this);
+		smsView.add(tv);
+		if(showingContactName && contactID != sms.getContactID()){
+			showingContactName = false;
 			contactName.setVisibility(GONE);
 		}
 	}
 	
-	/**
-	 * This method doesn't change what smses in the view
-	 */
-	public void updateTheme(){
-		themes = HaikuGenerator.getThemes();
-		themesView.clear();
-		ThemeObjectView tob;
-		for(int i = 0; i < themeViews.size(); i++){
-			themeViews.get(i).setVisibility(GONE);
-			themeViews.get(i).removeAllViews();
-		}
-		for(int i = 0; i < themes.size(); i++){
-			if(i >= themeViews.size()){
-				return; //TODO - Cannot have more than 8 themes at once because more than that cannot be shown
-			}
-			tob = new ThemeObjectView(context, themes.get(i), true);
-			themeViews.get(i).addView(tob);
-			themeViews.get(i).setVisibility(VISIBLE);
-			themesView.add(tob);
-			tob.setOnTouchListener(this);
+	public void removeSMS(BinSMSView sms){ //TODO check the generated haikus!!
+		textList.removeView(sms);
+		smsView.remove(sms);
+		updateContactName();
+	}
+	
+	public void addSMSES(ArrayList<SMS> smses){
+		for(int i = 0; i < smses.size(); i++){
+			addSMS(smses.get(i));
 		}
 	}
+	
+	public void removeSMSES(ArrayList<SMS> smses){ //TODO check the generated haikus!!
+		for(int i = smsView.size() -1 ; i >= 0; i--){
+			if(smses.contains(smsView.get(i).getSMS())){
+				textList.removeView(smsView.get(i));
+				smsView.remove(i);
+			}	
+		}
+		updateContactName();
+	}
+	
+	/**
+	 * Checks if the contact name should be added and adds it if so.
+	 * Called when an sms is removed from the view
+	 */
+	private void updateContactName(){
+		if(showingContactName){ // Is already shown
+			if(smsView.isEmpty()){ // but shouldn't be
+				showingContactName = false;
+				contactName.setVisibility(GONE);
+			}
+			return;
+		}
+		if(smsView.isEmpty()){ // Is not shown and shouldn't be shown
+			return;
+		}
+		
+		long firstContactID = smsView.get(0).getSMS().getContactID(); // can't be empty here
+		for(int i = 1; i < smsView.size(); i++){
+			if(smsView.get(i).getSMS().getContactID() != firstContactID){
+				// shouldn't be shown
+				return;
+			}
+		}
+		// is not shown, but should be
+		showingContactName = true;
+		contactID = firstContactID;
+		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id='" + firstContactID + "'", null, null);
+		if(cursor.moveToFirst()){
+			String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+			contactName.setText(HaikuActivity.getContactName(context, address));
+		}
+		else{
+			contactName.setText("Name not found");
+		}
+		contactName.setVisibility(VISIBLE);
+	}
+	
+	public void addTheme(Theme theme){
+		ThemeObjectView tob = new ThemeObjectView(context, theme, true);
+		themesView.add(tob);
+		int index = themesView.indexOf(tob);
+		themeViews.get(index).addView(tob);
+		themeViews.get(index).setVisibility(VISIBLE);
+		tob.setOnTouchListener(this);
+	}
+	
+	public void removeTheme(ThemeObjectView tob){ //TODO check the generated haikus!!
+		int index = themesView.indexOf(tob);
+		themesView.remove(tob);
+		themeViews.get(index).removeAllViews();
+		themeViews.get(index).setVisibility(GONE);
+	}
+	
+//	public void updateTheme(){
+//		themes = HaikuGenerator.getThemes();
+//		themesView.clear();
+//		ThemeObjectView tob;
+//		for(int i = 0; i < themeViews.size(); i++){
+//			themeViews.get(i).setVisibility(GONE);
+//			themeViews.get(i).removeAllViews();
+//		}
+//		for(int i = 0; i < themes.size(); i++){
+//			if(i >= themeViews.size()){
+//				return; //TODO - Cannot have more than 8 themes at once because more than that cannot be shown
+//			}
+//			tob = new ThemeObjectView(context, themes.get(i), true);
+//			themeViews.get(i).addView(tob);
+//			themeViews.get(i).setVisibility(VISIBLE);
+//			themesView.add(tob);
+//			tob.setOnTouchListener(this);
+//		}
+//	}
 	
 	/**
 	 * in px
@@ -652,7 +690,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 		
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
-			Log.i("TAG", "down"); //TODO
 			oldDistance = -1;
 			startX = eventX;
 			startY = eventY;
@@ -765,20 +802,16 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    		if(inDropRange){
 	    			if(viewBeingDragged instanceof BinSMSView){
 	    				HaikuGenerator.removeSMS(((BinSMSView)viewBeingDragged).getSMS());
-	    				viewBeingDragged.setVisibility(GONE); // much faster than checking the whole view
-	    				smsCounter--;
-	    				if(smsCounter == 0){
-	    					contactName.setVisibility(GONE);
-	    				}
-	    				//TODO check the generated haikus!!
+	    				removeSMS((BinSMSView)viewBeingDragged);
 	    			}
 	    			if(viewBeingDragged instanceof ThemeObjectView){
 	    				HaikuGenerator.removeTheme(((ThemeObjectView) viewBeingDragged).getTheme());
-	    				updateTheme();
+	    				removeTheme((ThemeObjectView) viewBeingDragged);
 	    			}
 	    			if(viewBeingDragged instanceof YearMonthView){
-	    				HaikuGenerator.removeDate(((YearMonthView) viewBeingDragged).getYearMonth());
-	    				update();
+	    				ArrayList<SMS> removedSMS = HaikuGenerator.removeDate(((YearMonthView) viewBeingDragged).getYearMonth());
+	    				removeDate((YearMonthView) viewBeingDragged);
+	    				removeSMSES(removedSMS);
 	    			}
 	    		}
 	    		else{

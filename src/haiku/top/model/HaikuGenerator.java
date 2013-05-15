@@ -1,7 +1,9 @@
 package haiku.top.model;
 
 import haiku.top.HaikuActivity;
+import haiku.top.view.BinView;
 import haiku.top.view.ConversationObjectView;
+import haiku.top.view.DateView;
 import haiku.top.view.MainView;
 import haiku.top.view.SMSObjectView;
 
@@ -37,13 +39,9 @@ public class HaikuGenerator {
 	 */
 	private static ArrayList<String> wordsNotFound = new ArrayList<String>();
 	
-	
-	public static void sortSavedHaikus(SortType sortType){
-		
-	}
-	
 	public static void addTheme(Theme theme){
 		themes.add(theme);
+		BinView.getInstance().addTheme(theme);
 	}
 	
 	public static void removeTheme(Theme theme){
@@ -67,7 +65,7 @@ public class HaikuGenerator {
 		}
 		for(int i = 0; i < threadSMS.size(); i++){
 			if(!smses.contains(threadSMS.get(i))){
-				smses.add(threadSMS.get(i));
+				addSMS(threadSMS.get(i));
 			}
 		}
 	}
@@ -85,6 +83,7 @@ public class HaikuGenerator {
 	
 	public static void addSMS(SMS sms){
 		smses.add(sms);
+		BinView.getInstance().addSMS(sms);
 	}
 	
 	public static void removeSMS(SMS sms){
@@ -97,8 +96,35 @@ public class HaikuGenerator {
 		return smses;
 	}
 	
+	public static void addYear(int year){
+		YearMonth ym;
+		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+			ym = new YearMonth(year, DateView.MONTHS_NAME[i]);
+			if(!dates.contains(ym)){
+				dates.add(ym);
+				BinView.getInstance().addDate(ym);
+			}
+		}
+		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
+		SMS tempSMS;
+		if (cursor.moveToFirst()) {
+			do{
+				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")));
+				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
+					addSMS(tempSMS);
+				}
+			}
+			while(cursor.moveToNext());
+		}
+	}
+	
 	public static void addDate(YearMonth date){
 		dates.add(date);
+		BinView.getInstance().addDate(date);
 		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
 		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
 		SMS tempSMS;
@@ -109,7 +135,7 @@ public class HaikuGenerator {
 						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
 						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")));
 				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
-					smses.add(tempSMS);
+					addSMS(tempSMS);
 				}
 			}
 			while(cursor.moveToNext());
@@ -117,13 +143,16 @@ public class HaikuGenerator {
 		
 	}
 	
-	public static void removeDate(YearMonth date){
+	public static ArrayList<SMS> removeDate(YearMonth date){
+		ArrayList<SMS> removedSMS = new ArrayList<SMS>();
 		dates.remove(date);
 		for(int i = smses.size()-1; i >= 0; i--){
 			if(smses.get(i).getYearMonth().equals(date)){
+				removedSMS.add(smses.get(i));
 				smses.remove(i);
 			}
 		}
+		return removedSMS;
 	}
 	
 	public static ArrayList<YearMonth> getDates(){

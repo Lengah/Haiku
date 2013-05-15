@@ -55,14 +55,15 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		}
 	    		if(view instanceof QuarterCircle){
 	    			if(((QuarterCircle) view).isYearView()){
-	    				ArrayList<YearMonth> yearMonths = HaikuGenerator.getDates();
-	    				YearMonth yearMonth;
-	    				for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
-	    					yearMonth = new YearMonth(MainView.getInstance().getSelectedYear(), DateView.MONTHS_NAME[i]);
-	    					if(!yearMonths.contains(yearMonth)){
-	    						HaikuGenerator.addDate(yearMonth);
-	    					}
-	    				}
+//	    				ArrayList<YearMonth> yearMonths = HaikuGenerator.getDates();
+//	    				YearMonth yearMonth;
+//	    				for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+//	    					yearMonth = new YearMonth(MainView.getInstance().getSelectedYear(), DateView.MONTHS_NAME[i]);
+//	    					if(!yearMonths.contains(yearMonth)){
+//	    						HaikuGenerator.addDate(yearMonth);
+//	    					}
+//	    				}
+	    				HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
 	    			}
 	    			else{
 	    				HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()));

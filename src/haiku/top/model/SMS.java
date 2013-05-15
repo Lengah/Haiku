@@ -49,6 +49,11 @@ public class SMS {
 		return new YearMonth(year, month);
 	}
 	
+	public int getYear(){
+		String dateString = getFullDate();
+		return Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1, dateString.indexOf(' ')));
+	}
+	
 	public void setDate(String date){
 		this.date = date;
 	}
