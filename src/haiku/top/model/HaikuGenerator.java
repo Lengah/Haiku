@@ -48,6 +48,7 @@ public class HaikuGenerator {
 	
 	public static void removeTheme(Theme theme){
 		themes.remove(theme);
+		MainView.getInstance().updateThemeView();
 	}
 	
 	public static ArrayList<Theme> getThemes(){
@@ -88,6 +89,7 @@ public class HaikuGenerator {
 	
 	public static void removeSMS(SMS sms){
 		smses.remove(sms);
+		MainView.getInstance().updateSMSView();
 		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
 	}
 	

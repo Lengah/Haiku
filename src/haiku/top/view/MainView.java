@@ -413,6 +413,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 					&& 45 > Math.acos(Math.abs(((int) event.getX()) - startX)
 							/Math.sqrt((((int) event.getX()) - startX) * (((int) event.getX()) - startX)
 							+ (((int) event.getY()) - startY) * (((int) event.getY()) - startY)))*180/Math.PI){
+				if(v.getAlpha() == OPACITY_USED){
+					// already in the bin! Can't drag it!
+					return false;
+				}
 				v.setAlpha(OPACITY_USED);
 				viewBeingDragged = v;
 				v.startDrag(null, new DragShadowBuilder(v), null, 0);
