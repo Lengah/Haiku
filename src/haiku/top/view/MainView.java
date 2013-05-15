@@ -178,11 +178,15 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		ArrayList<Theme> themes;
 //		themes = DatabaseHandler.getAllThemes();
 		themes = new ArrayList<Theme>();
-		themes.add(Theme.happy);
-		themes.add(Theme.sad);
-		themes.add(Theme.summer);
+		themes.add(Theme.art);
+		themes.add(Theme.body);
+		themes.add(Theme.emotion);
+		themes.add(Theme.silly);
+		themes.add(Theme.stockholm);
 		themes.add(Theme.time);
-		themes.add(Theme.time);
+		themes.add(Theme.test1);
+		themes.add(Theme.test2);
+		
 		
 		themeList = new LinearLayout(context);
 		themeList.setOrientation(LinearLayout.VERTICAL);

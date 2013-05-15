@@ -1,9 +1,13 @@
 package haiku.top.model;
 
 public enum Theme {
-	happy,
-	sad,
-	summer,
+	art,
+	body,
+	emotion,
+	silly,
+	stockholm,
 	time,
+	test1,
+	test2
 	
 }
