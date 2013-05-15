@@ -6,6 +6,7 @@ import haiku.top.model.Theme;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.util.TypedValue;
@@ -31,7 +32,7 @@ public class ThemeObjectView extends LinearLayout{
 		themeText = new TextView(context);
 		
 		if(bin){
-			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		}
 		else{
 			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
@@ -53,8 +54,22 @@ public class ThemeObjectView extends LinearLayout{
 //		themeText.setAlpha(MainView.OPACITY_FULL);
 		int maxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics());
 		if(bin){
-			themeText.setTextSize(2*maxSize/3);
+//			themeText.setTextSize(2*maxSize/3);
 			themeText.setPadding((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0);
+			int width = BinView.getThemeObjectWidth();
+			int height = BinView.getThemeObjectHeight();
+			
+			String text = theme.toString();
+			Paint textPaint = themeText.getPaint();
+			Rect textRect;
+			int size = 0;  
+		    do {
+		    	size++;
+		    	textPaint.setTextSize(size);
+		        textRect = new Rect();
+		        textPaint.getTextBounds(text, 0, text.length(), textRect);
+		    } while(textPaint.measureText(text) < 4*width/5
+		    		&& textRect.height() <= 4*height/5);
 		}
 		else{
 			themeText.setPadding((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, 0, 0);
@@ -69,7 +84,26 @@ public class ThemeObjectView extends LinearLayout{
 		    } while(themeText.getPaint().measureText("" + themeText.getText()) < width
 		    		&& size < maxSize);
 		}
+//		updateTextSize();
 	}
+	
+//	private void updateTextSize(){
+//		int size = 0;
+//		//TODO 100 siffran är tagen från mainview.xml under theme scrollviewen. Om den ändras ska även det här värdet ändras!
+//        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics()) - (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
+//        width = 9*width/10;
+//		String text = theme.toString();
+//		Paint textPaint = new Paint();
+//		Rect textRect;
+//	    do {
+//	    	size++;
+//	    	textPaint.setTextSize(size);
+//	        textRect = new Rect();
+//	        textPaint.getTextBounds(text, 0, text.length(), textRect);
+//	    } while(textPaint.measureText(text) < width
+//	    		&& textRect.height() <= 4*height/5);
+//	    themeText.setTextSize(textPaint.getTextSize());
+//	}
 	
 	public int getHeightOfView(){
 		return height;

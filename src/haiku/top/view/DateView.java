@@ -420,6 +420,10 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 									months.get(i).changeAngle(angleChange);
 								}
 							}
+							if(pressedDownOn.getAlpha() == MainView.OPACITY_USED_DATE){
+								// Already in the bin! Can't drag!
+								return false;
+							}
 							pressedDownOn.setAlpha(MainView.OPACITY_USED_DATE);
 							dragMonth(pressedDownOn);
 //							v.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);
@@ -499,10 +503,6 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			
 			@Override
 			public void onAnimationStart(Animation animation) {
-//				Log.i("TAG", "Animation start!"); //
-//				for(int i = 0; i < months.size(); i++){
-//					Log.i("TAG", months.get(i).getText() + "| Start: " + months.get(i).getStartAngle() + ", End: " + months.get(i).getEndAngle());
-//				}
 				scrolling = true;
 			}
 			
@@ -511,10 +511,6 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			
 			@Override
 			public void onAnimationEnd(Animation animation) {
-//				Log.i("TAG", "Animation end!");
-//				for(int i = 0; i < months.size(); i++){
-//					Log.i("TAG", months.get(i).getText() + "| Start: " + months.get(i).getStartAngle() + ", End: " + months.get(i).getEndAngle());
-//				}
 				scrolling = false;
 			}
 		});

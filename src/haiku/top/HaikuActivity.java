@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -30,6 +31,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 
 public class HaikuActivity extends Activity {
 	private static HaikuActivity ha;
@@ -73,6 +75,15 @@ public class HaikuActivity extends Activity {
         }
         ((CreateSamplesView)createSamplesView).updateAfterImport();
     }
+    
+    public int getStatusBarHeight() {
+    	int result = 0;
+    	int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+    	if (resourceId > 0) {
+    		result = getResources().getDimensionPixelSize(resourceId);
+    	}
+    	return result;
+      }
     
     protected void onPause() { //save data between sessions
         super.onPause();
