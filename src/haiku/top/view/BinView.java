@@ -423,10 +423,16 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textList.addView(tv);
 		tv.setOnTouchListener(this);
 		smsView.add(tv);
-		if(showingContactName && contactID != sms.getContactID()){
+		if(smsView.size() == 1){
+			// Only sms! -> show contact
+			updateContactName();
+			
+		}
+		else if(showingContactName && contactID != sms.getContactID()){
 			showingContactName = false;
 			contactName.setVisibility(GONE);
 		}
+		
 	}
 	
 	public void removeSMS(BinSMSView sms){ //TODO check the generated haikus!!
@@ -452,7 +458,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	/**
-	 * Checks if the contact name should be added and adds it if so.
+	 * Checks if the contact name should be shown and shows it if so.
 	 * Called when an sms is removed from the view
 	 */
 	private void updateContactName(){
@@ -504,26 +510,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		themeViews.get(index).removeAllViews();
 		themeViews.get(index).setVisibility(GONE);
 	}
-	
-//	public void updateTheme(){
-//		themes = HaikuGenerator.getThemes();
-//		themesView.clear();
-//		ThemeObjectView tob;
-//		for(int i = 0; i < themeViews.size(); i++){
-//			themeViews.get(i).setVisibility(GONE);
-//			themeViews.get(i).removeAllViews();
-//		}
-//		for(int i = 0; i < themes.size(); i++){
-//			if(i >= themeViews.size()){
-//				return; //TODO - Cannot have more than 8 themes at once because more than that cannot be shown
-//			}
-//			tob = new ThemeObjectView(context, themes.get(i), true);
-//			themeViews.get(i).addView(tob);
-//			themeViews.get(i).setVisibility(VISIBLE);
-//			themesView.add(tob);
-//			tob.setOnTouchListener(this);
-//		}
-//	}
 	
 	/**
 	 * in px

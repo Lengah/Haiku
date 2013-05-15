@@ -3,11 +3,11 @@ package haiku.top.model;
 public enum Month {
 	January,
 	February,
-	Mars,
+	March,
 	April,
 	May,
 	June,
-	Juli,
+	July,
 	August,
 	September,
 	October,

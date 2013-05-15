@@ -33,7 +33,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	
 	private ArrayList<QuarterCircle> months = new ArrayList<QuarterCircle>();
 	public static final Month[] MONTHS_NAME = new Month[] 
-			{Month.January, Month.February, Month.Mars, Month.April, Month.May, Month.June, Month.Juli, Month.August, Month.September, Month.October, Month.November, Month.December};
+			{Month.January, Month.February, Month.March, Month.April, Month.May, Month.June, Month.July, Month.August, Month.September, Month.October, Month.November, Month.December};
 	
 	public static final int SIZE_OF_MONTH = 25;
 	public static final int ANIMATION_NEW_YEAR_DURATION = 500;
