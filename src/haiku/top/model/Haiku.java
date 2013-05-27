@@ -1,31 +1,14 @@
 package haiku.top.model;
 
-import haiku.top.HaikuActivity;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 
 public class Haiku {
-	private Theme theme;
+	private ArrayList<Theme> themes;
 	private String poem;
-	private int rating = -1; // not rated
-	private Calendar date = Calendar.getInstance();
+	private ArrayList<Word> wordsUsed;
 	
-	public Haiku(Theme theme){
-		this.theme = theme;
-	}
-	
-	/**
-	 * 
-	 * @return DD/MM/YY hh:mm:ss
-	 */
-	public String getDate(){
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		return sdf.format(date.getTime());
+	public Haiku(){
+		themes = HaikuGenerator.getThemes();
 	}
 	
 	public String getHaikuPoem(){
@@ -33,7 +16,6 @@ public class Haiku {
 	}
 	
 	public void generate(){
-		
 		//TEST
 		poem = HaikuGenerator.getPartOfSentence("<sentence>");
 		while(poem.contains("a/an")){
@@ -58,19 +40,11 @@ public class Haiku {
 		// Third row
 	}
 	
-	public void rate(int rating){
-		this.rating = rating;
+	public ArrayList<Theme> getThemes(){
+		return themes;
 	}
 	
-	/**
-	 * -1 betyder att den inte har en rating
-	 * @return
-	 */
-	public int getRating(){
-		return rating;
-	}
-	
-	public Theme getTheme(){
-		return theme;
+	public ArrayList<Word> getWordsUsed(){
+		return wordsUsed;
 	}
 }

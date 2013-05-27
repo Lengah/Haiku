@@ -75,7 +75,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int screenWidth;
 	private int screenHeight;
 	
-	public static final int DELETE_DISTANCE = 30;
+	public static final int DELETE_DISTANCE = 5;
 	private int deleteDistance;
 	
 	// These positions are compared to the image width and height
@@ -170,7 +170,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int THEME_OBJECT_WIDTH = 120;
 	private static final int THEME_OBJECT_HEIGHT = 60;
 	private static final Position THEME1_UPPER_LEFT = new Position(280, 230);
-	private static final int THEME_PADDING = 20;
+	private static final int THEME_PADDING = 10;
 	private static final int THEME_BOTTOM_MARGIN_LEFT = 70;
 	private static final int THEME_BOTTOM_MARGIN_TOP = 20;
 	private static final int THEME_ROTATION = -45;
@@ -707,11 +707,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				else if(Math.abs(distance-oldDistance) > deleteDistance){
 					if(distance < oldDistance){
 						// delete
-						Log.i("TAG", "DELETE");
+						progressBar.incProgress();
 					}
 					else{
-						// undo
-						Log.i("TAG", "UNDO");
+						// undof
+						progressBar.decProgress();
 					}
 					oldDistance = distance;
 				}

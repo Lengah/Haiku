@@ -23,15 +23,11 @@ public class HaikuGenerator {
 	private static BufferedReader readerTheme;
 	private static ArrayList<String> smsLog = new ArrayList<String>();
 	private static ArrayList<Haiku> generatedHaikus = new ArrayList<Haiku>();
-	private static ArrayList<Haiku> savedHaikus = new ArrayList<Haiku>();
 	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
 	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
-	private static Theme currentTheme;
-	private static boolean newSMSLog = true;
-	
-	// From the sms log
+	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 	private static ArrayList<Word> smsLogWords = new ArrayList<Word>();
 	
 	/**
@@ -159,80 +155,18 @@ public class HaikuGenerator {
 		return dates;
 	}
 	
-	
-	/**
-	 * Just a test. Creates sms logs
-	 */
-	public static void testInit(){
-		smsLog.clear();
-		smsLog.add("Hi! How are you?");
-		smsLog.add("Hi! Where are you?");
-		smsLog.add("where are you?");
-		smsLog.add("I'll be late");
-		smsLog.add("When will you get home?");
-		smsLog.add("I am running! :D");
-		smsLog.add("Are you hungry/thirsty?");
-		smsLog.add("Lamp, Couch, tv, sofa, table, door, computers, socks, sock, earth, arrow, arrows, sun, " +
-				"stars, star, army, armies, hope, not, do, have, for, while, of, chance, all, them, us, your, algae antipodes affairs assizes bacteria " +
-				"lets, let, easy, hard, difficult, mediocre door are abbey act adios adulator affix");
-		updateLogs();
+	public static ArrayList<Theme> getAllThemes(){
+		return allThemes;
 	}
 	
-	public static void testInit2(){
-		try {
-			InputStream dictionary = HaikuActivity.getInstance().getAssets().open("dictionaryalfabetical.txt");
-			BufferedReader readerDictionary = new BufferedReader(new InputStreamReader(dictionary));
-			
-			String word;
-			String syllables;
-			String wordType;
-			
-			String text;
-			
-			readerDictionary.readLine(); // skip the first line
-			while ((text = readerDictionary.readLine()) != null) {
-				word = text.substring(0, text.indexOf('|'));
-				text = text.substring(text.indexOf('|')+1);
-				syllables = text.substring(0, text.indexOf('|'));
-				wordType = text.substring(text.lastIndexOf('|')+1);
-//				smsLogWords.add(new Word(word, syllables, wordType));
-			}
-			Log.i("TAG", "words: " + smsLogWords.size());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void initThemes(){
+		//TODO hämta alla themes från databasen och lägg in dom i arraylisten allThemes.
 	}
-	
-	private static boolean inited = false; //TEMP ta bort sen!
-	
-	public static void createHaiku(Theme theme){
-		if(!inited){
-			testInit2(); //TEST
-			inited = true;
-		}
-//		if(theme != currentTheme){
-//			// Update theme
-//			updateTheme(theme);
-//		}
-//		if(newSMSLog){
-//			newSMSLog = false;
-//			//TODO
-//			importSMS();
-//			updateLogs();
-//		}
-//		if(smsLogWords.isEmpty()){
-//			// No words found!
-//		}
-		Haiku haiku = new Haiku(theme);
+		
+	public static void createHaiku(){
+		Haiku haiku = new Haiku();
 		haiku.generate();
 		generatedHaikus.add(haiku);
-	}
-	
-	/**
-	 * Called when the user changes the smslog
-	 */
-	public static void newSMSLogs(){
-		newSMSLog = true;
 	}
 	
 	public static Haiku getHaiku(int index){
@@ -241,16 +175,6 @@ public class HaikuGenerator {
 	
 	public static Haiku getNewestHaiku(){
 		return generatedHaikus.get(generatedHaikus.size()-1);
-	}
-	
-	public static void updateTheme(Theme theme){
-		try {
-			currentTheme = theme;
-			InputStream themeStream = HaikuActivity.getInstance().getAssets().open("theme" + theme + ".txt");
-			readerTheme = new BufferedReader(new InputStreamReader(themeStream));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	public static void updateLogs(){
@@ -369,44 +293,6 @@ public class HaikuGenerator {
 		return null; // If something went wrong
 	}
 	
-//	public static Word lookUpWord(String word){
-//		try {
-//			if(word.length() == 0){
-//				return null;
-//			}
-//			word = word.toLowerCase();
-//			char firstLetter = word.charAt(0);
-//			int row;
-//			String text;
-//			String wordText;
-//			text = readerTheme.readLine();
-//			text = text.substring(text.indexOf(firstLetter));
-//			text = text.substring(text.indexOf('=')+1, text.indexOf('|'));
-//			row = Integer.parseInt(text);
-//			row = row-2;
-//			while(row > 0){
-//				readerTheme.readLine();
-//				row--;
-//			}
-//			while ((text = readerTheme.readLine()) != null) { // or until the word is found
-//				if(text.charAt(0) != firstLetter){
-//					return null; // the word doesn't exist
-//				}
-//				wordText = text.substring(0,text.indexOf('|'));
-//				if(wordText.equals(word)){
-//					text = text.substring(text.indexOf('|')+1);
-//					return new Word(wordText, Integer.parseInt(text.substring(0, text.indexOf('|'))),text.substring(text.lastIndexOf('|')+1));
-//				}
-//			}
-//			dictionary.close();
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-//	}
-	
 	private static Random randomGenerator = new Random();
 	private static int index;
 	
@@ -422,29 +308,29 @@ public class HaikuGenerator {
 			wordTypes = wordTypes.substring(1);
 		}
 		boolean exists;
-//		for(int i = 0; i < smsLogWords.size(); i++){
-//			exists = true;
-//			for(int t = 0; t < types.size(); t++){
-//				if(types.get(t) == 'U' && smsLogWords.get(i).getWordType().indexOf('p') != -1){
-//					// needs to be a singular noun, but the word is a plural noun
-//					exists = false;
-//					break;
-//				}
-//				if(types.get(t) == 'J' && smsLogWords.get(i).getWordType().indexOf('s') != -1){
-//					// needs to be a plural verb, but the word is a singular verb
-//					exists = false;
-//					break;
-//				}
-//				if(types.get(t) != 'U' && types.get(t) != 'J'  && smsLogWords.get(i).getWordType().indexOf(types.get(t)) == -1){
-//					// U and J does not exist in the dictionaries
-//					exists = false;
-//					break;
-//				}
-//			}
-//			if(exists){
-//				words.add(smsLogWords.get(i));
-//			}
-//		}
+		for(int i = 0; i < smsLogWords.size(); i++){
+			exists = true;
+			for(int t = 0; t < types.size(); t++){
+				if(types.get(t) == 'U' && smsLogWords.get(i).getwordTypes().indexOf('p') != -1){
+					// needs to be a singular noun, but the word is a plural noun
+					exists = false;
+					break;
+				}
+				if(types.get(t) == 'J' && smsLogWords.get(i).getwordTypes().indexOf('s') != -1){
+					// needs to be a plural verb, but the word is a singular verb
+					exists = false;
+					break;
+				}
+				if(types.get(t) != 'U' && types.get(t) != 'J'  && smsLogWords.get(i).getwordTypes().indexOf(types.get(t)) == -1){
+					// U and J does not exist in the dictionaries
+					exists = false;
+					break;
+				}
+			}
+			if(exists){
+				words.add(smsLogWords.get(i));
+			}
+		}
 		if(words.isEmpty()){
 			// finns inget sådant ord
 			return null;
@@ -499,7 +385,7 @@ public class HaikuGenerator {
 }
 	
 	/**
-	 * Only one(!) object surrounded by () or <>
+	 * Only one(!) object surrounded by (), <> or []
 	 * @param structure
 	 * @return
 	 */
@@ -554,12 +440,12 @@ public class HaikuGenerator {
 	}
 	
 	/**
-	 * A finished sentence does not contain any (,),< or >
+	 * A finished sentence does not contain any (,),<, >, [ or ]
 	 * @param sentence
 	 * @return
 	 */
 	public static boolean finishedSentence(String sentence){
-		if(sentence.contains("(") || sentence.contains(")") || sentence.contains("<") || sentence.contains(">")){
+		if(sentence.contains("(") || sentence.contains(")") || sentence.contains("<") || sentence.contains(">") || sentence.contains("[") || sentence.contains("]")){
 			return false;
 		}
 		return true;
@@ -628,9 +514,5 @@ public class HaikuGenerator {
 		}
 		Log.i("TAG", "wordType that gives null: " + wordType);
 		return (Character) null;
-	}
-	
-	public static void importSMS(){
-		
 	}
 }
