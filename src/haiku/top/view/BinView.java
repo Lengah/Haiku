@@ -179,6 +179,20 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private View viewBeingDragged = null;
 	
+	// Fling, in binView because the conversion to px is done here
+	private static final int FLING_MIN_DISTANCE = 50;
+	private static final int FLING_MIN_SPEED = 100; // px/s
+	private int flingMinDistance;
+	private int flingMinSpeed;
+//	
+//	public int getFlingMinDistance(){
+//		return flingMinDistance;
+//	}
+//	
+//	public int getFlingMinSpeed(){
+//		return flingMinSpeed;
+//	}
+	
 	public BinView(Context context) {
 		super(context);
 		this.context = context;
@@ -193,6 +207,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		screenHeight = size.y;
 		screenHeight = screenHeight - HaikuActivity.getInstance().getStatusBarHeight();
 		
+		//Fling
+		flingMinDistance = (int)(((double)FLING_MIN_DISTANCE)/BIN_IMAGE_WIDTH*screenWidth);
+		flingMinSpeed = (int)(((double)FLING_MIN_SPEED)/BIN_IMAGE_WIDTH*screenWidth);
 		
 		// See the DELETE_DISTANCE value as a dp value and convert it to a px value
         deleteDistance = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DELETE_DISTANCE, getResources().getDisplayMetrics());
@@ -667,13 +684,20 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public boolean onTouch(View v, MotionEvent event) {
 		int eventX = (int) event.getX();
 		int eventY = (int) event.getY();
-		if(event.getPointerCount() >= 2){
+		if(event.getPointerCount() == 2){
     		isDeleting = true;
     		twoFingers = true;
+    		Log.i("TAG", "Two fingers");
+    		if(!(v instanceof BinView)){
+    			onTouch(this, event);
+    			return false;
+    		}
     	}
 		else{
 			isDeleting = false;
+			Log.i("TAG", "One finger");
 		}
+//		Log.i("TAG", "" + event.getPointerCount());
 		
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
 			oldDistance = -1;
@@ -692,6 +716,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				MainView.getInstance().closeBinView();
 				twoFingers = false;
 			}
+			twoFingers = false;
 			pressedDownOn = null;
 		}
 		else if (event.getAction() == MotionEvent.ACTION_MOVE) {
@@ -710,12 +735,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						progressBar.incProgress();
 					}
 					else{
-						// undof
+						// undo
 						progressBar.decProgress();
 					}
 					oldDistance = distance;
 				}
-				
         		return true;
 			}
 			// not deleting
@@ -724,7 +748,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				return false;
 			}
 			double distance = Math.sqrt((eventX-startX)*(eventX-startX)+(eventY-startY)*(eventY-startY));
-			if(pressedDownOn instanceof BinSMSView || pressedDownOn instanceof YearMonthView){ // Becuase of scrolling
+			if(pressedDownOn instanceof BinSMSView || pressedDownOn instanceof YearMonthView){ // Because of scrolling
 				if(startX != -1 && Math.abs(startX - ((int) event.getX())) > MainView.MOVE_TO_DRAG_RANGE
 						&& 45 > Math.acos(Math.abs(((int) event.getX()) - startX)
 								/Math.sqrt((((int) event.getX()) - startX) * (((int) event.getX()) - startX)

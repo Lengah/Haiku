@@ -223,6 +223,12 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	
 	private boolean isScrolling = false;
 	
+	// Fling
+//	private static final int FLING_MIN_DEGREE = 30; // since this view is round it checks the distance in degrees, not in px
+//	private static final int FLING_MIN_SPEED = 100; // degrees/s
+	
+	
+	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if(scrolling){

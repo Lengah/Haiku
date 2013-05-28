@@ -65,7 +65,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final int BACKGROUND_COLOR_DEFAULT = Color.WHITE;
 	public static final int BACKGROUND_COLOR_BIN_REMOVE = Color.RED;
 	
-//	private Button themeButton;
 	private ScrollView themeScroll;
 	private LinearLayout themeList;
 	
@@ -80,7 +79,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LinearLayout smsList;
 	
 	private ImageView haikuBinViewSmall;
-//	private ImageView haikuBinViewExtended;
 	private BinView haikuBinViewExtended;
 	
 	private View viewBeingDragged = null;
@@ -119,7 +117,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
 		smsList = (LinearLayout)findViewById(R.id.listofsms);
 		
-//		themeButton = (Button)findViewById(R.id.themebutton);
 		themeScroll = (ScrollView)findViewById(R.id.themeview);
 		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
 		themeScroll.setRotation(THEME_ROTATION);
@@ -131,19 +128,28 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2*100, getResources().getDisplayMetrics());
         int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics());
         
+        double radiansAngle = ((double)Math.abs(THEME_ROTATION))/180.0*Math.PI; // The rotation in radians
+        
+        // the distance to the top of the screen
+        int yOffset = (int) (Math.sin(radiansAngle)*((double)width)/2); // the width of the actual themeview is width/2
+        
+        // the distance from the themeview's xpos to the xpos at the top of the screen if you follow the angle
+        int xOffset = (int) Math.sqrt(yOffset*yOffset*(1.0/(Math.cos(radiansAngle)*Math.cos(radiansAngle)) - 1));
+        
 		LayoutParams fillParams = new RelativeLayout.LayoutParams(width, height);
 		fillParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		fillParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		fillParams.setMargins(0, -yOffset, -width/2 + xOffset, 0);
 		yellowBackground.setLayoutParams(fillParams);
 		
-		yellowBackground.setScrollY(-height/2);
-		yellowBackground.setScrollX(width/2);
+//		yellowBackground.setScrollY(-height/2);
+//		yellowBackground.setScrollX(width/2);
 //		yellowBackground.offsetTopAndBottom(-height/2);
 		yellowBackground.setRotation(THEME_ROTATION);
 		addView(yellowBackground);
 //		yellowBackground.bringToFront();
 		themeScroll.bringToFront();
-		yellowBackground.setVisibility(GONE);
+//		yellowBackground.setVisibility(GONE);
 
 		
 		
@@ -363,24 +369,13 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	@Override
 	public void onClick(View v) {
-//		if(v.equals(themeButton)){
-//			openThemeView();
-//		}
-		/*else*/ if(v instanceof ConversationObjectView){
+		if(v instanceof ConversationObjectView){
 			chosenContact = (ConversationObjectView) v;
 			setSMSView(((ConversationObjectView)v).getThreadID());
 		}
-//		else{
-//			// themeObject
-//			closeThemeView();
-//		}
-
-		if(v.equals(haikuBinViewSmall)){
+		else if(v.equals(haikuBinViewSmall)){
 			openBinView();
 		}
-//		if(v.equals(haikuBinViewExtended)){
-//			closeBinView();
-//		}
 	}
 
 	@Override
