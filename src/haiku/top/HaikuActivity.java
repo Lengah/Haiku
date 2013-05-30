@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import haiku.top.model.Contact;
 import haiku.top.model.CreateSamplesContact;
+import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.MainView;
 import android.app.Activity;
@@ -16,6 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -44,6 +46,8 @@ public class HaikuActivity extends Activity {
     private static ArrayList<Contact> contacts = new ArrayList<Contact>();
 	private SharedPreferences mPrefs;
 	public static Vibrator vibe;
+	
+	public static DatabaseHandler databaseHandler;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +78,14 @@ public class HaikuActivity extends Activity {
 	        ((CreateSamplesView)createSamplesView).sms.addAll(importSMS);
         }
         ((CreateSamplesView)createSamplesView).updateAfterImport();
+        
+        
+        //create and open deltebyhaiku_db
+        databaseHandler = new DatabaseHandler(this);
+        try { databaseHandler.createDataBase(); } 
+        catch (IOException ioe) {  throw new Error("Unable to create database"); }
+        try { databaseHandler.openDataBase(); }
+        catch(SQLException sqle){ throw sqle; } 
     }
     
     public int getStatusBarHeight() {
@@ -105,6 +117,26 @@ public class HaikuActivity extends Activity {
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event ) {
      if (keycode == KeyEvent.KEYCODE_MENU) {
+
+    	 //test database
+    	 if (databaseHandler.getWord("upplands-väsb") != null) 
+        	 Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
+    	 else
+    		 Log.i("test", "upplands-väsb not found in dictionary"); //this happens
+    	 
+    	 if (databaseHandler.getWord("upplands-väsby") != null)
+        	 Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
+    	 else
+    		 Log.i("test", "upplands-väsby not found in dictionary");
+    	 
+    	 if (databaseHandler.getWord("asks") != null)
+    	 {
+    		Log.i("test", "partofspeech in word \"asks\":");
+        	ArrayList<String> wordtypes = new ArrayList<String>(databaseHandler.getWord("asks").getwordTypes()); //get partofspeechs from a word
+        	for (String s : wordtypes)
+        		Log.i("test", s);
+    	 }
+    	 
     	 setContentView(createSamplesView);
     	 inCreateSamplesView = true;
     	 return true;
