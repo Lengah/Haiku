@@ -225,8 +225,11 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	
 	// Fling
 //	private static final int FLING_MIN_DEGREE = 30; // since this view is round it checks the distance in degrees, not in px
-//	private static final int FLING_MIN_SPEED = 100; // degrees/s
-	
+	private static final double FLING_MIN_SPEED = 0.005; // degrees/ms
+	private double oldTime;
+	private double flingTime; // ms
+	private double flingDistance; // degrees
+	private double flingSpeed; // degrees/ms
 	
 	
 	@Override
@@ -242,6 +245,12 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //		int eventY = (int) event.getY() + offset;
 		int eventY = (int) event.getY();
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
+			oldTime = System.currentTimeMillis();
+			flingTime = 0;
+			flingDistance = 0;
+			if(flinging){ // if the user presses down, the flinging will stop
+				a.cancel();
+			}
 //			Log.i("TAG", "ACTION_DOWN");
 			isScrolling = false;
 			startX = eventX;
@@ -275,6 +284,9 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 				}
 			}
 			else{
+				if(flingTime > 0){ // fling
+					animateFling();
+				}
 				int angleChange = 0;
 				if(months.get(0).getEndAngle() < 0 && months.get(0).getEndAngle() > -90){
 					angleChange = -90 - months.get(0).getEndAngle();
@@ -318,6 +330,35 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 				
 //				Log.i("TAG", "eventOld: (" + scrollXOld +", " + scrollYOld +"), eventNew: (" + scrollXNew + ", " + scrollYNew + ")");
 //				Log.i("TAG", "Old: " + oldAngle + ", new: " + newAngle +", change: " + angleChange);
+				
+				// Fling
+				double timeDiff = System.currentTimeMillis() - oldTime;
+				// as soon as the speed is less than the minimum, then the fling is reset
+				Log.i("TAG", "speed: " + Math.abs(((double)angleChange)/timeDiff));
+				if(Math.abs(((double)angleChange)/timeDiff) < FLING_MIN_SPEED){
+					flingTime = 0;
+					flingDistance = 0;
+					oldTime = System.currentTimeMillis();
+				}
+				else{
+					flingTime += timeDiff;
+					double tempDistance = flingDistance;
+					flingDistance += angleChange;
+					if((tempDistance < 0 && tempDistance < flingDistance)
+							|| tempDistance > 0 && tempDistance > flingDistance){
+						// the user changed direction
+						flingTime = 0;
+						flingDistance = 0;
+						oldTime = System.currentTimeMillis();
+					}
+					// if the total speed is less than the minimum, the fling is reset
+					if(flingDistance/flingTime < FLING_MIN_SPEED){
+						flingTime = 0;
+						flingDistance = 0;
+						oldTime = System.currentTimeMillis();
+					}
+				}
+				Log.i("TAG", "fling time: " + flingTime);
 				
 				if(angleChange == 0){
 					return true;
@@ -521,6 +562,76 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			}
 		});
         a.setDuration(ANIMATION_NEW_YEAR_DURATION);
+        startAnimation(a);
+	}
+	
+	private static final int MAX_FLING_DISTANCE = (int) (SIZE_OF_MONTH * (12.0 - 90.0/SIZE_OF_MONTH)); // from showing January to showing December
+	
+	// if the total angle is MAX_FLING_ANGLE or more and the total time is MAX_FLING_TIME ms or less, then it will fling as much as it can
+	private static final int MAX_FLING_ANGLE = 60;
+	private static final double MAX_FLING_TIME = 50;
+	
+	private static final double FLING_SPEED = 180; // degrees/s
+	
+	private boolean flinging = false;
+	
+	public void animateFling(){
+		int totalAngleChange = 0;
+		if(flingTime < MAX_FLING_TIME && flingDistance > MAX_FLING_ANGLE){
+			totalAngleChange = MAX_FLING_DISTANCE;
+		}
+		else{
+			totalAngleChange = (int) Math.abs(flingDistance);
+		}
+		int angleOffset;
+		if(flingDistance > 0){
+			// flinging clockwise
+			angleOffset = months.get(0).getEndAngle() + 90;
+			totalAngleChange = Math.min(totalAngleChange, MAX_FLING_DISTANCE-angleOffset);
+		}
+		else{
+			// flinging counter-clockwise
+			angleOffset = months.get(months.size()-1).getStartAngle();
+			totalAngleChange = Math.min(totalAngleChange, MAX_FLING_DISTANCE-angleOffset);
+			totalAngleChange = -totalAngleChange;
+		}
+		final int angleChange = totalAngleChange;
+		long animationTime = Math.abs((long) (1/(FLING_SPEED/angleChange)*1000));
+		scrolledSoFar = 0;
+		flinging = true;
+		Log.i("TAG", "total time: " + flingTime + ", total distance: " + flingDistance);
+		Log.i("TAG", "Fling! " + "distance: " + angleChange + ", time: " + animationTime);
+		a = new Animation(){
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+            	int changeAngle = (int) (angleChange*interpolatedTime) - scrolledSoFar;
+            	scrolledSoFar += changeAngle;
+    			for(int i = 0; i < months.size(); i++){
+					months.get(i).changeAngle(changeAngle);
+				}
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return false;
+            }
+        };
+        a.setAnimationListener(new AnimationListener() {
+			
+			@Override
+			public void onAnimationStart(Animation animation) {
+				flinging = true;
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+			
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				flinging = false;
+			}
+		});
+        a.setDuration(animationTime);
         startAnimation(a);
 	}
 

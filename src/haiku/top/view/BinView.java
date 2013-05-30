@@ -180,18 +180,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private View viewBeingDragged = null;
 	
 	// Fling, in binView because the conversion to px is done here
-	private static final int FLING_MIN_DISTANCE = 50;
-	private static final int FLING_MIN_SPEED = 100; // px/s
-	private int flingMinDistance;
-	private int flingMinSpeed;
-//	
-//	public int getFlingMinDistance(){
-//		return flingMinDistance;
-//	}
-//	
-//	public int getFlingMinSpeed(){
-//		return flingMinSpeed;
-//	}
+//	private static final int FLING_MIN_DISTANCE = 50; //TODO
+//	private static final int FLING_MIN_SPEED = 100; // px/s
+//	private int flingMinDistance;
+//	private int flingMinSpeed;
 	
 	public BinView(Context context) {
 		super(context);
@@ -207,9 +199,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		screenHeight = size.y;
 		screenHeight = screenHeight - HaikuActivity.getInstance().getStatusBarHeight();
 		
-		//Fling
-		flingMinDistance = (int)(((double)FLING_MIN_DISTANCE)/BIN_IMAGE_WIDTH*screenWidth);
-		flingMinSpeed = (int)(((double)FLING_MIN_SPEED)/BIN_IMAGE_WIDTH*screenWidth);
+		//Fling //TODO
+//		flingMinDistance = (int)(((double)FLING_MIN_DISTANCE)/BIN_IMAGE_WIDTH*screenWidth);
+//		flingMinSpeed = (int)(((double)FLING_MIN_SPEED)/BIN_IMAGE_WIDTH*screenWidth);
 		
 		// See the DELETE_DISTANCE value as a dp value and convert it to a px value
         deleteDistance = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DELETE_DISTANCE, getResources().getDisplayMetrics());
@@ -412,6 +404,22 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		setOnClickListener(this);
 		setOnTouchListener(this);
 		setOnDragListener(this);
+		textScroll.setOnTouchListener(new OnTouchListener() {
+			   @Override
+			   public boolean onTouch(View v, MotionEvent event) {
+				   Log.i("TAG", "sms on touch: " + isDeleting);
+				   if(event.getPointerCount() == 2){
+			    		isDeleting = true;
+			    		twoFingers = true;
+			    		BinView.getInstance().onTouch(BinView.getInstance(), event);
+			    	}
+//				   	else{
+//						isDeleting = false;
+//					}
+				   return isDeleting; // if false, the scrollview's own onTouch will handle the event
+			   }
+		});
+//		textScroll.requestDisallowInterceptTouchEvent(true);
 	}
 	
 	public static BinView getInstance(){
@@ -679,24 +687,25 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private boolean isDeleting = false;
 	private boolean twoFingers = false; // if two fingers are used at anytime during the event, a click will not occur. Using this because I'm not sure if the isDeleting boolean is enough
 	private float oldDistance = 0;
+	
+	private static final double WAIT_TIME = 100; //ms
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		Log.i("TAG", "BinView onTouch!");
 		int eventX = (int) event.getX();
 		int eventY = (int) event.getY();
 		if(event.getPointerCount() == 2){
     		isDeleting = true;
     		twoFingers = true;
-    		Log.i("TAG", "Two fingers");
-    		if(!(v instanceof BinView)){
-    			onTouch(this, event);
-    			return false;
-    		}
     	}
 		else{
 			isDeleting = false;
-			Log.i("TAG", "One finger");
+			if(System.currentTimeMillis() - startTime < WAIT_TIME){
+				return true;
+			}
 		}
+		
 //		Log.i("TAG", "" + event.getPointerCount());
 		
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
