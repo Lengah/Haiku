@@ -52,8 +52,8 @@ public class HaikuActivity extends Activity {
 	public static Vibrator vibe;
 	
 	private SharedPreferences mPrefs;
-	public boolean smsWordTableExist; //has SMSWORD table been loaded
-	public static final String SMSWORD_EXIST_KEY = "DeleteByHaiku_smsWordTableExist";
+//	public boolean smsWordTableExist; //has SMSWORD table been loaded
+//	public static final String SMSWORD_EXIST_KEY = "DeleteByHaiku_smsWordTableExist";
 	
 	public static DatabaseHandler databaseHandler;
 	
@@ -69,7 +69,7 @@ public class HaikuActivity extends Activity {
 		//import saved data
 		mPrefs = getPreferences(Context.MODE_PRIVATE);
 		((CreateSamplesView)createSamplesView).samplesExist = mPrefs.getBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
-		smsWordTableExist =  mPrefs.getBoolean(SMSWORD_EXIST_KEY, false);
+//		smsWordTableExist =  mPrefs.getBoolean(SMSWORD_EXIST_KEY, false);
 		
         //if so, load contacts
         if (((CreateSamplesView)createSamplesView).samplesExist) {
@@ -94,11 +94,11 @@ public class HaikuActivity extends Activity {
         try { databaseHandler.createDataBase(); } catch (IOException ioe) {  throw new Error("Unable to create database"); }
         try { databaseHandler.openDataBase(); } catch(SQLException sqle){ throw sqle; }
         
-        if (!smsWordTableExist)
-        {
-        	databaseHandler.setupSMSTables(); //connect words in sms with dictionary
-        	smsWordTableExist = true;
-        }
+//        if (!smsWordTableExist)
+//        {
+//        	databaseHandler.setupSMSTables(); //connect words in sms with dictionary
+//        	smsWordTableExist = true;
+//        }
         
     }
     
@@ -115,7 +115,7 @@ public class HaikuActivity extends Activity {
         super.onPause();
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, ((CreateSamplesView)createSamplesView).samplesExist);
-        ed.putBoolean(SMSWORD_EXIST_KEY, smsWordTableExist);
+//        ed.putBoolean(SMSWORD_EXIST_KEY, smsWordTableExist);
         
         if (((CreateSamplesView)createSamplesView).samplesExist) { //if samples were created during session, save contacts
 	        Set<String> exportContact = new HashSet<String>();
@@ -142,10 +142,12 @@ public class HaikuActivity extends Activity {
        	 inCreateSamplesView = true;
         return true;
         case R.id.safemode:
-        
+        	
+        //safeMode = safeMode
+        	
         //----------------------------------------------------------------------------------------------------------------------
        	 //test database
-       	 if (databaseHandler.getWord("upplands-väsb") != null) 
+/*       	 if (databaseHandler.getWord("upplands-väsb") != null) 
            	 Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
        	 else
        		 Log.i("test", "upplands-väsb not found in dictionary"); //this happens
@@ -162,14 +164,7 @@ public class HaikuActivity extends Activity {
            	for (String s : wordtypes)
            		Log.i("test", s);
        	 }
-       	 
-          	if (databaseHandler.getWord("collage") != null) {
-       		Log.i("test", "themes for word \"collage\":");
-           	ArrayList<String> themes = new ArrayList<String>(databaseHandler.getWord("collage").getThemes()); //get themes from a word
-           	for (String s : themes)
-           		Log.i("test", s);
-       	 }
-          	 
+       	 	 
           	ArrayList<String> wordsids = databaseHandler.getWordsInSMS("2327");
           	Log.i("wordinsms", wordsids.size() + "");
           	for (String id : wordsids)
@@ -180,7 +175,7 @@ public class HaikuActivity extends Activity {
           		Log.i("themes", t.getName());
           	 
    //----------------------------------------------------------------------------------------------------------------------	
-        	
+        */
         	
         return true;
         default:

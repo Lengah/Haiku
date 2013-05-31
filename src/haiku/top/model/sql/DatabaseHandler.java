@@ -184,18 +184,20 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    	return "";
 	    }
 	}
-	
+	/**
+	 * 
+	 * @param text
+	 * @return null if word not found
+	 */
 	public Word getWord(String text) { //return null if word not found
 		 
-	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID,
-	            KEY_WORD_TEXT, KEY_WORD_SYLLABLES }, KEY_WORD_TEXT + "=?",
+	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_SYLLABLES }, KEY_WORD_TEXT + "=?",
 	            new String[] { text }, null, null, null, null);
 	    	    
 	    if (cursor != null && cursor.getCount() > 0) { //if word found
 		    cursor.moveToFirst();
 		    String id = cursor.getString(0);
-		    String text2 = cursor.getString(1);
-		    String syllables = cursor.getString(2);
+		    String syllables = cursor.getString(1);
 		    
 		    //get partofspeech
 		    ArrayList<String> wordtypes = new ArrayList<String>();
@@ -214,26 +216,8 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		        } while (cursor2.moveToNext());
 		    }
 		    cursor2.close();
-		    
-		    //get themes
-		    ArrayList<String> themes = new ArrayList<String>();
-		    Cursor cursor4 = myDataBase.rawQuery("SELECT " + KEY_THEMEWORD_THEMEID + " FROM " + TABLE_THEMEWORD + " WHERE " + KEY_THEMEWORD_WORDID + " = " + id  + ";", null);
-		    if (cursor4.moveToFirst()) {
-		        do {
-		        	String themeid = cursor4.getString(0);
-		    	    Cursor cursor5 = myDataBase.query(TABLE_THEME, new String[] { KEY_THEME_NAME }, KEY_THEME_ID + "=?", new String[] { themeid }, null, null, null, null);
-		    	    if (cursor5 != null) {
-		    		    cursor5.moveToFirst();
-		    		    String theme = cursor5.getString(0);
-		    		    	themes.add(theme);
-		    	    }
-		    	    cursor5.close();
-		    	    	
-		        } while (cursor4.moveToNext());
-		    }
-		    cursor4.close();
 		    	    
-		    Word word = new Word(text2, syllables, wordtypes, themes);
+		    Word word = new Word(text, syllables, wordtypes);
 		    cursor.close();
 		    return word;
 	    }
@@ -242,6 +226,20 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    }
 
 	    
+	}
+	
+	
+	public ArrayList<Long> initTheme(Theme t) {
+		ArrayList<Long> wordids = new ArrayList<Long>();
+		
+	    Cursor cursor = myDataBase.rawQuery("SELECT " + KEY_THEMEWORD_WORDID + " FROM " + TABLE_THEMEWORD + " WHERE " + KEY_THEMEWORD_THEMEID + " = " + t.getID() + ";", null);
+	    if (cursor.moveToFirst()) {
+	        do {
+	    		wordids.add(cursor.getLong(0));
+	        } while (cursor.moveToNext());
+	    }
+	    cursor.close();
+		return wordids;
 	}
 	
 	public ArrayList<String> getWordsInSMS(String smsID) {
@@ -254,6 +252,12 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    }
 	    cursor.close();
 	    return words;
+	}
+	
+	public Theme getTheAllTheme() {
+	    Cursor cursor = myDataBase.query(TABLE_THEME, new String[] { KEY_THEME_ID }, KEY_THEME_NAME + "=?", new String[] { "all" }, null, null, null, null);
+    	cursor.moveToFirst();
+    	return new Theme(cursor.getLong(0), "all");   
 	}
 	
 	public ArrayList<Theme> getAllThemes() {
@@ -270,8 +274,76 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    cursor.close();
 		return themes;
 	}
+
+	public ArrayList<Word> initSMS(SMS sms) {
+		ArrayList<String> words = new ArrayList<String>();
+		
+		String smsid = sms.getID() + "";
+		
+		// not just "real" words -> can't use the database because the database only contain "real" words
+		String textMessage = sms.getMessage().toLowerCase();
+		String word;
+		int pos1;
+		int pos2;
+		while(textMessage.length() > 0){
+			// Remove symbols from the start
+			pos1 = 0;
+			while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
+				 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
+				 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
+				 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
+				 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
+				 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
+			     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
+			     && textMessage.charAt(pos1) != 'å' && textMessage.charAt(pos1) != 'ä' && textMessage.charAt(pos1) != 'ö' && textMessage.charAt(pos1) != '\''){
+				pos1++;
+				if(pos1 >= textMessage.length()){
+					break;
+				}
+			}
+			if(pos1 >= textMessage.length()){
+				break; // just a bunch of symbols left of the message
+			}
+			// find the end of the word
+			pos2 = pos1;
+			while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
+				 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
+				 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
+				 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
+				 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
+				 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
+			     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
+			     || textMessage.charAt(pos1) == 'å' || textMessage.charAt(pos1) == 'ä' || textMessage.charAt(pos1) == 'ö' || textMessage.charAt(pos1) == '\''){
+				pos2++;
+				if(pos1+pos2 >= textMessage.length()){
+					break;
+				}
+			}
+			// a word is found between indexes pos1 and pos2
+			word = textMessage.substring(pos1, pos2);
+			if(word.length() == 0){
+				break;
+			}
+			words.add(word);
+			if(pos2+1 <= textMessage.length())
+				textMessage = textMessage.substring(pos2+1);
+			else
+				break;
+		}
+		
+		ArrayList<Word> realWords = new ArrayList<Word>();
+		Word tempWord;
+		for (String w : words) { //get word ids for those that exist in dictionary
+			tempWord = getWord(w);
+			if (tempWord != null)
+				realWords.add(tempWord);
+		}
+		return realWords;
+	}
 	
-	public void setupSMSTables() { 
+
+	
+/*	public void setupSMSTables() { 
 		//see what words (that exist in dictionary) that are in phone's SMS, add to "SMS_Word" table
 		//TODO
 		//see what "coherent" sentences that can be found ins SMSes, add to "Sentence" table. Also connect contained words with dictionary (Word table), add to "WordInSentence" table
@@ -366,5 +438,5 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	        }
 	    } catch (Exception e) {} finally { cursor.close();}
 	    cursor.close();
-	}
+	}*/
 }

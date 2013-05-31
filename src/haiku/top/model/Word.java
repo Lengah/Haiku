@@ -6,17 +6,8 @@ public class Word {
 	private String text;
 	private String syllables;
 	private ArrayList<String> wordTypes; //parthofspeech
-	private ArrayList<String> themes;
 	private int numberOfSyllables;
 
-	public Word(String text, String syllables, ArrayList<String> wordTypes, ArrayList<String> themes) { 
-		this.text = text;
-		this.syllables = syllables;
-		this.wordTypes = new ArrayList<String>(wordTypes);
-		this.themes = new ArrayList<String>(themes);
-		initNumberOfSyllables();
-	}
-	
 	/**
 	 * FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
 	 * @param dicLine
@@ -67,9 +58,5 @@ public class Word {
 	
 	public ArrayList<String> getwordTypes() {
 		return wordTypes;
-	}
-	
-	public ArrayList<String> getThemes() {
-		return themes;
 	}
 }

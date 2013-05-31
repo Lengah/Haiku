@@ -1,5 +1,6 @@
 package haiku.top.model;
 
+import haiku.top.HaikuActivity;
 import haiku.top.view.DateView;
 
 import java.text.SimpleDateFormat;
@@ -22,16 +23,10 @@ public class SMS {
 		this.contactID = contactID;
 	}
 	
-	public boolean isWordsInited(){
-		return wordsInSms != null;
-	}
-	
 	public ArrayList<Word> getWords(){
+		if (wordsInSms == null)
+			wordsInSms = HaikuActivity.databaseHandler.initSMS(this);
 		return wordsInSms;
-	}
-	
-	public void setWords(ArrayList<Word> words){
-		this.wordsInSms = new ArrayList<Word>(words);
 	}
 	
 	/**
