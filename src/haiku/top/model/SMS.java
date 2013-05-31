@@ -3,6 +3,7 @@ package haiku.top.model;
 import haiku.top.view.DateView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -12,6 +13,7 @@ public class SMS {
 	private String date;
 	private long contactID;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+	private ArrayList<Word> wordsInSms;
 	
 	public SMS(long id, String message, String date, long contactID){
 		this.id = id;
@@ -20,8 +22,16 @@ public class SMS {
 		this.contactID = contactID;
 	}
 	
-	public SMS(){
-		
+	public boolean isWordsInited(){
+		return wordsInSms != null;
+	}
+	
+	public ArrayList<Word> getWords(){
+		return wordsInSms;
+	}
+	
+	public void setWords(ArrayList<Word> words){
+		this.wordsInSms = new ArrayList<Word>(words);
 	}
 	
 	/**

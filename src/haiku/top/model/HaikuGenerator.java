@@ -58,7 +58,7 @@ public class HaikuGenerator {
 			}
 		}
 	}
-	
+
 	public static void removeThread(int threadID){
 		Integer thread_id = threadID;
 		if(thread_ids.remove(thread_id)){
