@@ -35,6 +35,9 @@ public class Haiku {
 		// Third row
 		String row3 = HaikuGenerator.findSentenceWithSyllables(5);
 		poem = row1 + "\n" + row2 + "\n" + row3;
-		Log.i("TAG", poem);
+		Log.i("TAG", "" + row1);
+		Log.i("TAG", "" + row2);
+		Log.i("TAG", "" + row3);
+		Log.i("TAG", " ");
 	}
 }

@@ -196,7 +196,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    	    
 	    if (cursor != null && cursor.getCount() > 0) { //if word found
 		    cursor.moveToFirst();
-		    String id = cursor.getString(0);
+		    long id = cursor.getLong(0);
 		    String syllables = cursor.getString(1);
 		    
 		    //get partofspeech
@@ -217,7 +217,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		    }
 		    cursor2.close();
 		    	    
-		    Word word = new Word(text, syllables, wordtypes);
+		    Word word = new Word(id, text, syllables, wordtypes);
 		    cursor.close();
 		    return word;
 	    }

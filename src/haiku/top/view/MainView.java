@@ -420,6 +420,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public void openBinView(){
 //		haikuBinViewExtended.update();
+		HaikuGenerator.createHaikus();
 		binViewClosed = false;
 		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(GONE);

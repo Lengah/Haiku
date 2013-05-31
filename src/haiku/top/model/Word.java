@@ -3,6 +3,7 @@ package haiku.top.model;
 import java.util.ArrayList;
 
 public class Word {
+	private long id;
 	private String text;
 	private String syllables;
 	private ArrayList<String> wordTypes; //parthofspeech
@@ -27,11 +28,16 @@ public class Word {
 		initNumberOfSyllables();
 	}*/
 	
-	public Word(String text, String syllables, ArrayList<String> wordTypes) { 
+	public Word(long id, String text, String syllables, ArrayList<String> wordTypes) {
+		this.id = id;
 		this.text = text;
 		this.syllables = syllables;
 		this.wordTypes = new ArrayList<String>(wordTypes);
 		initNumberOfSyllables();
+	}
+	
+	public long getID(){
+		return id;
 	}
 	
 	public String getText() {
@@ -58,5 +64,13 @@ public class Word {
 	
 	public ArrayList<String> getwordTypes() {
 		return wordTypes;
+	}
+	
+	@Override
+	public boolean equals(Object word){
+		if(word instanceof Word && this.id == ((Word)word).getID()){
+			return true;
+		}
+		return false;
 	}
 }
