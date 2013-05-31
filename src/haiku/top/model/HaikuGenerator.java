@@ -20,20 +20,13 @@ import android.net.Uri;
 import android.util.Log;
 
 public class HaikuGenerator {
-	private static BufferedReader readerTheme;
-	private static ArrayList<String> smsLog = new ArrayList<String>();
-	private static ArrayList<Haiku> generatedHaikus = new ArrayList<Haiku>();
 	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
 	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 	private static ArrayList<Word> smsLogWords = new ArrayList<Word>();
-	
-	/**
-	 *  A test. Contains the words that wasn't found 
-	 */
-	private static ArrayList<String> wordsNotFound = new ArrayList<String>();
+	private static Haiku haiku;
 	
 	public static void addTheme(Theme theme){
 		themes.add(theme);
@@ -164,137 +157,132 @@ public class HaikuGenerator {
 	}
 		
 	public static void createHaiku(){
-		Haiku haiku = new Haiku();
+		haiku = new Haiku();
 		haiku.generate();
-		generatedHaikus.add(haiku);
 	}
 	
-	public static Haiku getHaiku(int index){
-		return generatedHaikus.get(index);
+	public static Haiku getGeneratedHaiku(){
+		return haiku;
 	}
 	
-	public static Haiku getNewestHaiku(){
-		return generatedHaikus.get(generatedHaikus.size()-1);
-	}
 	
-	public static void updateLogs(){
-		smsLogWords.clear();
-		Word tempWord;
-		String textMessage;
-		String word;
-		int pos1;
-		int pos2;
-		for(int i = 0; i < smsLog.size(); i++){
-			textMessage = smsLog.get(i).toLowerCase();
-			while(textMessage.length() > 0){
-				// Remove symbols from the start
-				pos1 = 0;
-				while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
-					 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
-					 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
-					 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
-					 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
-					 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
-				     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
-				     && textMessage.charAt(pos1) != '\''){
-					pos1++;
-					if(pos1 > textMessage.length()){
-						break;
-					}
-				}
-				if(pos1 > textMessage.length()){
-					break; // just a bunch of symbols left of the message
-				}
-				// find the end of the word
-				pos2 = pos1;
-				while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
-					 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
-					 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
-					 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
-					 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
-					 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
-				     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
-				     || textMessage.charAt(pos1) == '\''){
-					pos2++;
-					if(pos1+pos2 >= textMessage.length()){
-						break;
-					}
-				}
-				// a word is found between indexes pos1 and pos2
-				word = textMessage.substring(pos1, pos2);
-				if(word.length() == 0){
-					break;
-				}
-				tempWord = lookUpWord(word);
-				if(tempWord != null){
-					boolean exists = false;
-					for(int w = 0; w < smsLogWords.size(); w++){
-						if(smsLogWords.get(i).equals(word)){
-							exists = true;
-							break;
-						}
-					}
-					if(!exists){
-						smsLogWords.add(tempWord);
-//						Log.i("TAG", "The word " + word + " was added");
-					}
-					else{
-						Log.i("TAG", "The word " + word + " was already added");
-					}
-				}
-				else{
-					Log.i("TAG", "The word " + word + " didn't exist");
-				}
-				if(pos2+1 <= textMessage.length()){
-					textMessage = textMessage.substring(pos2+1);
-				}
-				else{
-					break;
-				}
-			}
-		}
-		Log.i("TAG", "Number of words found: " + smsLogWords.size());
-	}
+//	public static void updateLogs(){
+//		smsLogWords.clear();
+//		Word tempWord;
+//		String textMessage;
+//		String word;
+//		int pos1;
+//		int pos2;
+//		for(int i = 0; i < smsLog.size(); i++){
+//			textMessage = smsLog.get(i).toLowerCase();
+//			while(textMessage.length() > 0){
+//				// Remove symbols from the start
+//				pos1 = 0;
+//				while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
+//					 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
+//					 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
+//					 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
+//					 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
+//					 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
+//				     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
+//				     && textMessage.charAt(pos1) != '\''){
+//					pos1++;
+//					if(pos1 > textMessage.length()){
+//						break;
+//					}
+//				}
+//				if(pos1 > textMessage.length()){
+//					break; // just a bunch of symbols left of the message
+//				}
+//				// find the end of the word
+//				pos2 = pos1;
+//				while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
+//					 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
+//					 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
+//					 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
+//					 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
+//					 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
+//				     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
+//				     || textMessage.charAt(pos1) == '\''){
+//					pos2++;
+//					if(pos1+pos2 >= textMessage.length()){
+//						break;
+//					}
+//				}
+//				// a word is found between indexes pos1 and pos2
+//				word = textMessage.substring(pos1, pos2);
+//				if(word.length() == 0){
+//					break;
+//				}
+//				tempWord = lookUpWord(word);
+//				if(tempWord != null){
+//					boolean exists = false;
+//					for(int w = 0; w < smsLogWords.size(); w++){
+//						if(smsLogWords.get(i).equals(word)){
+//							exists = true;
+//							break;
+//						}
+//					}
+//					if(!exists){
+//						smsLogWords.add(tempWord);
+////						Log.i("TAG", "The word " + word + " was added");
+//					}
+//					else{
+//						Log.i("TAG", "The word " + word + " was already added");
+//					}
+//				}
+//				else{
+//					Log.i("TAG", "The word " + word + " didn't exist");
+//				}
+//				if(pos2+1 <= textMessage.length()){
+//					textMessage = textMessage.substring(pos2+1);
+//				}
+//				else{
+//					break;
+//				}
+//			}
+//		}
+//		Log.i("TAG", "Number of words found: " + smsLogWords.size());
+//	}
 	
-	/**
-	 * Returns the word with its info (word, syllables, part-of-speech).
-	 * If the word isn't found it returns null.
-	 * @param word - just the word (not syllables or part-of-speech)
-	 * @return - A Word object (word, syllables, part-of-speech) or null if doesn't
-	 * find the word
-	 */
-	public static Word lookUpWord(String word){
-		try {
-			if(word.length() == 0){
-				return null;
-			}
-			word = word.toLowerCase();
-			String text;
-			String wordText;
-			Word returnWord = null;
-			while ((text = readerTheme.readLine()) != null) { // or until the word is found
-				if((wordText = text.substring(0,text.indexOf('|'))).equals(word)){
-					text = text.substring(text.indexOf('|')+1);
-//					returnWord = new Word(wordText, text.substring(0, text.indexOf('|')),text.substring(text.lastIndexOf('|')+1));
-					break;
-				}
-			}
-			//TODO close the stream?
-			if(returnWord == null){ // used to debug
-				wordsNotFound.add(word);
-			}
-			return returnWord;
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		wordsNotFound.add(word);
-		return null; // If something went wrong
-	}
+//	/**
+//	 * Returns the word with its info (word, syllables, part-of-speech).
+//	 * If the word isn't found it returns null.
+//	 * @param word - just the word (not syllables or part-of-speech)
+//	 * @return - A Word object (word, syllables, part-of-speech) or null if doesn't
+//	 * find the word
+//	 */
+//	public static Word lookUpWord(String word){
+//		try {
+//			if(word.length() == 0){
+//				return null;
+//			}
+//			word = word.toLowerCase();
+//			String text;
+//			String wordText;
+//			Word returnWord = null;
+//			while ((text = readerTheme.readLine()) != null) { // or until the word is found
+//				if((wordText = text.substring(0,text.indexOf('|'))).equals(word)){
+//					text = text.substring(text.indexOf('|')+1);
+////					returnWord = new Word(wordText, text.substring(0, text.indexOf('|')),text.substring(text.lastIndexOf('|')+1));
+//					break;
+//				}
+//			}
+//			//TODO close the stream?
+//			if(returnWord == null){ // used to debug
+//				wordsNotFound.add(word);
+//			}
+//			return returnWord;
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		wordsNotFound.add(word);
+//		return null; // If something went wrong
+//	}
 	
 	private static Random randomGenerator = new Random();
-	private static int index;
 	
 	/**
 	 * 
@@ -335,8 +323,30 @@ public class HaikuGenerator {
 			// finns inget sådant ord
 			return null;
 		}
-		index = randomGenerator.nextInt(words.size());
-		return words.get(index);
+		int randomIndex = randomGenerator.nextInt(words.size());
+		return words.get(randomIndex);
+	}
+	
+	/**
+	 * 
+	 * @return All words in the bin with the right part-of-speech(es)
+	 */
+	public static ArrayList<Word> getWords(ArrayList<String> wordTypes){
+		ArrayList<Word> words = new ArrayList<Word>();
+		boolean exists;
+		for(int i = 0; i < smsLogWords.size(); i++){
+			exists = true;
+			for(int t = 0; t < wordTypes.size(); t++){
+				if(smsLogWords.get(i).getwordTypes().contains(wordTypes.get(t))){
+					exists = false;
+					break;
+				}
+			}
+			if(exists){
+				words.add(smsLogWords.get(i));
+			}
+		}
+		return words;
 	}
 	
 	/**
@@ -400,10 +410,10 @@ public class HaikuGenerator {
 					if(tempText.contains(structure + "=")){
 						// The right line is found!
 						int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1));
-						index = randomGenerator.nextInt(rows);
-						while(index > 0){
+						int randomIndex = randomGenerator.nextInt(rows);
+						while(randomIndex > 0){
 							reader.readLine();
-							index--;
+							randomIndex--;
 						}
 						return getSentence(reader.readLine());
 					}
@@ -514,5 +524,358 @@ public class HaikuGenerator {
 		}
 		Log.i("TAG", "wordType that gives null: " + wordType);
 		return (Character) null;
+	}
+	
+	
+	private static int syllables = 5;
+	
+	public static String findSentenceWithSyllables(int maxSyllables){
+		syllables = maxSyllables;
+		return getStructureWithSyllables("<sentence>");
+	}
+	
+	private static InputStream rules;
+	private static BufferedReader reader;
+	
+	private static String getStructureWithSyllables(String structure){
+		int randomIndex;
+		String returnString;
+		String firstPart = null;
+		String theRest = null;
+		if(structure.charAt(0) == '<'){
+			int endIndex = structure.indexOf('>');
+			firstPart = structure.substring(0, endIndex+1);
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			try {
+				ArrayList<Integer> rowsLeft = new ArrayList<Integer>();
+				boolean firstTime = true;
+				do{
+					// needs to read from text file
+					rules = HaikuActivity.getInstance().getAssets().open("rules.txt");
+					reader = new BufferedReader(new InputStreamReader(rules));
+					String tempText;
+					while ((tempText = reader.readLine()) != null) {// or until the part is found
+						if(tempText.contains(firstPart + "=")){
+							// The right line is found!
+							if(firstTime){
+								int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1));
+								for(int i = 0; i < rows; i++){
+									rowsLeft.add(i);
+								}
+								firstTime = false;
+							}
+							break;
+						}
+					}
+					if(tempText == null){
+						// did not find the structure
+						Log.i("TAG", "did not find the structure: " + firstPart);
+						return null;
+					}
+					randomIndex = randomGenerator.nextInt(rowsLeft.size());
+					int row = rowsLeft.get(randomIndex);
+					while(row > 0){ // if there are 4 rows, the rows will be 0, 1, 2 and 3. so to get to the forth row this loop will happen 3 times
+						reader.readLine();
+						row--;
+					}
+					tempText = reader.readLine();
+					String returnStringOfTheRest = null;
+					if(theRest == null){
+						// the last object in the tempText structure will also be the last object in the sentence -> call this method again with the tempText structure
+						returnString = getStructureWithSyllables(tempText);
+					}
+					else{
+						// the last object in the tempText structure will NOT be the last object in the sentence -> call the inner method
+						returnString = getStructureWithSyllablesInner(tempText);
+						if(returnString != null){
+							returnStringOfTheRest = getStructureWithSyllables(theRest);
+						}
+					}
+					if(returnString != null && theRest != null && returnStringOfTheRest != null){
+						return returnString + " " + returnStringOfTheRest; // found a sentence!
+					}
+					else if(returnString != null && theRest == null){
+						return returnString; // found a sentence!
+					}
+					// if here, then the attempt failed -> try another row
+					rowsLeft.remove(randomIndex);
+				}while(!rowsLeft.isEmpty());
+				return null;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if(structure.charAt(0) == '('){
+			int endIndex = structure.indexOf(')');
+			firstPart = structure.substring(0, endIndex+1);
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			String tempString = structure.substring(1, endIndex);
+			ArrayList<String> wordTypes = new ArrayList<String>();
+			int tempIndex;
+			while((tempIndex = tempString.indexOf(' ')) != -1){
+				wordTypes.add(tempString.substring(0, tempIndex));
+				tempString = tempString.substring(tempIndex+1);
+			}
+			// one more
+			wordTypes.add(tempString);
+			ArrayList<Word> availableWords = getWords(wordTypes);
+			if(theRest == null){
+				// the last object
+				// find a word with the right amount of syllables
+				ArrayList<Word> rightAmountOfSyllablesWords = new ArrayList<Word>();
+				for(int i = 0; i < availableWords.size(); i++){
+					if(availableWords.get(i).getNumberOfSyllables() == syllables){
+						rightAmountOfSyllablesWords.add(availableWords.get(i));
+					}
+				}
+				if(rightAmountOfSyllablesWords.isEmpty()){
+					// no words found
+					return null;
+				}
+				randomIndex = randomGenerator.nextInt(rightAmountOfSyllablesWords.size());
+				// A whole sentence has been found!
+				return rightAmountOfSyllablesWords.get(randomIndex).getText();
+			}
+			// not the last object 
+			// pick a random word that doesn't have too many syllables
+			int tempSyllabels;
+			while(!availableWords.isEmpty()){
+				randomIndex = randomGenerator.nextInt(availableWords.size());
+				syllables -= availableWords.get(randomIndex).getNumberOfSyllables();
+				if(syllables <= 0){
+					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
+					syllables += tempSyllabels;
+					// since we know that words with the same amount of syllables or more as the word we just tried won't work, we can remove them from the list
+					availableWords.remove(randomIndex);
+					for(int i = availableWords.size()-1; i >= 0; i--){
+						if(availableWords.get(i).getNumberOfSyllables() >= tempSyllabels){
+							availableWords.remove(i);
+						}
+					}
+					continue;
+				}
+				returnString = getStructureWithSyllables(theRest);
+				if(returnString == null){
+					// the rest of the sentence can not be completed with this word
+					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
+					syllables += tempSyllabels;
+					// since we know that words with the same amount of syllables as the word we just tried won't work, we can remove them from the list
+					availableWords.remove(randomIndex);
+					for(int i = availableWords.size()-1; i >= 0; i--){
+						if(availableWords.get(i).getNumberOfSyllables() == tempSyllabels){
+							availableWords.remove(i);
+						}
+					}
+					continue;
+				}
+				// return string did return something!
+				// we have found a complete sentence!
+				return availableWords.get(randomIndex).getText() + " " + returnString;
+			}
+			return null; // no words with the right word types exist in the bin
+		}
+		else if(structure.charAt(0) == '['){
+			int endIndex = structure.indexOf(']');
+			firstPart = structure.substring(0, endIndex+1);
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			int syllIndexS = structure.indexOf('(');
+			int syllIndexE = structure.indexOf(')');
+			int syll = Integer.parseInt(structure.substring(syllIndexS+1, syllIndexE));
+			syllables -= syll;
+			if(theRest == null && syllables != 0){
+				// was the last object, but wrong amount of syllables used
+				syllables += syll;
+				return null;
+			}
+			if(theRest == null && syllables == 0){
+				return structure.substring(1, syllIndexS);
+			}
+			if(theRest != null && syllables <= 0){
+				// there are more objects, but all syllables are used
+				syllables += syll;
+				return null;
+			}
+			if(theRest != null && syllables > 0){
+				// not all syllables are used and the sentence isn't finished
+				returnString = getStructureWithSyllables(theRest);
+				if(returnString == null){
+					return null;
+				}
+				else{
+					return structure.substring(1, syllIndexS) + returnString;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * This method is like getStructureWithSyllables(), but it will not try to use up all syllables if it is the last object (since it actually isn't the last object).
+	 * @param structure
+	 * @return
+	 */
+	private static String getStructureWithSyllablesInner(String structure){
+		int randomIndex;
+		String returnString;
+		String firstPart = null;
+		String theRest = null;
+		if(structure.charAt(0) == '<'){
+			int endIndex = structure.indexOf('>');
+			firstPart = structure.substring(0, endIndex+1);
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			try {
+				ArrayList<Integer> rowsLeft = new ArrayList<Integer>();
+				boolean firstTime = true;
+				do{
+					// needs to read from text file
+					rules = HaikuActivity.getInstance().getAssets().open("rules.txt");
+					reader = new BufferedReader(new InputStreamReader(rules));
+					String tempText;
+					while ((tempText = reader.readLine()) != null) {// or until the part is found
+						if(tempText.contains(firstPart + "=")){
+							// The right line is found!
+							if(firstTime){
+								int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1));
+								for(int i = 0; i < rows; i++){
+									rowsLeft.add(i);
+								}
+								firstTime = false;
+							}
+							break;
+						}
+					}
+					if(tempText == null){
+						// did not find the structure
+						Log.i("TAG", "did not find the structure: " + firstPart);
+						return null;
+					}
+					randomIndex = randomGenerator.nextInt(rowsLeft.size());
+					int row = rowsLeft.get(randomIndex);
+					while(row > 0){ // if there are 4 rows, the rows will be 0, 1, 2 and 3. so to get to the forth row this loop will happen 3 times
+						reader.readLine();
+						row--;
+					}
+					tempText = reader.readLine();
+					String returnStringOfTheRest = null;
+					if(theRest == null){
+						// the last object in the tempText structure will also be the last object in this structure (but not the sentence)
+						returnString = getStructureWithSyllablesInner(tempText);
+					}
+					else{
+						// the last object in the tempText structure will NOT be the last object in this structure
+						returnString = getStructureWithSyllablesInner(tempText);
+						if(returnString != null){
+							returnStringOfTheRest = getStructureWithSyllablesInner(theRest);
+						}
+					}
+					if(returnString != null && theRest != null && returnStringOfTheRest != null){
+						return returnString + " " + returnStringOfTheRest; // found a sentence!
+					}
+					else if(returnString != null && theRest == null){
+						return returnString; // found a sentence!
+					}
+					// if here, then the attempt failed -> try another row
+					rowsLeft.remove(randomIndex);
+				}while(!rowsLeft.isEmpty());
+				return null;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if(structure.charAt(0) == '('){
+			int endIndex = structure.indexOf(')');
+			firstPart = structure.substring(0, endIndex+1);
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			String tempString = structure.substring(1, endIndex);
+			ArrayList<String> wordTypes = new ArrayList<String>();
+			int tempIndex;
+			while((tempIndex = tempString.indexOf(' ')) != -1){
+				wordTypes.add(tempString.substring(0, tempIndex));
+				tempString = tempString.substring(tempIndex+1);
+			}
+			// one more
+			wordTypes.add(tempString);
+			ArrayList<Word> availableWords = getWords(wordTypes);
+			// pick a random word that doesn't have too many syllables
+			int tempSyllabels;
+			while(!availableWords.isEmpty()){
+				randomIndex = randomGenerator.nextInt(availableWords.size());
+				syllables -= availableWords.get(randomIndex).getNumberOfSyllables();
+				if(syllables <= 0){
+					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
+					syllables += tempSyllabels;
+					// since we know that words with the same amount of syllables or more as the word we just tried won't work, we can remove them from the list
+					availableWords.remove(randomIndex);
+					for(int i = availableWords.size()-1; i >= 0; i--){
+						if(availableWords.get(i).getNumberOfSyllables() >= tempSyllabels){
+							availableWords.remove(i);
+						}
+					}
+					continue;
+				}
+				if(theRest == null){
+					// last object in this structure
+					return availableWords.get(randomIndex).getText();
+				}
+				// not the last object
+				returnString = getStructureWithSyllablesInner(theRest);
+				if(returnString == null){
+					// the rest of the sentence can not be completed with this word
+					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
+					syllables += tempSyllabels;
+					// since we know that words with the same amount of syllables as the word we just tried won't work, we can remove them from the list
+					availableWords.remove(randomIndex);
+					for(int i = availableWords.size()-1; i >= 0; i--){
+						if(availableWords.get(i).getNumberOfSyllables() == tempSyllabels){
+							availableWords.remove(i);
+						}
+					}
+					continue;
+				}
+				// return string did return something!
+				// we have found a complete sentence!
+				return availableWords.get(randomIndex).getText() + " " + returnString;
+			}
+			return null; // no words with the right word types and syllables exist in the bin
+		}
+		else if(structure.charAt(0) == '['){
+			int endIndex = structure.indexOf(']');
+			firstPart = structure.substring(0, endIndex+1);
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			int syllIndexS = structure.indexOf('(');
+			int syllIndexE = structure.indexOf(')');
+			int syll = Integer.parseInt(structure.substring(syllIndexS+1, syllIndexE));
+			syllables -= syll;
+			if(syllables <= 0){
+				// there are more objects, but all syllables are used. Since this is the inner method there will be more objects!
+				syllables += syll;
+				return null;
+			}
+			if(theRest == null){
+				return structure.substring(1, syllIndexS);
+			}
+			// theRest != null
+			// not all syllables are used and the structure isn't finished
+			returnString = getStructureWithSyllablesInner(theRest);
+			if(returnString == null){
+				return null;
+			}
+			else{
+				return structure.substring(1, syllIndexS) + returnString;
+			}
+		}
+		return null;
 	}
 }

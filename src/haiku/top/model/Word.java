@@ -7,12 +7,40 @@ public class Word {
 	private String syllables;
 	private ArrayList<String> wordTypes; //parthofspeech
 	private ArrayList<String> themes;
-	
+	private int numberOfSyllables;
+
 	public Word(String text, String syllables, ArrayList<String> wordTypes, ArrayList<String> themes) { 
 		this.text = text;
 		this.syllables = syllables;
 		this.wordTypes = new ArrayList<String>(wordTypes);
 		this.themes = new ArrayList<String>(themes);
+		initNumberOfSyllables();
+	}
+	
+	/**
+	 * FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
+	 * @param dicLine
+	 */
+	/*public Word(String dicLine) {
+		text = dicLine.substring(0, dicLine.indexOf('|'));
+		dicLine = dicLine.substring(dicLine.indexOf('|')+1);
+		syllables = dicLine.substring(0, dicLine.indexOf('|'));
+		dicLine = dicLine.substring(dicLine.indexOf('|')+1);
+		wordTypes = new ArrayList<String>();
+		while(dicLine.contains(".")){
+			wordTypes.add(dicLine.substring(0, dicLine.indexOf('.')));
+			dicLine = dicLine.substring(dicLine.indexOf('.')+1);
+		}
+		// last word type left (what's left of the string)
+		wordTypes.add(dicLine);
+		initNumberOfSyllables();
+	}*/
+	
+	public Word(String text, String syllables, ArrayList<String> wordTypes) { 
+		this.text = text;
+		this.syllables = syllables;
+		this.wordTypes = new ArrayList<String>(wordTypes);
+		initNumberOfSyllables();
 	}
 	
 	public String getText() {
@@ -22,7 +50,7 @@ public class Word {
 		return syllables;
 	}
 	
-	public int getNumberOfSyllables() {
+	public void initNumberOfSyllables() {
 		int pos;
 		String temp = syllables;
 		int counter = 1;
@@ -30,15 +58,18 @@ public class Word {
 			counter++;
 			temp = temp.substring(pos+1);
 		}
-		return counter;
+		numberOfSyllables = counter;
+	}
+	
+	public int getNumberOfSyllables(){
+		return numberOfSyllables;
 	}
 	
 	public ArrayList<String> getwordTypes() {
-		return new ArrayList<String>(wordTypes);
+		return wordTypes;
 	}
 	
 	public ArrayList<String> getThemes() {
-		return new ArrayList<String>(themes);
+		return themes;
 	}
 }
-
