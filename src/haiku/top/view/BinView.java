@@ -179,12 +179,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private View viewBeingDragged = null;
 	
-	// Fling, in binView because the conversion to px is done here
-//	private static final int FLING_MIN_DISTANCE = 50; //TODO
-//	private static final int FLING_MIN_SPEED = 100; // px/s
-//	private int flingMinDistance;
-//	private int flingMinSpeed;
-	
 	public BinView(Context context) {
 		super(context);
 		this.context = context;
@@ -198,10 +192,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		screenWidth = size.x;
 		screenHeight = size.y;
 		screenHeight = screenHeight - HaikuActivity.getInstance().getStatusBarHeight();
-		
-		//Fling //TODO
-//		flingMinDistance = (int)(((double)FLING_MIN_DISTANCE)/BIN_IMAGE_WIDTH*screenWidth);
-//		flingMinSpeed = (int)(((double)FLING_MIN_SPEED)/BIN_IMAGE_WIDTH*screenWidth);
 		
 		// See the DELETE_DISTANCE value as a dp value and convert it to a px value
         deleteDistance = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DELETE_DISTANCE, getResources().getDisplayMetrics());

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Word {
 	private String text;
 	private String syllables;
+	private int numberOfSyllables;
 	private ArrayList<String> wordTypes;
 	
 /*	public Word(String dicLine) { 
@@ -19,9 +20,10 @@ public class Word {
 		this.text = text;
 		this.syllables = syllables;
 		this.wordTypes = new ArrayList<String>(wordTypes);
+		initNumberOfSyllables();
 	}
 	
-	public int getNumberOfSyllables() {
+	public void initNumberOfSyllables() {
 		int pos;
 		String temp = syllables;
 		int counter = 1;
@@ -29,7 +31,11 @@ public class Word {
 			counter++;
 			temp = temp.substring(pos+1);
 		}
-		return counter;
+		numberOfSyllables = counter;
+	}
+	
+	public int getNumberOfSyllables(){
+		return numberOfSyllables;
 	}
 	
 	public String getText() {
@@ -40,7 +46,7 @@ public class Word {
 	}
 	
 	public ArrayList<String> getwordTypes() {
-		return new ArrayList<String>(wordTypes);
+		return wordTypes;
 	}
 }
 

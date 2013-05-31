@@ -12,14 +12,14 @@
 <noun phrase>(intransitiveverb)(adverb)
 <noun phrase>(intransitiveverb)(preposition)<noun phrase>
 <noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
-(adverb)[,]<noun phrase>(intransitiveverb)
-(adverb)[,]<noun phrase>(intransitiveverb)(adverb)
-(adverb)[,]<noun phrase>(intransitiveverb)(preposition)<noun phrase>
-(adverb)[,]<noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
+(adverb)[,(0)]<noun phrase>(intransitiveverb)
+(adverb)[,(0)]<noun phrase>(intransitiveverb)(adverb)
+(adverb)[,(0)]<noun phrase>(intransitiveverb)(preposition)<noun phrase>
+(adverb)[,(0)]<noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
 <noun phrase>(adverb)(intransitiveverb)
 <noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
-(adverb)[,]<noun phrase>(adverb)(intransitiveverb)
-(adverb)[,]<noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
+(adverb)[,(0)]<noun phrase>(adverb)(intransitiveverb)
+(adverb)[,(0)]<noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
 <noun phrase>(transitiveverb)<noun phrase>
 <noun phrase>(transitiveverb)<noun phrase>(adverb)
 <noun phrase>(adverb)(transitiveverb)<noun phrase>
@@ -28,9 +28,9 @@
 (pronoun)
 (propernoun)
 (positive-adjective)(propernoun)
-[the](impropernoun)
-[the](positive-adjective)(impropernoun)
-[a/an](singular-noun)
-[a/an](positive-adjective)(singular-noun)
+[the(1)](impropernoun)
+[the(1)](positive-adjective)(impropernoun)
+[a/an(1)](singular-noun)
+[a/an(1)](positive-adjective)(singular-noun)
 (plural-noun)
 (positive-adjective)(plural-noun)
