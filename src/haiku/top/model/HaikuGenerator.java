@@ -20,20 +20,13 @@ import android.net.Uri;
 import android.util.Log;
 
 public class HaikuGenerator {
-	private static BufferedReader readerTheme;
-	private static ArrayList<String> smsLog = new ArrayList<String>();
-	private static ArrayList<Haiku> generatedHaikus = new ArrayList<Haiku>();
 	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
 	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 	private static ArrayList<Word> smsLogWords = new ArrayList<Word>();
-	
-	/**
-	 *  A test. Contains the words that wasn't found 
-	 */
-	private static ArrayList<String> wordsNotFound = new ArrayList<String>();
+	private static Haiku haiku;
 	
 	public static void addTheme(Theme theme){
 		themes.add(theme);
@@ -164,137 +157,132 @@ public class HaikuGenerator {
 	}
 		
 	public static void createHaiku(){
-		Haiku haiku = new Haiku();
+		haiku = new Haiku();
 		haiku.generate();
-		generatedHaikus.add(haiku);
 	}
 	
-	public static Haiku getHaiku(int index){
-		return generatedHaikus.get(index);
+	public static Haiku getGeneratedHaiku(){
+		return haiku;
 	}
 	
-	public static Haiku getNewestHaiku(){
-		return generatedHaikus.get(generatedHaikus.size()-1);
-	}
 	
-	public static void updateLogs(){
-		smsLogWords.clear();
-		Word tempWord;
-		String textMessage;
-		String word;
-		int pos1;
-		int pos2;
-		for(int i = 0; i < smsLog.size(); i++){
-			textMessage = smsLog.get(i).toLowerCase();
-			while(textMessage.length() > 0){
-				// Remove symbols from the start
-				pos1 = 0;
-				while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
-					 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
-					 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
-					 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
-					 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
-					 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
-				     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
-				     && textMessage.charAt(pos1) != '\''){
-					pos1++;
-					if(pos1 > textMessage.length()){
-						break;
-					}
-				}
-				if(pos1 > textMessage.length()){
-					break; // just a bunch of symbols left of the message
-				}
-				// find the end of the word
-				pos2 = pos1;
-				while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
-					 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
-					 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
-					 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
-					 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
-					 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
-				     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
-				     || textMessage.charAt(pos1) == '\''){
-					pos2++;
-					if(pos1+pos2 >= textMessage.length()){
-						break;
-					}
-				}
-				// a word is found between indexes pos1 and pos2
-				word = textMessage.substring(pos1, pos2);
-				if(word.length() == 0){
-					break;
-				}
-				tempWord = lookUpWord(word);
-				if(tempWord != null){
-					boolean exists = false;
-					for(int w = 0; w < smsLogWords.size(); w++){
-						if(smsLogWords.get(i).equals(word)){
-							exists = true;
-							break;
-						}
-					}
-					if(!exists){
-						smsLogWords.add(tempWord);
-//						Log.i("TAG", "The word " + word + " was added");
-					}
-					else{
-						Log.i("TAG", "The word " + word + " was already added");
-					}
-				}
-				else{
-					Log.i("TAG", "The word " + word + " didn't exist");
-				}
-				if(pos2+1 <= textMessage.length()){
-					textMessage = textMessage.substring(pos2+1);
-				}
-				else{
-					break;
-				}
-			}
-		}
-		Log.i("TAG", "Number of words found: " + smsLogWords.size());
-	}
+//	public static void updateLogs(){
+//		smsLogWords.clear();
+//		Word tempWord;
+//		String textMessage;
+//		String word;
+//		int pos1;
+//		int pos2;
+//		for(int i = 0; i < smsLog.size(); i++){
+//			textMessage = smsLog.get(i).toLowerCase();
+//			while(textMessage.length() > 0){
+//				// Remove symbols from the start
+//				pos1 = 0;
+//				while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
+//					 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
+//					 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
+//					 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
+//					 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
+//					 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
+//				     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
+//				     && textMessage.charAt(pos1) != '\''){
+//					pos1++;
+//					if(pos1 > textMessage.length()){
+//						break;
+//					}
+//				}
+//				if(pos1 > textMessage.length()){
+//					break; // just a bunch of symbols left of the message
+//				}
+//				// find the end of the word
+//				pos2 = pos1;
+//				while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
+//					 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
+//					 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
+//					 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
+//					 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
+//					 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
+//				     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
+//				     || textMessage.charAt(pos1) == '\''){
+//					pos2++;
+//					if(pos1+pos2 >= textMessage.length()){
+//						break;
+//					}
+//				}
+//				// a word is found between indexes pos1 and pos2
+//				word = textMessage.substring(pos1, pos2);
+//				if(word.length() == 0){
+//					break;
+//				}
+//				tempWord = lookUpWord(word);
+//				if(tempWord != null){
+//					boolean exists = false;
+//					for(int w = 0; w < smsLogWords.size(); w++){
+//						if(smsLogWords.get(i).equals(word)){
+//							exists = true;
+//							break;
+//						}
+//					}
+//					if(!exists){
+//						smsLogWords.add(tempWord);
+////						Log.i("TAG", "The word " + word + " was added");
+//					}
+//					else{
+//						Log.i("TAG", "The word " + word + " was already added");
+//					}
+//				}
+//				else{
+//					Log.i("TAG", "The word " + word + " didn't exist");
+//				}
+//				if(pos2+1 <= textMessage.length()){
+//					textMessage = textMessage.substring(pos2+1);
+//				}
+//				else{
+//					break;
+//				}
+//			}
+//		}
+//		Log.i("TAG", "Number of words found: " + smsLogWords.size());
+//	}
 	
-	/**
-	 * Returns the word with its info (word, syllables, part-of-speech).
-	 * If the word isn't found it returns null.
-	 * @param word - just the word (not syllables or part-of-speech)
-	 * @return - A Word object (word, syllables, part-of-speech) or null if doesn't
-	 * find the word
-	 */
-	public static Word lookUpWord(String word){
-		try {
-			if(word.length() == 0){
-				return null;
-			}
-			word = word.toLowerCase();
-			String text;
-			String wordText;
-			Word returnWord = null;
-			while ((text = readerTheme.readLine()) != null) { // or until the word is found
-				if((wordText = text.substring(0,text.indexOf('|'))).equals(word)){
-					text = text.substring(text.indexOf('|')+1);
-//					returnWord = new Word(wordText, text.substring(0, text.indexOf('|')),text.substring(text.lastIndexOf('|')+1));
-					break;
-				}
-			}
-			//TODO close the stream?
-			if(returnWord == null){ // used to debug
-				wordsNotFound.add(word);
-			}
-			return returnWord;
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		wordsNotFound.add(word);
-		return null; // If something went wrong
-	}
+//	/**
+//	 * Returns the word with its info (word, syllables, part-of-speech).
+//	 * If the word isn't found it returns null.
+//	 * @param word - just the word (not syllables or part-of-speech)
+//	 * @return - A Word object (word, syllables, part-of-speech) or null if doesn't
+//	 * find the word
+//	 */
+//	public static Word lookUpWord(String word){
+//		try {
+//			if(word.length() == 0){
+//				return null;
+//			}
+//			word = word.toLowerCase();
+//			String text;
+//			String wordText;
+//			Word returnWord = null;
+//			while ((text = readerTheme.readLine()) != null) { // or until the word is found
+//				if((wordText = text.substring(0,text.indexOf('|'))).equals(word)){
+//					text = text.substring(text.indexOf('|')+1);
+////					returnWord = new Word(wordText, text.substring(0, text.indexOf('|')),text.substring(text.lastIndexOf('|')+1));
+//					break;
+//				}
+//			}
+//			//TODO close the stream?
+//			if(returnWord == null){ // used to debug
+//				wordsNotFound.add(word);
+//			}
+//			return returnWord;
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		wordsNotFound.add(word);
+//		return null; // If something went wrong
+//	}
 	
 	private static Random randomGenerator = new Random();
-	private static int index;
 	
 	/**
 	 * 
@@ -335,8 +323,8 @@ public class HaikuGenerator {
 			// finns inget sådant ord
 			return null;
 		}
-		index = randomGenerator.nextInt(words.size());
-		return words.get(index);
+		int randomIndex = randomGenerator.nextInt(words.size());
+		return words.get(randomIndex);
 	}
 	
 	/**
@@ -422,10 +410,10 @@ public class HaikuGenerator {
 					if(tempText.contains(structure + "=")){
 						// The right line is found!
 						int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1));
-						index = randomGenerator.nextInt(rows);
-						while(index > 0){
+						int randomIndex = randomGenerator.nextInt(rows);
+						while(randomIndex > 0){
 							reader.readLine();
-							index--;
+							randomIndex--;
 						}
 						return getSentence(reader.readLine());
 					}

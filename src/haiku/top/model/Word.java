@@ -8,13 +8,24 @@ public class Word {
 	private int numberOfSyllables;
 	private ArrayList<String> wordTypes;
 	
-/*	public Word(String dicLine) { 
-		//FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
+	/**
+	 * FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
+	 * @param dicLine
+	 */
+	public Word(String dicLine) {
 		text = dicLine.substring(0, dicLine.indexOf('|'));
-		dicLine = dicLine.substring(text.length()+1);
+		dicLine = dicLine.substring(dicLine.indexOf('|')+1);
 		syllables = dicLine.substring(0, dicLine.indexOf('|'));
-		wordTypes = dicLine.substring(syllables.length()+1);
-	}*/
+		dicLine = dicLine.substring(dicLine.indexOf('|')+1);
+		wordTypes = new ArrayList<String>();
+		while(dicLine.contains(".")){
+			wordTypes.add(dicLine.substring(0, dicLine.indexOf('.')));
+			dicLine = dicLine.substring(dicLine.indexOf('.')+1);
+		}
+		// last word type left (what's left of the string)
+		wordTypes.add(dicLine);
+		initNumberOfSyllables();
+	}
 	
 	public Word(String text, String syllables, ArrayList<String> wordTypes) { 
 		this.text = text;
