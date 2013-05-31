@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import haiku.top.model.Contact;
 import haiku.top.model.CreateSamplesContact;
+import haiku.top.model.Theme;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.MainView;
@@ -30,6 +31,9 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -44,8 +48,12 @@ public class HaikuActivity extends Activity {
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
     private static ArrayList<Contact> contacts = new ArrayList<Contact>();
-	private SharedPreferences mPrefs;
+
 	public static Vibrator vibe;
+	
+	private SharedPreferences mPrefs;
+	public boolean smsWordTableExist; //has SMSWORD table been loaded
+	public static final String SMSWORD_EXIST_KEY = "DeleteByHaiku_smsWordTableExist";
 	
 	public static DatabaseHandler databaseHandler;
 	
@@ -61,7 +69,8 @@ public class HaikuActivity extends Activity {
 		//import saved data
 		mPrefs = getPreferences(Context.MODE_PRIVATE);
 		((CreateSamplesView)createSamplesView).samplesExist = mPrefs.getBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
-        
+		smsWordTableExist =  mPrefs.getBoolean(SMSWORD_EXIST_KEY, false);
+		
         //if so, load contacts
         if (((CreateSamplesView)createSamplesView).samplesExist) {
         	Set<String> importContact = new HashSet<String>();
@@ -82,10 +91,15 @@ public class HaikuActivity extends Activity {
         
         //create and open deltebyhaiku_db
         databaseHandler = new DatabaseHandler(this);
-        try { databaseHandler.createDataBase(); } 
-        catch (IOException ioe) {  throw new Error("Unable to create database"); }
-        try { databaseHandler.openDataBase(); }
-        catch(SQLException sqle){ throw sqle; } 
+        try { databaseHandler.createDataBase(); } catch (IOException ioe) {  throw new Error("Unable to create database"); }
+        try { databaseHandler.openDataBase(); } catch(SQLException sqle){ throw sqle; }
+        
+        if (!smsWordTableExist)
+        {
+        	databaseHandler.setupSMSTables(); //connect words in sms with dictionary
+        	smsWordTableExist = true;
+        }
+        
     }
     
     public int getStatusBarHeight() {
@@ -101,6 +115,7 @@ public class HaikuActivity extends Activity {
         super.onPause();
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, ((CreateSamplesView)createSamplesView).samplesExist);
+        ed.putBoolean(SMSWORD_EXIST_KEY, smsWordTableExist);
         
         if (((CreateSamplesView)createSamplesView).samplesExist) { //if samples were created during session, save contacts
 	        Set<String> exportContact = new HashSet<String>();
@@ -111,37 +126,71 @@ public class HaikuActivity extends Activity {
 	        Set<String> exportSMS = new HashSet<String>(((CreateSamplesView)createSamplesView).sms);
 	        ed.putStringSet(CreateSamplesView.EXPORT_SMS_KEY, exportSMS);
         }
+
         ed.commit();
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
+    }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.samplecontent:
+       	 setContentView(createSamplesView);
+       	 inCreateSamplesView = true;
+        return true;
+        case R.id.safemode:
+        
+        //----------------------------------------------------------------------------------------------------------------------
+       	 //test database
+       	 if (databaseHandler.getWord("upplands-väsb") != null) 
+           	 Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
+       	 else
+       		 Log.i("test", "upplands-väsb not found in dictionary"); //this happens
+       	 
+       	 if (databaseHandler.getWord("upplands-väsby") != null)
+           	 Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
+       	 else
+       		 Log.i("test", "upplands-väsby not found in dictionary");
+       	 
+       	 if (databaseHandler.getWord("asks") != null)
+       	 {
+       		Log.i("test", "partofspeech in word \"asks\":");
+           	ArrayList<String> wordtypes = new ArrayList<String>(databaseHandler.getWord("asks").getwordTypes()); //get partofspeechs from a word
+           	for (String s : wordtypes)
+           		Log.i("test", s);
+       	 }
+       	 
+          	if (databaseHandler.getWord("collage") != null) {
+       		Log.i("test", "themes for word \"collage\":");
+           	ArrayList<String> themes = new ArrayList<String>(databaseHandler.getWord("collage").getThemes()); //get themes from a word
+           	for (String s : themes)
+           		Log.i("test", s);
+       	 }
+          	 
+          	ArrayList<String> wordsids = databaseHandler.getWordsInSMS("2327");
+          	Log.i("wordinsms", wordsids.size() + "");
+          	for (String id : wordsids)
+          		Log.i("wordsinsms", databaseHandler.getWordTextFromID(id));
+          	
+          	ArrayList<Theme> themes = databaseHandler.getAllThemes();
+          	for (Theme t : themes)
+          		Log.i("themes", t.getName());
+          	 
+   //----------------------------------------------------------------------------------------------------------------------	
+        	
+        	
+        return true;
+        default:
+        return super.onOptionsItemSelected(item);
+        }
+    }
+    
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event ) {
-     if (keycode == KeyEvent.KEYCODE_MENU) {
-
-    	 //test database
-    	 if (databaseHandler.getWord("upplands-väsb") != null) 
-        	 Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
-    	 else
-    		 Log.i("test", "upplands-väsb not found in dictionary"); //this happens
-    	 
-    	 if (databaseHandler.getWord("upplands-väsby") != null)
-        	 Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
-    	 else
-    		 Log.i("test", "upplands-väsby not found in dictionary");
-    	 
-    	 if (databaseHandler.getWord("asks") != null)
-    	 {
-    		Log.i("test", "partofspeech in word \"asks\":");
-        	ArrayList<String> wordtypes = new ArrayList<String>(databaseHandler.getWord("asks").getwordTypes()); //get partofspeechs from a word
-        	for (String s : wordtypes)
-        		Log.i("test", s);
-    	 }
-    	 
-    	 setContentView(createSamplesView);
-    	 inCreateSamplesView = true;
-    	 return true;
-     }
-     else if(keycode == KeyEvent.KEYCODE_BACK){
+    if(keycode == KeyEvent.KEYCODE_BACK){
 			if(inCreateSamplesView){
 				setContentView(mainView);
 				inCreateSamplesView = false;

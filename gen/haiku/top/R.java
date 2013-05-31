@@ -103,6 +103,8 @@ containing a value of this type.
         public static final int pickedcontactname=0x7f080020;
         public static final int pickedcontactpic=0x7f08001f;
         public static final int removeButton=0x7f080013;
+        public static final int safemode=0x7f080025;
+        public static final int samplecontent=0x7f080024;
         public static final int saveButton=0x7f080003;
         public static final int scrollofcontacts=0x7f08001c;
         public static final int scrollofsms=0x7f080021;
@@ -131,6 +133,7 @@ containing a value of this type.
     }
     public static final class menu {
         public static final int haiku=0x7f070000;
+        public static final int options_menu=0x7f070001;
     }
     public static final class string {
         public static final int action_settings=0x7f050001;

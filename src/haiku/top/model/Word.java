@@ -5,20 +5,21 @@ import java.util.ArrayList;
 public class Word {
 	private String text;
 	private String syllables;
-	private ArrayList<String> wordTypes;
+	private ArrayList<String> wordTypes; //parthofspeech
+	private ArrayList<String> themes;
 	
-/*	public Word(String dicLine) { 
-		//FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
-		text = dicLine.substring(0, dicLine.indexOf('|'));
-		dicLine = dicLine.substring(text.length()+1);
-		syllables = dicLine.substring(0, dicLine.indexOf('|'));
-		wordTypes = dicLine.substring(syllables.length()+1);
-	}*/
-	
-	public Word(String text, String syllables, ArrayList<String> wordTypes) { 
+	public Word(String text, String syllables, ArrayList<String> wordTypes, ArrayList<String> themes) { 
 		this.text = text;
 		this.syllables = syllables;
 		this.wordTypes = new ArrayList<String>(wordTypes);
+		this.themes = new ArrayList<String>(themes);
+	}
+	
+	public String getText() {
+		return text;
+	}
+	public String getSyllables() {
+		return syllables;
 	}
 	
 	public int getNumberOfSyllables() {
@@ -32,15 +33,12 @@ public class Word {
 		return counter;
 	}
 	
-	public String getText() {
-		return text;
-	}
-	public String getSyllables() {
-		return syllables;
-	}
-	
 	public ArrayList<String> getwordTypes() {
 		return new ArrayList<String>(wordTypes);
+	}
+	
+	public ArrayList<String> getThemes() {
+		return new ArrayList<String>(themes);
 	}
 }
 
