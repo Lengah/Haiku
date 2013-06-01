@@ -13,9 +13,11 @@ import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.MainView;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -55,6 +57,8 @@ public class HaikuActivity extends Activity {
 	private SharedPreferences mPrefs;
 //	public boolean smsWordTableExist; //has SMSWORD table been loaded
 //	public static final String SMSWORD_EXIST_KEY = "DeleteByHaiku_smsWordTableExist";
+	public boolean safeMode; //safe mode enabled?
+	public static final String SAFE_MODE_KEY = "DeleteByHaiku_safeMode";
 	
 	public static DatabaseHandler databaseHandler;
 	
@@ -69,6 +73,7 @@ public class HaikuActivity extends Activity {
 		mPrefs = getPreferences(Context.MODE_PRIVATE);
 		((CreateSamplesView)createSamplesView).samplesExist = mPrefs.getBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
 //		smsWordTableExist =  mPrefs.getBoolean(SMSWORD_EXIST_KEY, false);
+		safeMode =  mPrefs.getBoolean(SAFE_MODE_KEY, false);
 		
         //if so, load contacts
         if (((CreateSamplesView)createSamplesView).samplesExist) {
@@ -117,7 +122,8 @@ public class HaikuActivity extends Activity {
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, ((CreateSamplesView)createSamplesView).samplesExist);
 //        ed.putBoolean(SMSWORD_EXIST_KEY, smsWordTableExist);
-        
+        ed.putBoolean(SAFE_MODE_KEY, safeMode);
+
         if (((CreateSamplesView)createSamplesView).samplesExist) { //if samples were created during session, save contacts
 	        Set<String> exportContact = new HashSet<String>();
 	        for (CreateSamplesContact contact : ((CreateSamplesView)createSamplesView).contacts)
@@ -143,9 +149,46 @@ public class HaikuActivity extends Activity {
        	 inCreateSamplesView = true;
         return true;
         case R.id.safemode:
-        	
-        //safeMode = safeMode
-        	
+        
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		alertDialogBuilder.setTitle("Safe mode");
+			
+		if (safeMode) {
+		alertDialogBuilder
+			.setMessage("Safe mode is ON. Turn OFF? SMS deleted in this app WILL be deleted in phone too!")
+			.setCancelable(false)
+			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,int id) {
+					safeMode = false;
+					dialog.cancel();
+				}
+			  })
+			.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,int id) {
+						dialog.cancel();
+					}
+				});
+			}
+		else {
+			alertDialogBuilder
+			.setMessage("Safe mode is OFF. Turn ON? SMS deleted in this app WILL NOT be deleted in phone.")
+			.setCancelable(false)
+			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,int id) {
+					safeMode = true;
+					dialog.cancel();
+				}
+			  })
+			.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,int id) {
+						dialog.cancel();
+					}
+				});	
+		}
+ 
+		AlertDialog alertDialog = alertDialogBuilder.create();
+		alertDialog.show();
+        return true;
         //----------------------------------------------------------------------------------------------------------------------
        	 //test database
 /*       	 if (databaseHandler.getWord("upplands-väsb") != null) 
@@ -177,8 +220,6 @@ public class HaikuActivity extends Activity {
           	 
    //----------------------------------------------------------------------------------------------------------------------	
         */
-        	
-        return true;
         default:
         return super.onOptionsItemSelected(item);
         }
