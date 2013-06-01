@@ -36,6 +36,30 @@ public class Word {
 		initNumberOfSyllables();
 	}
 	
+	/**
+	 * If a word is created by this constructor, then wordTypes should be added in the near future
+	 * @param id
+	 * @param text
+	 * @param syllables
+	 */
+	public Word(long id, String text, String syllables) {
+		this.id = id;
+		this.text = text;
+		this.syllables = syllables;
+		initNumberOfSyllables();
+	}
+	
+	public void addWordType(PartOfSpeech wordType){
+		if(wordTypes == null){
+			wordTypes = new ArrayList<String>();
+		}
+		wordTypes.add(wordType.getType());
+	}
+	
+	public void setWordTypes(ArrayList<String> wordTypes){
+		this.wordTypes = new ArrayList<String>(wordTypes);
+	}
+	
 	public long getID(){
 		return id;
 	}

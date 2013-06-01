@@ -46,7 +46,7 @@ public class ThemeObjectView extends LinearLayout{
 //        textPaint.setColor(Color.WHITE);
 //        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
 		
-		themeText.setText(theme.toString());
+		themeText.setText(theme.getName());
 		themeText.setTextColor(Color.WHITE);
 		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		themeText.setTypeface(Typeface.DEFAULT);
@@ -59,7 +59,7 @@ public class ThemeObjectView extends LinearLayout{
 			int width = BinView.getThemeObjectWidth();
 			int height = BinView.getThemeObjectHeight();
 			
-			String text = theme.toString();
+			String text = theme.getName();
 			Paint textPaint = themeText.getPaint();
 			Rect textRect;
 			int size = 0;  

@@ -1,16 +1,16 @@
 package haiku.top.model;
 
 public class PartOfSpeech {
+	private long id;
 	private String type;
 	
-	public PartOfSpeech(){}
-	
-	public PartOfSpeech(String type){
+	public PartOfSpeech(long id, String type){
+		this.id = id;
 		this.type = type;
 	}
 	
-	public void setType(String type){
-		this.type = type;
+	public long getID(){
+		return id;
 	}
 	
 	public String getType(){

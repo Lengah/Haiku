@@ -8,29 +8,30 @@
 (adverb)(gerund)<simple sentence>
 
 <simple sentence>=15
-<noun phrase>(intransitiveverb)
-<noun phrase>(intransitiveverb)(adverb)
-<noun phrase>(intransitiveverb)(preposition)<noun phrase>
-<noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
-(adverb)[,(0)]<noun phrase>(intransitiveverb)
-(adverb)[,(0)]<noun phrase>(intransitiveverb)(adverb)
-(adverb)[,(0)]<noun phrase>(intransitiveverb)(preposition)<noun phrase>
-(adverb)[,(0)]<noun phrase>(intransitiveverb)(adverb)(preposition)<noun phrase>
-<noun phrase>(adverb)(intransitiveverb)
-<noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
-(adverb)[,(0)]<noun phrase>(adverb)(intransitiveverb)
-(adverb)[,(0)]<noun phrase>(adverb)(intransitiveverb)(preposition)<noun phrase>
-<noun phrase>(transitiveverb)<noun phrase>
-<noun phrase>(transitiveverb)<noun phrase>(adverb)
-<noun phrase>(adverb)(transitiveverb)<noun phrase>
+<noun phrase>(intransitive verb)
+<noun phrase>(intransitive verb)(adverb)
+<noun phrase>(intransitive verb)(preposition)<noun phrase>
+<noun phrase>(intransitive verb)(adverb)(preposition)<noun phrase>
+(adverb)[,(0)]<noun phrase>(intransitive verb)
+(adverb)[,(0)]<noun phrase>(intransitive verb)(adverb)
+(adverb)[,(0)]<noun phrase>(intransitive verb)(preposition)<noun phrase>
+(adverb)[,(0)]<noun phrase>(intransitive verb)(adverb)(preposition)<noun phrase>
+<noun phrase>(adverb)(intransitive verb)
+<noun phrase>(adverb)(intransitive verb)(preposition)<noun phrase>
+(adverb)[,(0)]<noun phrase>(adverb)(intransitive verb)
+(adverb)[,(0)]<noun phrase>(adverb)(intransitive verb)(preposition)<noun phrase>
+<noun phrase>(transitive verb)<noun phrase>
+<noun phrase>(transitive verb)<noun phrase>(adverb)
+<noun phrase>(adverb)(transitive verb)<noun phrase>
 
-<noun phrase>=9
+<noun phrase>=10
 (pronoun)
-(propernoun)
-(positive-adjective)(propernoun)
-[the(1)](impropernoun)
-[the(1)](positive-adjective)(impropernoun)
-[a/an(1)](singular-noun)
-[a/an(1)](positive-adjective)(singular-noun)
-(plural-noun)
-(positive-adjective)(plural-noun)
+(noun)
+(positive adjective)(noun)
+[the(1)](noun)
+[the(1)](plural noun)
+[the(1)](positive adjective)(noun)
+[a/an(1)](noun)
+[a/an(1)](positive adjective)(noun)
+(plural noun)
+(positive adjective)(plural noun)

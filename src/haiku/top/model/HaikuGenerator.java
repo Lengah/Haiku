@@ -17,6 +17,7 @@ import java.util.Random;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.AlteredCharSequence;
 import android.util.Log;
 
 public class HaikuGenerator {
@@ -31,6 +32,26 @@ public class HaikuGenerator {
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
 	private static final int NUMBER_OF_GENERATIONS = 1;
+	
+	private static ArrayList<PartOfSpeech> allWordTypes = new ArrayList<PartOfSpeech>();
+	
+	public static void init(){
+		initPartOfSpeech();
+		initThemes();
+	}
+	
+	public static PartOfSpeech getPartOfSpeechWithID(long id){
+		for(int i = 0; i < allWordTypes.size(); i++){
+			if(allWordTypes.get(i).getID() == id){
+				return allWordTypes.get(i);
+			}
+		}
+		return null;
+	}
+	
+	private static void initPartOfSpeech(){
+		allWordTypes = HaikuActivity.databaseHandler.getAllPartOfSpeeches();
+	}
 	
 	public static void addTheme(Theme theme){
 		themes.add(theme);
@@ -94,11 +115,20 @@ public class HaikuGenerator {
 			}
 		}
 		Log.i("TAG", "Add sms time: " + (System.currentTimeMillis()-startTime));
+		Log.i("TAG", " ");
+		Log.i("TAG", " ");
 	}
 	
 	public static void removeSMS(SMS sms){
 		smses.remove(sms);
 		MainView.getInstance().updateSMSView();
+		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
+		allSmsLogWords.removeAll(sms.getWords());
+		smsLogWordsWithThemes.removeAll(sms.getWords());
+	}
+	
+	private static void removeSMSWithoutUpdate(SMS sms){
+		smses.remove(sms);
 		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
 		allSmsLogWords.removeAll(sms.getWords());
 		smsLogWordsWithThemes.removeAll(sms.getWords());
@@ -161,7 +191,8 @@ public class HaikuGenerator {
 		for(int i = smses.size()-1; i >= 0; i--){
 			if(smses.get(i).getYearMonth().equals(date)){
 				removedSMS.add(smses.get(i));
-				smses.remove(i);
+//				smses.remove(i); // old
+				removeSMSWithoutUpdate(smses.get(i)); // new
 			}
 		}
 		return removedSMS;
@@ -175,7 +206,7 @@ public class HaikuGenerator {
 		return allThemes;
 	}
 	
-	public void initThemes(){
+	private static void initThemes(){
 		allThemes.addAll(HaikuActivity.databaseHandler.getAllThemes());
 		theAllTheme = HaikuActivity.databaseHandler.getTheAllTheme();
 		themeWordIDs.addAll(theAllTheme.getWordids()); // Will always be there
@@ -303,7 +334,7 @@ public class HaikuGenerator {
 			String tempString = structure.substring(1, endIndex);
 			ArrayList<String> wordTypes = new ArrayList<String>();
 			int tempIndex;
-			while((tempIndex = tempString.indexOf(' ')) != -1){
+			while((tempIndex = tempString.indexOf('.')) != -1){
 				wordTypes.add(tempString.substring(0, tempIndex));
 				tempString = tempString.substring(tempIndex+1);
 			}
@@ -486,7 +517,7 @@ public class HaikuGenerator {
 			String tempString = structure.substring(1, endIndex);
 			ArrayList<String> wordTypes = new ArrayList<String>();
 			int tempIndex;
-			while((tempIndex = tempString.indexOf(' ')) != -1){
+			while((tempIndex = tempString.indexOf('.')) != -1){
 				wordTypes.add(tempString.substring(0, tempIndex));
 				tempString = tempString.substring(tempIndex+1);
 			}

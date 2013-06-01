@@ -102,26 +102,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		super(context);
 		this.context = context;
 		mv = this;
-		
 		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
 		
-		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		layoutInflater.inflate(R.layout.mainview,this);
-		
-		contactScroll = (ScrollView)findViewById(R.id.scrollofcontacts);
-		contactList = (LinearLayout)findViewById(R.id.listofcontacts);
-		
-		smslayout = (LinearLayout)findViewById(R.id.smslayout);
-		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
-		contactName = (TextView)findViewById(R.id.pickedcontactname);
-		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
-		smsList = (LinearLayout)findViewById(R.id.listofsms);
-		
-		themeScroll = (ScrollView)findViewById(R.id.themeview);
-		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
-		themeScroll.setRotation(THEME_ROTATION);
-		
-		//TODO
 		ImageView yellowBackground = new ImageView(context);
 		yellowBackground.setBackgroundColor(Color.rgb(251, 206, 13));
 		
@@ -142,16 +124,24 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		fillParams.setMargins(0, -yOffset, -width/2 + xOffset, 0);
 		yellowBackground.setLayoutParams(fillParams);
 		
-//		yellowBackground.setScrollY(-height/2);
-//		yellowBackground.setScrollX(width/2);
-//		yellowBackground.offsetTopAndBottom(-height/2);
 		yellowBackground.setRotation(THEME_ROTATION);
 		addView(yellowBackground);
-//		yellowBackground.bringToFront();
-		themeScroll.bringToFront();
-//		yellowBackground.setVisibility(GONE);
-
 		
+		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		layoutInflater.inflate(R.layout.mainview,this);
+		
+		contactScroll = (ScrollView)findViewById(R.id.scrollofcontacts);
+		contactList = (LinearLayout)findViewById(R.id.listofcontacts);
+		
+		smslayout = (LinearLayout)findViewById(R.id.smslayout);
+		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
+		contactName = (TextView)findViewById(R.id.pickedcontactname);
+		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
+		smsList = (LinearLayout)findViewById(R.id.listofsms);
+		
+		themeScroll = (ScrollView)findViewById(R.id.themeview);
+		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
+		themeScroll.setRotation(THEME_ROTATION);
 		
 		haikuBinViewSmall.setOnDragListener(new HaikuBinDragListener(haikuBinViewSmall));
 		haikuBinViewSmall.bringToFront();
@@ -185,7 +175,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		themes = DatabaseHandler.getAllThemes();
 		themes = new ArrayList<Theme>();
 		themes.addAll(HaikuGenerator.getAllThemes());
-		
 		
 		themeList = new LinearLayout(context);
 		themeList.setOrientation(LinearLayout.VERTICAL);

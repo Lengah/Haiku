@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import haiku.top.model.Contact;
 import haiku.top.model.CreateSamplesContact;
+import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Theme;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
@@ -60,9 +61,7 @@ public class HaikuActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ha = this;
-        mainView = new MainView(this);
         createSamplesView = new CreateSamplesView(this);
-        setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 //        initContactsAndSMS(this);
         vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         
@@ -99,7 +98,9 @@ public class HaikuActivity extends Activity {
 //        	databaseHandler.setupSMSTables(); //connect words in sms with dictionary
 //        	smsWordTableExist = true;
 //        }
-        
+		HaikuGenerator.init();
+		mainView = new MainView(this);
+		setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
     
     public int getStatusBarHeight() {
