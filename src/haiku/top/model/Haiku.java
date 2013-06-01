@@ -1,6 +1,5 @@
 package haiku.top.model;
 
-import haiku.top.FindSentenceThread;
 
 import java.util.ArrayList;
 

@@ -217,7 +217,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		haikuBinViewExtended.bringToFront();
 	}
 	
-	public static MainView getInstance(){
+	public static synchronized MainView getInstance(){
 		return mv;
 	}
 	
@@ -258,12 +258,52 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 	}
 	
+	//Old. Slow, but working
+//	public void setSMSView(int threadID){ 
+//		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
+//		contactScroll.setVisibility(GONE);
+////		smsScroll.setVisibility(VISIBLE); // TODO
+//		smslayout.setVisibility(VISIBLE);
+//		Cursor cursor = HaikuActivity.getThread(context, threadID);
+//		if(chosenContact.getPicture() != null){
+//			contactPic.setImageBitmap(chosenContact.getPicture());
+//		}
+//		else{
+////			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
+//		}
+//		contactName.setText(chosenContact.getName());
+//		Log.i("TAG", "Count: " + cursor.getCount());
+//		if (cursor.moveToFirst()) {
+//			do{
+//				smsObjects.add(new SMSObjectView(context, cursor.getString(cursor.getColumnIndexOrThrow("type")),new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID)));
+//				smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+//				smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
+//			}
+//			while(cursor.moveToNext());
+//		}
+//		cursor.close();
+//		for(int i = 0; i < smsObjects.size(); i++){
+//			smsList.addView(smsObjects.get(i));
+//		}
+//		updateSMSView();
+//	}
+	
+	private ShowSMSESThread workerThread;
+	
+	public synchronized void removeWorkerThread(){
+		workerThread = null;
+	}
+	
+	public synchronized void stopWorkerThreadIfActive(){
+		if(workerThread != null){
+			workerThread.stopWorking();
+		}
+	}
+	
 	public void setSMSView(int threadID){
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 		contactScroll.setVisibility(GONE);
-//		smsScroll.setVisibility(VISIBLE); // TODO
 		smslayout.setVisibility(VISIBLE);
-		Cursor cursor = HaikuActivity.getThread(context, threadID);
 		if(chosenContact.getPicture() != null){
 			contactPic.setImageBitmap(chosenContact.getPicture());
 		}
@@ -271,19 +311,28 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
 		}
 		contactName.setText(chosenContact.getName());
-		Log.i("TAG", "Count: " + cursor.getCount());
-		if (cursor.moveToFirst()) {
-			do{
-				smsObjects.add(new SMSObjectView(context, cursor.getString(cursor.getColumnIndexOrThrow("type")),new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID)));
-				smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
-				smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
-			}
-			while(cursor.moveToNext());
-		}
-		for(int i = 0; i < smsObjects.size(); i++){
-			smsList.addView(smsObjects.get(i));
-		}
-		updateSMSView();
+		workerThread = new ShowSMSESThread(threadID);
+		workerThread.start();
+	}
+	
+	public synchronized void addSMSToView(final SMSObjectView smsObject){
+		smsObjects.add(smsObject);
+		smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+		smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
+		HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+	        @Override
+	        public void run(){
+	        	smsList.addView(smsObject);
+	    		if(HaikuGenerator.getAllAddedSMS().contains(smsObject.getSMS())){
+	    			smsObject.setAlpha(OPACITY_USED);
+	    		}
+	    		else{
+	    			smsObject.setAlpha(OPACITY_DEFAULT);
+	    		}        
+	        }
+	    });
+		
+		
 	}
 	
 	/**
@@ -327,6 +376,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		smsObjects.clear();
 		smsList.removeAllViews();
 		removeViewElement(VIEW_SHOWN_SMS);
+		stopWorkerThreadIfActive();
 	}
 	
 	public void updateThemeView(){

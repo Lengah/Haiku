@@ -1,8 +1,6 @@
-package haiku.top;
+package haiku.top.model;
 
-import haiku.top.model.Haiku;
-import haiku.top.model.HaikuGenerator;
-import haiku.top.model.Word;
+import haiku.top.HaikuActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
