@@ -245,6 +245,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	}
 	
 	public ArrayList<Word> getWords(ArrayList<String> texts){
+		Log.i("TAG", "getWords(): check " + texts.size() + " words");
 		double startTime = System.currentTimeMillis();
 		String selection = "";
 		if(!texts.isEmpty()){
@@ -253,7 +254,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		for(int i = 1; i < texts.size(); i++){
 			selection += " OR " + KEY_WORD_TEXT + " = '" + texts.get(i) + "'";
 		}
-	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_SYLLABLES, KEY_WORD_TEXT, }, selection, null, null, null, null, null);
+	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  }, selection, null, null, null, null, null);
 	    ArrayList<Word> words = new ArrayList<Word>();
 	    
 	    if(cursor.moveToFirst()){
@@ -261,15 +262,19 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    	String syllables;
 	    	String text;
 	    	do {
-	    		id = cursor.getLong(0);
-	    		syllables = cursor.getString(2);
-	    		text = cursor.getString(1); // this is correct
+	    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
+	    		text = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // text and syllables are swapped for some reason (there is a test a few rows down)
+	    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_TEXT));
 	    		words.add(new Word(id, syllables, text));
 	    	}while(cursor.moveToNext());
 	    }
 	    cursor.close();
-//	    Log.i("TAG", "Syllables: " + words.get(0).getSyllables() + ", text: " + words.get(0).getText());
-	    Log.i("TAG", "Getting all the words: " + (System.currentTimeMillis() - startTime));
+//	    //TEST
+//	    for(int i = 0; i < words.size(); i++){
+//	    	Log.i("TAG", "Syllables: " + words.get(i).getSyllables() + ", text: " + words.get(i).getText());
+//	    }
+//	    // /TEST
+	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
 	    startTime = System.currentTimeMillis();
 	    if(words.isEmpty()){
 	    	return words; // no words were found
@@ -294,7 +299,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    		}
 	    	}while(cursor.moveToNext());
 	    }
-	    Log.i("TAG", "Setting the word types on the words: " + (System.currentTimeMillis() - startTime));
+	    Log.i("TAG", "getWords(): Setting the word types on the words: " + (System.currentTimeMillis() - startTime));
 	    cursor.close();
 	    return words;
 	}
@@ -344,60 +349,43 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    cursor.close();
 		return themes;
 	}
+	
+	public void initSMSES(ArrayList<SMS> smses){
+		double startTime = System.currentTimeMillis();
+		ArrayList<String> wordsToFind = new ArrayList<String>();
+		ArrayList<String> tempList;
+		for(int i = 0; i < smses.size(); i++){
+			tempList = smses.get(i).getNotRealWords();
+			for(int a = 0; a < tempList.size(); a++){
+				if(!wordsToFind.contains(tempList.get(a))){
+					wordsToFind.add(tempList.get(a));
+				}
+			}
+		}
+		ArrayList<Word> allUniqueWordsInAllSmses = getWords(wordsToFind);
+		double wordTime = System.currentTimeMillis();
+		for(int i = 0; i < allUniqueWordsInAllSmses.size(); i++){
+			for(int a = 0; a < smses.size(); a++){
+				smses.get(a).addWord(null); // creates the arraylist so that the program knows that the sms has been initiated even if there are no words in the sms
+				for(int b = 0; b < smses.get(a).getNotRealWords().size(); b++){
+					if(smses.get(a).getNotRealWords().get(b).equals(allUniqueWordsInAllSmses.get(i).getText())){
+						smses.get(a).addWord(allUniqueWordsInAllSmses.get(i)); // Can have several instances of the same word (that word will have a bigger chance of being picked for the haiku)
+					}
+				}
+			}
+		}
+		Log.i("TAG", "initSMSES(): placing the words to the right smses time: " + (System.currentTimeMillis()-wordTime));
+		Log.i("TAG", "initSMSES(): finding all the real words in the smses: " + (System.currentTimeMillis()-startTime));
+	}
 
 	public ArrayList<Word> initSMS(SMS sms) {
 		double startTime = System.currentTimeMillis();
-		ArrayList<String> words = new ArrayList<String>();
-		
-		// not just "real" words -> can't use the database because the database only contain "real" words
-		String textMessage = sms.getMessage().toLowerCase();
-		String word;
-		int pos1;
-		int pos2;
-		while(textMessage.length() > 0){
-			// Remove symbols from the start
-			pos1 = 0;
-			while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
-				 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
-				 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
-				 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
-				 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
-				 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
-			     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
-			     && textMessage.charAt(pos1) != 'å' && textMessage.charAt(pos1) != 'ä' && textMessage.charAt(pos1) != 'ö' && textMessage.charAt(pos1) != '\''){
-				pos1++;
-				if(pos1 >= textMessage.length()){
-					break;
-				}
+		ArrayList<String> words = sms.getNotRealWords();
+		ArrayList<String> wordsUnique = new ArrayList<String>(); // doing this so the sql request goes faster
+		for(int i = 0; i < words.size(); i++){
+			if(!wordsUnique.contains(words.get(i))){
+				wordsUnique.add(words.get(i));
 			}
-			if(pos1 >= textMessage.length()){
-				break; // just a bunch of symbols left of the message
-			}
-			// find the end of the word
-			pos2 = pos1;
-			while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
-				 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
-				 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
-				 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
-				 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
-				 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
-			     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
-			     || textMessage.charAt(pos1) == 'å' || textMessage.charAt(pos1) == 'ä' || textMessage.charAt(pos1) == 'ö' || textMessage.charAt(pos1) == '\''){
-				pos2++;
-				if(pos1+pos2 >= textMessage.length()){
-					break;
-				}
-			}
-			// a word is found between indexes pos1 and pos2
-			word = textMessage.substring(pos1, pos2);
-			if(word.length() == 0){
-				break;
-			}
-			words.add(word);
-			if(pos2+1 <= textMessage.length())
-				textMessage = textMessage.substring(pos2+1);
-			else
-				break;
 		}
 		startTime = System.currentTimeMillis();
 //		ArrayList<Word> realWords = new ArrayList<Word>();
@@ -407,8 +395,16 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 //			if (tempWord != null)
 //				realWords.add(tempWord);
 //		}
-		ArrayList<Word> realWords = getWords(words);
-		Log.i("TAG", "finding all the real words from the strings: " + (System.currentTimeMillis()-startTime));
+		ArrayList<Word> realWordsUnique = getWords(wordsUnique);
+		ArrayList<Word> realWords = new ArrayList<Word>();
+		for(int i = 0; i < realWordsUnique.size(); i++){
+			for(int a = 0; a < sms.getNotRealWords().size(); a++){
+				if(sms.getNotRealWords().get(a).equals(realWordsUnique.get(i).getText())){
+					realWords.add(realWordsUnique.get(i)); // Can have several instances of the same word (that word will have a bigger chance of being picked for the haiku)
+				}
+			}
+		}
+		Log.i("TAG", "initSMS(): finding all the real words from the strings: " + (System.currentTimeMillis()-startTime));
 		return realWords;
 	}
 	

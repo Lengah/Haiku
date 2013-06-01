@@ -51,7 +51,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    			HaikuGenerator.addThread(((ConversationObjectView)view).getThreadID());
 	    		}
 	    		if(view instanceof SMSObjectView){
-	    			HaikuGenerator.addSMS(((SMSObjectView)view).getSMS());
+	    			HaikuGenerator.calculateSMS(((SMSObjectView)view).getSMS());
 	    		}
 	    		if(view instanceof QuarterCircle){
 	    			if(((QuarterCircle) view).isYearView()){
