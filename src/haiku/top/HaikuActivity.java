@@ -57,7 +57,7 @@ public class HaikuActivity extends Activity {
 	private SharedPreferences mPrefs;
 //	public boolean smsWordTableExist; //has SMSWORD table been loaded
 //	public static final String SMSWORD_EXIST_KEY = "DeleteByHaiku_smsWordTableExist";
-	public boolean safeMode; //safe mode enabled?
+	private boolean safeMode; //safe mode enabled?
 	public static final String SAFE_MODE_KEY = "DeleteByHaiku_safeMode";
 	
 	public static DatabaseHandler databaseHandler;
@@ -97,7 +97,6 @@ public class HaikuActivity extends Activity {
         databaseHandler = new DatabaseHandler(this);
         try { databaseHandler.createDataBase(); } catch (IOException ioe) {  throw new Error("Unable to create database"); }
         try { databaseHandler.openDataBase(); } catch(SQLException sqle){ throw sqle; }
-        
 //        if (!smsWordTableExist)
 //        {
 //        	databaseHandler.setupSMSTables(); //connect words in sms with dictionary
@@ -106,6 +105,10 @@ public class HaikuActivity extends Activity {
 		HaikuGenerator.init();
 		mainView = new MainView(this);
 		setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+    
+    public boolean isSafeMode(){
+    	return safeMode;
     }
     
     public int getStatusBarHeight() {

@@ -130,16 +130,8 @@ public class FindSentenceThread extends Thread{
 			if(endIndex+1 != structure.length()){
 				theRest = structure.substring(endIndex+1);
 			}
-			String tempString = structure.substring(1, endIndex);
-			ArrayList<String> wordTypes = new ArrayList<String>();
-			int tempIndex;
-			while((tempIndex = tempString.indexOf('.')) != -1){
-				wordTypes.add(tempString.substring(0, tempIndex));
-				tempString = tempString.substring(tempIndex+1);
-			}
-			// one more
-			wordTypes.add(tempString);
-			ArrayList<Word> availableWords = getWords(wordTypes);
+			String wordType = structure.substring(1, endIndex);
+			ArrayList<Word> availableWords = getWords(wordType);
 			if(theRest == null){
 				// the last object
 				// find a word with the right amount of syllables
@@ -313,16 +305,8 @@ public class FindSentenceThread extends Thread{
 			if(endIndex+1 != structure.length()){
 				theRest = structure.substring(endIndex+1);
 			}
-			String tempString = structure.substring(1, endIndex);
-			ArrayList<String> wordTypes = new ArrayList<String>();
-			int tempIndex;
-			while((tempIndex = tempString.indexOf('.')) != -1){
-				wordTypes.add(tempString.substring(0, tempIndex));
-				tempString = tempString.substring(tempIndex+1);
-			}
-			// one more
-			wordTypes.add(tempString);
-			ArrayList<Word> availableWords = getWords(wordTypes);
+			String wordType = structure.substring(1, endIndex);
+			ArrayList<Word> availableWords = getWords(wordType);
 			// pick a random word that doesn't have too many syllables
 			int tempSyllabels;
 			while(!availableWords.isEmpty()){
@@ -398,20 +382,12 @@ public class FindSentenceThread extends Thread{
 	
 	/**
 	 * 
-	 * @return All words in the bin with the right part-of-speech(es)
+	 * @return All words in the bin with the right part-of-speech
 	 */
-	private ArrayList<Word> getWords(ArrayList<String> wordTypes){
+	private ArrayList<Word> getWords(String wordType){
 		ArrayList<Word> words = new ArrayList<Word>();
-		boolean exists;
 		for(int i = 0; i < wordsUsed.size(); i++){
-			exists = true;
-			for(int t = 0; t < wordTypes.size(); t++){
-				if(wordsUsed.get(i).getwordTypes().contains(wordTypes.get(t))){
-					exists = false;
-					break;
-				}
-			}
-			if(exists){
+			if(wordsUsed.get(i).getwordType().equals(wordType)){
 				words.add(wordsUsed.get(i));
 			}
 		}

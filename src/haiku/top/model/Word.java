@@ -6,7 +6,7 @@ public class Word {
 	private long id;
 	private String text;
 	private String syllables;
-	private ArrayList<String> wordTypes; //parthofspeech
+	private String wordType; //parthofspeech
 	private int numberOfSyllables;
 
 	/**
@@ -28,37 +28,33 @@ public class Word {
 		initNumberOfSyllables();
 	}*/
 	
-	public Word(long id, String text, String syllables, ArrayList<String> wordTypes) {
+	public Word(long id, String text, String syllables, String wordType) {
 		this.id = id;
 		this.text = text;
 		this.syllables = syllables;
-		this.wordTypes = new ArrayList<String>(wordTypes);
+		this.wordType = wordType;
 		initNumberOfSyllables();
 	}
 	
-	/**
-	 * If a word is created by this constructor, then wordTypes should be added in the near future
-	 * @param id
-	 * @param text
-	 * @param syllables
-	 */
-	public Word(long id, String text, String syllables) {
-		this.id = id;
-		this.text = text;
-		this.syllables = syllables;
-		initNumberOfSyllables();
-	}
-	
-	public void addWordType(PartOfSpeech wordType){
-		if(wordTypes == null){
-			wordTypes = new ArrayList<String>();
-		}
-		wordTypes.add(wordType.getType());
-	}
-	
-	public void setWordTypes(ArrayList<String> wordTypes){
-		this.wordTypes = new ArrayList<String>(wordTypes);
-	}
+//	/**
+//	 * If a word is created by this constructor, then wordTypes should be added in the near future
+//	 * @param id
+//	 * @param text
+//	 * @param syllables
+//	 */
+//	public Word(long id, String text, String syllables) {
+//		this.id = id;
+//		this.text = text;
+//		this.syllables = syllables;
+//		initNumberOfSyllables();
+//	}
+//	
+//	public void addWordType(PartOfSpeech wordType){
+//		if(wordTypes == null){
+//			wordTypes = new ArrayList<String>();
+//		}
+//		wordTypes.add(wordType.getType());
+//	}
 	
 	public long getID(){
 		return id;
@@ -86,8 +82,8 @@ public class Word {
 		return numberOfSyllables;
 	}
 	
-	public ArrayList<String> getwordTypes() {
-		return wordTypes;
+	public String getwordType() {
+		return wordType;
 	}
 	
 	@Override
