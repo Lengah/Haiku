@@ -14,6 +14,7 @@ import android.util.Log;
 public class FindSentenceThread extends Thread{
 	private int syllables;
 	private ArrayList<Word> wordsUsed;
+	private ArrayList<Word> backupWords; // words that are in the all theme. will only use these if it can't find one in the wordsUsed list.
 	private InputStream rules;
 	private BufferedReader reader;
 	private Random randomGenerator = new Random();
@@ -21,16 +22,18 @@ public class FindSentenceThread extends Thread{
 	private int row;
 	
 	public static final String START_OBJECT = "<sentence>";
+	public static final double CHANCE_TO_START_WITH_THEME_LIST = 80; // in %
 	
 	public FindSentenceThread(int numberOfSyllables, Haiku haiku, int row){
 		this.syllables = numberOfSyllables;
 		this.haiku = haiku;
 		this.row = row;
 		wordsUsed = new ArrayList<Word>(HaikuGenerator.getWordsUsed());
+		backupWords = new ArrayList<Word>(HaikuGenerator.getWordsUsedWithTheAllTheme());
 	}
 	
 	public void run(){
-		double startTime = System.currentTimeMillis();
+//		double startTime = System.currentTimeMillis();
 		String sentence = getStructureWithSyllables(START_OBJECT);
 		if(sentence == null){
 			sentence = "NULL";
@@ -133,12 +136,25 @@ public class FindSentenceThread extends Thread{
 			}
 		}
 		else if(structure.charAt(0) == '('){
+			boolean swithced = false;
+			boolean startWithThemeList = true;
+			randomIndex = randomGenerator.nextInt(100+1);
+			if(randomIndex > CHANCE_TO_START_WITH_THEME_LIST){
+				startWithThemeList = false;
+			}
 			int endIndex = structure.indexOf(')');
 			if(endIndex+1 != structure.length()){
 				theRest = structure.substring(endIndex+1);
 			}
 			String wordType = structure.substring(1, endIndex);
-			ArrayList<Word> availableWords = getWords(wordType);
+			ArrayList<Word> availableWords;
+			if(startWithThemeList){
+				availableWords = getWords(wordType);
+			}
+			else{
+				availableWords = getBackUpWords(wordType);
+			}
+			
 			if(theRest == null){
 				// the last object
 				// find a word with the right amount of syllables
@@ -150,8 +166,25 @@ public class FindSentenceThread extends Thread{
 				}
 				if(rightAmountOfSyllablesWords.isEmpty()){
 					// no words found
-					//Log.i("TAG", "back");
-					return null;
+					// check the other list
+					if(startWithThemeList){
+						availableWords = getBackUpWords(wordType);
+					}
+					else{
+						availableWords = getWords(wordType);
+					}
+					rightAmountOfSyllablesWords = new ArrayList<Word>();
+					for(int i = 0; i < availableWords.size(); i++){
+						if(availableWords.get(i).getNumberOfSyllables() == syllables){
+							rightAmountOfSyllablesWords.add(availableWords.get(i));
+						}
+					}
+					if(rightAmountOfSyllablesWords.isEmpty()){
+						// no words found
+						//Log.i("TAG", "back");
+						return null;
+					}
+					
 				}
 				randomIndex = randomGenerator.nextInt(rightAmountOfSyllablesWords.size());
 				// A whole sentence has been found!
@@ -160,6 +193,15 @@ public class FindSentenceThread extends Thread{
 			// not the last object 
 			// pick a random word that doesn't have too many syllables
 			int tempSyllabels;
+			if(availableWords.isEmpty()){
+				swithced = true;
+				if(startWithThemeList){
+					availableWords = getBackUpWords(wordType);
+				}
+				else{
+					availableWords = getWords(wordType);
+				}
+			}
 			while(!availableWords.isEmpty()){
 				randomIndex = randomGenerator.nextInt(availableWords.size());
 				//Log.i("TAG", "syllables: " + syllables + ", wordtype: " + wordType + ", available: " + availableWords.size() + ", word: " + availableWords.get(randomIndex).getText());
@@ -174,6 +216,15 @@ public class FindSentenceThread extends Thread{
 							availableWords.remove(i);
 						}
 					}
+					if(availableWords.isEmpty() && !swithced){
+						swithced = true;
+						if(startWithThemeList){
+							availableWords = getBackUpWords(wordType);
+						}
+						else{
+							availableWords = getWords(wordType);
+						}
+					}
 					continue;
 				}
 				returnString = getStructureWithSyllables(theRest);
@@ -186,6 +237,15 @@ public class FindSentenceThread extends Thread{
 					for(int i = availableWords.size()-1; i >= 0; i--){
 						if(availableWords.get(i).getNumberOfSyllables() == tempSyllabels){
 							availableWords.remove(i);
+						}
+					}
+					if(availableWords.isEmpty() && !swithced){
+						swithced = true;
+						if(startWithThemeList){
+							availableWords = getBackUpWords(wordType);
+						}
+						else{
+							availableWords = getWords(wordType);
 						}
 					}
 					continue;
@@ -238,8 +298,6 @@ public class FindSentenceThread extends Thread{
 		//Log.i("TAG", "back");
 		return null;
 	}
-	
-	private ArrayList<Word> innerTempWords = new ArrayList<Word>();
 	
 	/**
 	 * This method is like getStructureWithSyllables(), but it will not try to use up all syllables if it is the last object (since it actually isn't the last object).
@@ -324,15 +382,31 @@ public class FindSentenceThread extends Thread{
 			}
 		}
 		else if(structure.charAt(0) == '('){
+			boolean switched = false;
+			boolean startWithThemeList = true;
+			randomIndex = randomGenerator.nextInt(100+1);
+			if(randomIndex > CHANCE_TO_START_WITH_THEME_LIST){
+				startWithThemeList = false;
+			}
 			int endIndex = structure.indexOf(')');
 			firstPart = structure.substring(0, endIndex+1);
 			if(endIndex+1 != structure.length()){
 				theRest = structure.substring(endIndex+1);
 			}
 			String wordType = structure.substring(1, endIndex);
-			ArrayList<Word> availableWords = getWords(wordType);
+			ArrayList<Word> availableWords;
+			if(startWithThemeList){
+				availableWords = getBackUpWords(wordType);
+			}
+			else{
+				availableWords = getWords(wordType);
+			}
 			// pick a random word that doesn't have too many syllables
 			int tempSyllabels;
+			if(availableWords.isEmpty()){
+				switched = true;
+				availableWords = getBackUpWords(wordType);
+			}
 			while(!availableWords.isEmpty()){
 				randomIndex = randomGenerator.nextInt(availableWords.size());
 				//Log.i("TAG", "I: syllables: " + syllables + ", wordtype: " + wordType + ", available: " + availableWords.size() + ", word: " + availableWords.get(randomIndex).getText());
@@ -345,6 +419,15 @@ public class FindSentenceThread extends Thread{
 					for(int i = availableWords.size()-1; i >= 0; i--){
 						if(availableWords.get(i).getNumberOfSyllables() >= tempSyllabels){
 							availableWords.remove(i);
+						}
+					}
+					if(availableWords.isEmpty() && !switched){
+						switched = true;
+						if(startWithThemeList){
+							availableWords = getBackUpWords(wordType);
+						}
+						else{
+							availableWords = getWords(wordType);
 						}
 					}
 					continue;
@@ -364,6 +447,15 @@ public class FindSentenceThread extends Thread{
 					for(int i = availableWords.size()-1; i >= 0; i--){
 						if(availableWords.get(i).getNumberOfSyllables() == tempSyllabels){
 							availableWords.remove(i);
+						}
+					}
+					if(availableWords.isEmpty() && !switched){
+						switched = true;
+						if(startWithThemeList){
+							availableWords = getBackUpWords(wordType);
+						}
+						else{
+							availableWords = getWords(wordType);
 						}
 					}
 					continue;
@@ -424,6 +516,20 @@ public class FindSentenceThread extends Thread{
 		return words;
 	}
 	
+	/**
+	 * 
+	 * @return All backup words in the bin with the right part-of-speech
+	 */
+	private ArrayList<Word> getBackUpWords(String wordType){
+		ArrayList<Word> words = new ArrayList<Word>();
+		for(int i = 0; i < backupWords.size(); i++){
+			if(backupWords.get(i).getwordType().equals(wordType)){
+				words.add(backupWords.get(i));
+			}
+		}
+		return words;
+	}
+	
 	private int countSyllables(String sentence){
 		int numberOfSyllables = 0;
 		ArrayList<String> words = HaikuGenerator.getWords(sentence);
@@ -441,6 +547,16 @@ public class FindSentenceThread extends Thread{
 			for(int a = 0; a < wordsUsed.size(); a++){
 				if(wordsUsed.get(a).getText().equals(words.get(i))){
 					numberOfSyllables += wordsUsed.get(a).getNumberOfSyllables();
+					found = true;
+					break;
+				}
+			}
+			if(found){
+				continue;
+			}
+			for(int a = 0; a < backupWords.size(); a++){
+				if(backupWords.get(a).getText().equals(words.get(i))){
+					numberOfSyllables += backupWords.get(a).getNumberOfSyllables();
 					found = true;
 					break;
 				}

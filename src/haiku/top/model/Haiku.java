@@ -9,8 +9,6 @@ public class Haiku {
 	private String row1;
 	private String row2;
 	private String row3;
-	private ArrayList<String> LinesWithSyllables5 = new ArrayList<String>();
-	private ArrayList<String> LinesWithSyllables7 = new ArrayList<String>();
 	private boolean haikuFinished = false;
 	private double startTime = System.currentTimeMillis();
 	

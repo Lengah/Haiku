@@ -29,8 +29,10 @@ public class HaikuGenerator {
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 	private static Theme theAllTheme;
 	private static ArrayList<Word> smsLogWordsWithThemes = new ArrayList<Word>();
+	private static ArrayList<Word> smsLogWordsWithTheAllTheme = new ArrayList<Word>();
 	private static ArrayList<Word> allSmsLogWords = new ArrayList<Word>();
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
+	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
 	private static final int NUMBER_OF_GENERATIONS = 1;
 	
@@ -200,6 +202,11 @@ public class HaikuGenerator {
 					}
 				}
 			}
+			for(int i = 0; i < sms.getWords().size(); i++){
+				if(theAllThemeWordIDs.contains(sms.getWords().get(i).getID())){
+					smsLogWordsWithTheAllTheme.add(sms.getWords().get(i));
+				}
+			}
 			smsSemaphore.release();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -217,6 +224,7 @@ public class HaikuGenerator {
 		}
 		allSmsLogWords.removeAll(sms.getWords());
 		smsLogWordsWithThemes.removeAll(sms.getWords());
+		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		smsSemaphore.release();
 	}
 	
@@ -230,6 +238,7 @@ public class HaikuGenerator {
 		}
 		allSmsLogWords.removeAll(sms.getWords());
 		smsLogWordsWithThemes.removeAll(sms.getWords());
+		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		smsSemaphore.release();
 	}
 	
@@ -311,7 +320,7 @@ public class HaikuGenerator {
 	private static void initThemes(){
 		allThemes.addAll(HaikuActivity.databaseHandler.getAllThemes());
 		theAllTheme = HaikuActivity.databaseHandler.getTheAllTheme();
-		themeWordIDs.addAll(theAllTheme.getWordids()); // Will always be there
+		theAllThemeWordIDs.addAll(theAllTheme.getWordids()); // Will always be there
 	}
 		
 	public static void createHaikus(){
@@ -348,11 +357,21 @@ public class HaikuGenerator {
 		return smsLogWordsWithThemes;
 	}
 	
+	public static ArrayList<Word> getWordsUsedWithTheAllTheme(){
+		return smsLogWordsWithTheAllTheme;
+	}
+	
 	public static void printAllUsableWords(){
 		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){
 			smsLogWordsWithThemes.get(i).print("TAG");
 		}
-		Log.i("TAG", "Total number of usable words: " + smsLogWordsWithThemes.size());
+		Log.i("TAG", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
+		
+		for(int i = 0; i < smsLogWordsWithTheAllTheme.size(); i++){
+			smsLogWordsWithTheAllTheme.get(i).print("TAG");
+		}
+		Log.i("TAG", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
+		Log.i("TAG", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
 	}
 	
 	/**
