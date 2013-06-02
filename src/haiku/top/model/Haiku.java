@@ -19,6 +19,7 @@ public class Haiku {
 	}
 	
 	public void generate(){
+//		HaikuGenerator.printAllUsableWords();
 		new FindSentenceThread(5, this, 1).start();
 		new FindSentenceThread(7, this, 2).start();
 		new FindSentenceThread(5, this, 3).start();

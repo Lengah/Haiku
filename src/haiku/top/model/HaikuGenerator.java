@@ -36,12 +36,18 @@ public class HaikuGenerator {
 	
 	private static ArrayList<PartOfSpeech> allWordTypes = new ArrayList<PartOfSpeech>();
 	
+//	private static ArrayList<String> sentenceCombinations = new ArrayList<String>();
+	
+	// for example [the(1)]
+	private static ArrayList<Word> wordsDefinedInRulesTextFile = new ArrayList<Word>();
+	
 	// allSmsLogWords, themes, smsLogWordsWithThemes, themeWordIDs
 	private static Semaphore smsSemaphore = new Semaphore(1);
 	
 	public static void init(){
 		initPartOfSpeech();
 		initThemes();
+		initRulesWords();
 	}
 	
 	public static PartOfSpeech getPartOfSpeechWithID(long id){
@@ -51,6 +57,48 @@ public class HaikuGenerator {
 			}
 		}
 		return null;
+	}
+	
+	private static void initRulesWords(){
+		try {
+			InputStream rules = HaikuActivity.getInstance().getAssets().open("rules.txt");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(rules));
+			String tempText;
+			String wordPart;
+			int syllables;
+			boolean exists;
+			while ((tempText = reader.readLine()) != null) {// or until the part is found
+				while(tempText.contains("[")){
+					wordPart = tempText.substring(tempText.indexOf('[')+1, tempText.indexOf(']'));
+					syllables = Integer.parseInt(wordPart.substring(wordPart.indexOf('(')+1, wordPart.indexOf(')')));
+					wordPart = wordPart.substring(0, wordPart.indexOf('('));
+					exists = false;
+					for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
+						if(wordsDefinedInRulesTextFile.get(i).getText().equals(wordPart)){
+							exists = true;
+							break;
+						}
+					}
+					if(!exists){
+						wordsDefinedInRulesTextFile.add(new Word(wordPart, syllables));
+					}
+					if(tempText.indexOf(']') == tempText.length() - 1){
+						// if it is the last object
+						break; // there are no more
+					}
+					tempText = tempText.substring(tempText.indexOf(']')+1);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+//		for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
+//			Log.i("TAG", wordsDefinedInRulesTextFile.get(i).getText());
+//		}
+	}
+	
+	public static ArrayList<Word> getRulesWords(){
+		return wordsDefinedInRulesTextFile;
 	}
 	
 	private static void initPartOfSpeech(){
@@ -298,6 +346,74 @@ public class HaikuGenerator {
 	
 	public static ArrayList<Word> getWordsUsed(){
 		return smsLogWordsWithThemes;
+	}
+	
+	public static void printAllUsableWords(){
+		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){
+			smsLogWordsWithThemes.get(i).print("TAG");
+		}
+		Log.i("TAG", "Total number of usable words: " + smsLogWordsWithThemes.size());
+	}
+	
+	/**
+	 * takes one String and divides it into smaller Strings, each with its own word
+	 * @param sentence
+	 * @return an ArrayList of all the words in the sentence
+	 */
+	public static ArrayList<String> getWords(String sentence){
+		ArrayList<String> notRealWords = new ArrayList<String>();
+		String textMessage = sentence.toLowerCase();
+		String word;
+		int pos1;
+		int pos2;
+		while(textMessage.length() > 0){
+			// Remove symbols from the start
+			pos1 = 0;
+			while(textMessage.charAt(pos1) != 'a' && textMessage.charAt(pos1) != 'b' && textMessage.charAt(pos1) != 'c' && textMessage.charAt(pos1) != 'd'
+				 && textMessage.charAt(pos1) != 'e' && textMessage.charAt(pos1) != 'f' && textMessage.charAt(pos1) != 'g' && textMessage.charAt(pos1) != 'h'
+				 && textMessage.charAt(pos1) != 'i' && textMessage.charAt(pos1) != 'j' && textMessage.charAt(pos1) != 'k' && textMessage.charAt(pos1) != 'l'
+				 && textMessage.charAt(pos1) != 'm' && textMessage.charAt(pos1) != 'n' && textMessage.charAt(pos1) != 'o' && textMessage.charAt(pos1) != 'p'
+				 && textMessage.charAt(pos1) != 'q' && textMessage.charAt(pos1) != 'r' && textMessage.charAt(pos1) != 's' && textMessage.charAt(pos1) != 't'
+				 && textMessage.charAt(pos1) != 'u' && textMessage.charAt(pos1) != 'v' && textMessage.charAt(pos1) != 'w' && textMessage.charAt(pos1) != 'x'
+			     && textMessage.charAt(pos1) != 'y' && textMessage.charAt(pos1) != 'z' && textMessage.charAt(pos1) != 'é' && textMessage.charAt(pos1) != 'è'
+			     && textMessage.charAt(pos1) != 'å' && textMessage.charAt(pos1) != 'ä' && textMessage.charAt(pos1) != 'ö' && textMessage.charAt(pos1) != '\''){
+				pos1++;
+				if(pos1 >= textMessage.length()){
+					break;
+				}
+			}
+			if(pos1 >= textMessage.length()){
+				break; // just a bunch of symbols left of the message
+			}
+			// find the end of the word
+			pos2 = pos1;
+			while(textMessage.charAt(pos2) == 'a' || textMessage.charAt(pos2) == 'b' || textMessage.charAt(pos2) == 'c' || textMessage.charAt(pos2) == 'd'
+				 || textMessage.charAt(pos2) == 'e' || textMessage.charAt(pos2) == 'f' || textMessage.charAt(pos2) == 'g' || textMessage.charAt(pos2) == 'h'
+				 || textMessage.charAt(pos2) == 'i' || textMessage.charAt(pos2) == 'j' || textMessage.charAt(pos2) == 'k' || textMessage.charAt(pos2) == 'l'
+				 || textMessage.charAt(pos2) == 'm' || textMessage.charAt(pos2) == 'n' || textMessage.charAt(pos2) == 'o' || textMessage.charAt(pos2) == 'p'
+				 || textMessage.charAt(pos2) == 'q' || textMessage.charAt(pos2) == 'r' || textMessage.charAt(pos2) == 's' || textMessage.charAt(pos2) == 't'
+				 || textMessage.charAt(pos2) == 'u' || textMessage.charAt(pos2) == 'v' || textMessage.charAt(pos2) == 'w' || textMessage.charAt(pos2) == 'x'
+			     || textMessage.charAt(pos2) == 'y' || textMessage.charAt(pos2) == 'z' || textMessage.charAt(pos1) == 'é' || textMessage.charAt(pos1) == 'è'
+			     || textMessage.charAt(pos1) == 'å' || textMessage.charAt(pos1) == 'ä' || textMessage.charAt(pos1) == 'ö' || textMessage.charAt(pos1) == '\''){
+				pos2++;
+				if(pos1+pos2 >= textMessage.length()){
+					break;
+				}
+			}
+			// a word is found between indexes pos1 and pos2
+			word = textMessage.substring(pos1, pos2);
+			if(word.length() == 0){
+				break;
+			}
+			notRealWords.add(word);
+			if(pos2+1 <= textMessage.length()){
+				textMessage = textMessage.substring(pos2+1);
+			}
+			else{
+				break;
+			}
+		}
+		return notRealWords;
 	}
 	
 //	private static int syllables = 5;

@@ -2,6 +2,8 @@ package haiku.top.model;
 
 import java.util.ArrayList;
 
+import android.util.Log;
+
 public class Word {
 	private long id;
 	private String text;
@@ -34,6 +36,16 @@ public class Word {
 		this.syllables = syllables;
 		this.wordType = wordType;
 		initNumberOfSyllables();
+	}
+	
+	/**
+	 * @IMPORTANT Used only by the words that are in the rules.txt file such as the or a. The words in the rules.txt file doesn't have to be in the dictionary, but we need to know their number of syllables
+	 * @param text
+	 * @param numberOfSyllables
+	 */
+	public Word(String text, int numberOfSyllables){
+		this.text = text;
+		this.numberOfSyllables = numberOfSyllables;
 	}
 	
 //	/**
@@ -84,6 +96,10 @@ public class Word {
 	
 	public String getwordType() {
 		return wordType;
+	}
+	
+	public void print(String Tag){
+		Log.i(Tag, text + "|" + syllables + "|" + wordType);
 	}
 	
 	@Override
