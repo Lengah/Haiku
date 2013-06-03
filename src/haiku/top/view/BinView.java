@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
+import haiku.top.model.Haiku;
 import haiku.top.model.HaikuGenerator;
 import haiku.top.model.SMS;
 import haiku.top.model.Theme;
@@ -178,6 +179,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static int themeObjectHeight;
 	
 	private View viewBeingDragged = null;
+	
+	private boolean haikuFinished = false;
 	
 	public BinView(Context context) {
 		super(context);
@@ -449,10 +452,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		
 	}
 	
-	public void removeSMS(BinSMSView sms){ //TODO check the generated haikus!!
+	public void removeSMS(BinSMSView sms){
 		textList.removeView(sms);
 		smsView.remove(sms);
 		updateContactName();
+		resetHaikuFinished();
+		HaikuGenerator.createHaikus();
 	}
 	
 	public void addSMSES(ArrayList<SMS> smses){
@@ -461,7 +466,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 	}
 	
-	public void removeSMSES(ArrayList<SMS> smses){ //TODO check the generated haikus!!
+	public void removeSMSES(ArrayList<SMS> smses){
 		for(int i = smsView.size() -1 ; i >= 0; i--){
 			if(smses.contains(smsView.get(i).getSMS())){
 				textList.removeView(smsView.get(i));
@@ -469,6 +474,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			}	
 		}
 		updateContactName();
+		resetHaikuFinished();
+		HaikuGenerator.createHaikus();
+	}
+	
+	public void updateProgress(){
+		progressBar.resetProgress();
+//		progressBar.setMaxProgress(smsView.size()*10); //TODO
 	}
 	
 	/**
@@ -518,11 +530,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		tob.setOnTouchListener(this);
 	}
 	
-	public void removeTheme(ThemeObjectView tob){ //TODO check the generated haikus!!
+	public void removeTheme(ThemeObjectView tob){
 		int index = themesView.indexOf(tob);
 		themesView.remove(tob);
 		themeViews.get(index).removeAllViews();
 		themeViews.get(index).setVisibility(GONE);
+		resetHaikuFinished();
+		HaikuGenerator.createHaikus();
 	}
 	
 	/**
@@ -661,6 +675,16 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		saveButton.setVisibility(VISIBLE);
 	}
 	
+	public void haikuIsFinished(){
+		if(!haikuFinished){
+			haikuFinished = true;
+		}
+	}
+	
+	public void resetHaikuFinished(){
+		haikuFinished = false;
+	}
+	
 	public View getDraggedView(){
 		return viewBeingDragged;
 	}
@@ -678,6 +702,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private float oldDistance = 0;
 	
 	private static final double WAIT_TIME = 100; //ms
+	
+	private boolean canUndo = false;
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -726,13 +752,15 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					// first distance check
 					oldDistance = distance;
 				}
-				else if(Math.abs(distance-oldDistance) > deleteDistance){
+				else if(Math.abs(distance-oldDistance) > deleteDistance && haikuFinished){ //TODO
 					if(distance < oldDistance){
 						// delete
 						progressBar.incProgress();
+						canUndo = true;
 					}
-					else{
+					else if(canUndo){
 						// undo
+						canUndo = false;
 						progressBar.decProgress();
 					}
 					oldDistance = distance;

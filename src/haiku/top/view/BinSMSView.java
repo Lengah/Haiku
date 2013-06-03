@@ -5,6 +5,7 @@ import haiku.top.model.SMSBinWord;
 import haiku.top.model.Word;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -132,11 +133,42 @@ public class BinSMSView extends LinearLayout{
 				break;
 			}
 		}
+		lastIndexSetToUsed = index;
+		updateMessage();
+	}
+	
+	public void unsetUsedWordAtPos(int index){
+		Integer ind = index;
+		usedWordsIndexes.remove(ind);
 		updateMessage();
 	}
 	
 	public SMS getSMS(){
 		return sms;
+	}
+	
+	private static Random randomGenerator = new Random();
+	
+	/**
+	 * 
+	 * @return the index of the text set to used
+	 */
+	public void setUsedWordAtRandom(){
+		ArrayList<Integer> notUsed = new ArrayList<Integer>();
+		for(int i = 0; i < words.size(); i++){
+			notUsed.add(i);
+		}
+		notUsed.removeAll(usedWordsIndexes);
+		int randomIndex = randomGenerator.nextInt(notUsed.size());
+		setUsedWordAtPos(usedWordsIndexes.get(randomIndex));
+	}
+	
+	private int lastIndexSetToUsed = -1;
+	
+	public void undoLast(){
+		if(lastIndexSetToUsed != -1){ // if -1, then nothing has been done -> nothing to undo
+			unsetUsedWordAtPos(lastIndexSetToUsed);
+		}
 	}
 
 }

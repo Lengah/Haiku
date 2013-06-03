@@ -91,4 +91,8 @@ public class HaikuProgressBar extends View{
 	public void setMaxProgress(int maxProgress){
 		this.maxProgress = maxProgress;
 	}
+	
+	public void resetProgress(){
+		progress = 0;
+	}
 }

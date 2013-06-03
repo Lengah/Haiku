@@ -1,6 +1,8 @@
 package haiku.top.model;
 
 
+import haiku.top.view.BinView;
+
 import java.util.ArrayList;
 
 import android.util.Log;
@@ -16,6 +18,19 @@ public class Haiku {
 		return row1 + "\n" + row2 + "\n" + row3;
 	}
 	
+	public String getRow(int row){
+		if(row == 1){
+			return row1;
+		}
+		if(row == 2){
+			return row2;
+		}
+		if(row == 3){
+			return row3;
+		}
+		return null;
+	}
+	
 	public void generate(){
 //		HaikuGenerator.printAllUsableWords();
 		new FindSentenceThread(5, this, 1).start();
@@ -28,6 +43,7 @@ public class Haiku {
 		if(haikuFinished){
 			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
 			print();
+			BinView.getInstance().haikuIsFinished();
 		}
 	}
 	

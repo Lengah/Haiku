@@ -272,6 +272,7 @@ public class HaikuGenerator {
 			while(cursor.moveToNext());
 		}
 		calculateSMSes(newSMSes);
+		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 	}
 	
 	public static void addDate(YearMonth date){
@@ -294,6 +295,7 @@ public class HaikuGenerator {
 			while(cursor.moveToNext());
 		}
 		calculateSMSes(newSMSes);
+		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 	}
 	
 	public static ArrayList<SMS> removeDate(YearMonth date){
@@ -307,6 +309,54 @@ public class HaikuGenerator {
 			}
 		}
 		return removedSMS;
+	}
+	
+	public static void updateThreadIDsADD(ArrayList<SMS> smsesAdded){
+		double startTime = System.currentTimeMillis();
+		ArrayList<Integer> threadIDs = new ArrayList<Integer>();
+		Integer thread_id;
+		for(int i = 0; i < smsesAdded.size(); i++){
+			if(!thread_ids.contains(smsesAdded.get(i).getContactID()) && !threadIDs.contains(smsesAdded.get(i).getContactID())){
+				thread_id = (int) smsesAdded.get(i).getContactID(); // will remove the index and not the object otherwise
+				threadIDs.add(thread_id);
+			}
+		}
+		Cursor cursor;
+		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+		String[] projection;
+		long id;
+		boolean exists;
+		boolean allExists;
+		boolean update = false;
+		for(int i = 0; i < threadIDs.size(); i++){
+			allExists = true;
+			projection = new String[] {"_id"};
+			cursor =  MainView.getInstance().getContext().getContentResolver().query(uri, projection, "thread_id = '" + threadIDs.get(i) + "'", null, null);
+			if(cursor.moveToFirst()){
+				do{
+					exists = false;
+					id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
+					for(int s = 0; s < smses.size(); s++){
+						if(smses.get(s).getID() == id){
+							exists = true;
+							break;
+						}
+					}
+					if(!exists){
+						allExists = false;
+						break;
+					}
+				}while(cursor.moveToNext());
+			}
+			if(allExists){
+				thread_ids.add(threadIDs.get(i));
+				update = true;
+			}
+		}
+		if(update){
+			MainView.getInstance().updateConversations();
+		}
+		Log.i("TAG", "Time to check if whole conversations were added: " + (System.currentTimeMillis() - startTime) + " ms");
 	}
 	
 	public static ArrayList<YearMonth> getDates(){
@@ -333,6 +383,21 @@ public class HaikuGenerator {
 	
 	public static ArrayList<Haiku> getGeneratedHaikus(){
 		return haikus;
+	}
+	
+	private static Random randomGenerator = new Random();
+	
+	public static Haiku getRandomReadyHaiku(){
+		if(haikus.isEmpty()){
+			return null;
+		}
+		ArrayList<Haiku> tempHaikus = new ArrayList<Haiku>();
+		for(int i = 0; i < haikus.size(); i++){
+			if(haikus.get(i).isHaikuFinished()){
+				tempHaikus.add(haikus.get(i));
+			}
+		}
+		return tempHaikus.get(randomGenerator.nextInt(tempHaikus.size()));
 	}
 	
 	/**
