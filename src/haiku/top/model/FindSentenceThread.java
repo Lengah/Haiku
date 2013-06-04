@@ -20,6 +20,7 @@ public class FindSentenceThread extends Thread{
 	private Random randomGenerator = new Random();
 	private Haiku haiku;
 	private int row;
+	private boolean themes;
 	
 	public static final String START_OBJECT = "<sentence>";
 	public static final double CHANCE_TO_START_WITH_THEME_LIST = 80; // in %
@@ -30,6 +31,7 @@ public class FindSentenceThread extends Thread{
 		this.row = row;
 		wordsUsed = new ArrayList<Word>(HaikuGenerator.getWordsUsed());
 		backupWords = new ArrayList<Word>(HaikuGenerator.getWordsUsedWithTheAllTheme());
+		themes = haiku.containsThemes();
 	}
 	
 	public void run(){
@@ -136,7 +138,7 @@ public class FindSentenceThread extends Thread{
 			}
 		}
 		else if(structure.charAt(0) == '('){
-			boolean swithced = false;
+			boolean switched = false;
 			boolean startWithThemeList = true;
 			randomIndex = randomGenerator.nextInt(100+1);
 			if(randomIndex > CHANCE_TO_START_WITH_THEME_LIST){
@@ -148,11 +150,18 @@ public class FindSentenceThread extends Thread{
 			}
 			String wordType = structure.substring(1, endIndex);
 			ArrayList<Word> availableWords;
-			if(startWithThemeList){
+			if(!themes){
+				// if there are no selected themes, then the getWords() method will return all words available. There is no need for a switch
+				switched = true;
 				availableWords = getWords(wordType);
 			}
 			else{
-				availableWords = getBackUpWords(wordType);
+				if(startWithThemeList){
+					availableWords = getWords(wordType);
+				}
+				else{
+					availableWords = getBackUpWords(wordType);
+				}
 			}
 			
 			if(theRest == null){
@@ -193,8 +202,8 @@ public class FindSentenceThread extends Thread{
 			// not the last object 
 			// pick a random word that doesn't have too many syllables
 			int tempSyllabels;
-			if(availableWords.isEmpty()){
-				swithced = true;
+			if(availableWords.isEmpty() && !switched){
+				switched = true;
 				if(startWithThemeList){
 					availableWords = getBackUpWords(wordType);
 				}
@@ -216,8 +225,8 @@ public class FindSentenceThread extends Thread{
 							availableWords.remove(i);
 						}
 					}
-					if(availableWords.isEmpty() && !swithced){
-						swithced = true;
+					if(availableWords.isEmpty() && !switched){
+						switched = true;
 						if(startWithThemeList){
 							availableWords = getBackUpWords(wordType);
 						}
@@ -239,8 +248,8 @@ public class FindSentenceThread extends Thread{
 							availableWords.remove(i);
 						}
 					}
-					if(availableWords.isEmpty() && !swithced){
-						swithced = true;
+					if(availableWords.isEmpty() && !switched){
+						switched = true;
 						if(startWithThemeList){
 							availableWords = getBackUpWords(wordType);
 						}
@@ -395,15 +404,22 @@ public class FindSentenceThread extends Thread{
 			}
 			String wordType = structure.substring(1, endIndex);
 			ArrayList<Word> availableWords;
-			if(startWithThemeList){
-				availableWords = getBackUpWords(wordType);
+			if(!themes){
+				// if there are no selected themes, then the getWords() method will return all words available. There is no need for a switch
+				switched = true;
+				availableWords = getWords(wordType);
 			}
 			else{
-				availableWords = getWords(wordType);
+				if(startWithThemeList){
+					availableWords = getWords(wordType);
+				}
+				else{
+					availableWords = getBackUpWords(wordType);
+				}
 			}
 			// pick a random word that doesn't have too many syllables
 			int tempSyllabels;
-			if(availableWords.isEmpty()){
+			if(availableWords.isEmpty() && !switched){
 				switched = true;
 				availableWords = getBackUpWords(wordType);
 			}

@@ -376,7 +376,7 @@ public class HaikuGenerator {
 	public static void createHaikus(){
 		haikus.clear();
 		for(int i = 0; i < NUMBER_OF_GENERATIONS; i++){
-			haikus.add(new Haiku());
+			haikus.add(new Haiku(!themes.isEmpty()));
 			haikus.get(i).generate();
 		}
 	}

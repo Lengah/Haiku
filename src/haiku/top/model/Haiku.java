@@ -13,6 +13,15 @@ public class Haiku {
 	private String row3;
 	private boolean haikuFinished = false;
 	private double startTime = System.currentTimeMillis();
+	private boolean themes;
+	
+	public Haiku(boolean themes){
+		this.themes = themes;
+	}
+	
+	public boolean containsThemes(){
+		return themes;
+	}
 	
 	public String getHaikuPoem(){
 		return row1 + "\n" + row2 + "\n" + row3;
