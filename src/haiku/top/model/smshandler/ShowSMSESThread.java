@@ -1,7 +1,8 @@
-package haiku.top.view;
+package haiku.top.model.smshandler;
 
 import haiku.top.HaikuActivity;
-import haiku.top.model.SMS;
+import haiku.top.view.main.MainView;
+import haiku.top.view.main.SMSObjectView;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;

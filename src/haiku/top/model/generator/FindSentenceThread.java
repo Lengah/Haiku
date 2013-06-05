@@ -1,6 +1,7 @@
-package haiku.top.model;
+package haiku.top.model.generator;
 
 import haiku.top.HaikuActivity;
+import haiku.top.model.Word;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,8 +36,7 @@ public class FindSentenceThread extends Thread{
 	}
 	
 	public void run(){
-//		double startTime = System.currentTimeMillis();
-		String sentence = getStructureWithSyllables(START_OBJECT);
+		String sentence = getSentence(START_OBJECT);
 		if(sentence == null){
 			sentence = "NULL";
 		}
@@ -56,12 +56,9 @@ public class FindSentenceThread extends Thread{
 		}
 		sentence = sentence.substring(0, 1).toUpperCase() + sentence.substring(1);
 		haiku.addRow(row, sentence);
-		//Log.i("TAG", "find sentence worker thread finished in :" + (System.currentTimeMillis() - startTime) + " ms");
-		//Log.i("TAG", sentence);
 	}
 	
-	private String getStructureWithSyllables(String structure){
-		//Log.i("TAG", "structure: " + structure);
+	private String getSentence(String structure){
 		int randomIndex;
 		String returnString;
 		String firstPart = null;
@@ -95,7 +92,6 @@ public class FindSentenceThread extends Thread{
 					}
 					if(tempText == null){
 						// did not find the structure
-						//Log.i("TAG", "did not find the structure: " + firstPart);
 						return null;
 					}
 					randomIndex = randomGenerator.nextInt(rowsLeft.size());
@@ -108,13 +104,13 @@ public class FindSentenceThread extends Thread{
 					String returnStringOfTheRest = null;
 					if(theRest == null){
 						// the last object in the tempText structure will also be the last object in the sentence -> call this method again with the tempText structure
-						returnString = getStructureWithSyllables(tempText);
+						returnString = getSentence(tempText);
 					}
 					else{
 						// the last object in the tempText structure will NOT be the last object in the sentence -> call the inner method
-						returnString = getStructureWithSyllablesInner(tempText);
+						returnString = getSentenceInner(tempText);
 						if(returnString != null){
-							returnStringOfTheRest = getStructureWithSyllables(theRest);
+							returnStringOfTheRest = getSentence(theRest);
 						}
 					}
 					if(returnString != null && theRest != null && returnStringOfTheRest != null){
@@ -131,7 +127,6 @@ public class FindSentenceThread extends Thread{
 					// try another row
 					rowsLeft.remove(randomIndex);
 				}while(!rowsLeft.isEmpty());
-				//Log.i("TAG", "back");
 				return null;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -190,7 +185,6 @@ public class FindSentenceThread extends Thread{
 					}
 					if(rightAmountOfSyllablesWords.isEmpty()){
 						// no words found
-						//Log.i("TAG", "back");
 						return null;
 					}
 					
@@ -213,7 +207,6 @@ public class FindSentenceThread extends Thread{
 			}
 			while(!availableWords.isEmpty()){
 				randomIndex = randomGenerator.nextInt(availableWords.size());
-				//Log.i("TAG", "syllables: " + syllables + ", wordtype: " + wordType + ", available: " + availableWords.size() + ", word: " + availableWords.get(randomIndex).getText());
 				syllables -= availableWords.get(randomIndex).getNumberOfSyllables();
 				if(syllables <= 0){
 					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
@@ -236,7 +229,7 @@ public class FindSentenceThread extends Thread{
 					}
 					continue;
 				}
-				returnString = getStructureWithSyllables(theRest);
+				returnString = getSentence(theRest);
 				if(returnString == null){
 					// the rest of the sentence can not be completed with this word
 					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
@@ -263,7 +256,6 @@ public class FindSentenceThread extends Thread{
 				// we have found a complete sentence!
 				return availableWords.get(randomIndex).getText() + " " + returnString;
 			}
-			//Log.i("TAG", "back");
 			return null; // no words with the right word types exist in the bin
 		}
 		else if(structure.charAt(0) == '['){
@@ -279,7 +271,6 @@ public class FindSentenceThread extends Thread{
 			if(theRest == null && syllables != 0){
 				// was the last object, but wrong amount of syllables used
 				syllables += syll;
-				//Log.i("TAG", "back");
 				return null;
 			}
 			if(theRest == null && syllables == 0){
@@ -288,14 +279,12 @@ public class FindSentenceThread extends Thread{
 			if(theRest != null && syllables <= 0){
 				// there are more objects, but all syllables are used
 				syllables += syll;
-				//Log.i("TAG", "back");
 				return null;
 			}
 			if(theRest != null && syllables > 0){
 				// not all syllables are used and the sentence isn't finished
-				returnString = getStructureWithSyllables(theRest);
+				returnString = getSentence(theRest);
 				if(returnString == null){
-					//Log.i("TAG", "back");
 					syllables += syll;
 					return null;
 				}
@@ -304,17 +293,15 @@ public class FindSentenceThread extends Thread{
 				}
 			}
 		}
-		//Log.i("TAG", "back");
 		return null;
 	}
 	
 	/**
-	 * This method is like getStructureWithSyllables(), but it will not try to use up all syllables if it is the last object (since it actually isn't the last object).
+	 * This method is like getStructure(), but it will not try to use up all syllables if it is the last object (since it actually isn't the last object).
 	 * @param structure
 	 * @return
 	 */
-	private String getStructureWithSyllablesInner(String structure){
-		//Log.i("TAG", "I: structure: " + structure);
+	private String getSentenceInner(String structure){
 		int randomIndex;
 		String returnString;
 		String firstPart = null;
@@ -348,7 +335,6 @@ public class FindSentenceThread extends Thread{
 					}
 					if(tempText == null){
 						// did not find the structure
-						//Log.i("TAG", "did not find the structure: " + firstPart);
 						return null;
 					}
 					randomIndex = randomGenerator.nextInt(rowsLeft.size());
@@ -361,13 +347,13 @@ public class FindSentenceThread extends Thread{
 					String returnStringOfTheRest = null;
 					if(theRest == null){
 						// the last object in the tempText structure will also be the last object in this structure (but not the sentence)
-						returnString = getStructureWithSyllablesInner(tempText);
+						returnString = getSentenceInner(tempText);
 					}
 					else{
 						// the last object in the tempText structure will NOT be the last object in this structure
-						returnString = getStructureWithSyllablesInner(tempText);
+						returnString = getSentenceInner(tempText);
 						if(returnString != null){
-							returnStringOfTheRest = getStructureWithSyllablesInner(theRest);
+							returnStringOfTheRest = getSentenceInner(theRest);
 						}
 					}
 					if(returnString != null && theRest != null && returnStringOfTheRest != null){
@@ -384,7 +370,6 @@ public class FindSentenceThread extends Thread{
 					// try another row
 					rowsLeft.remove(randomIndex);
 				}while(!rowsLeft.isEmpty());
-				//Log.i("TAG", "back");
 				return null;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -425,7 +410,6 @@ public class FindSentenceThread extends Thread{
 			}
 			while(!availableWords.isEmpty()){
 				randomIndex = randomGenerator.nextInt(availableWords.size());
-				//Log.i("TAG", "I: syllables: " + syllables + ", wordtype: " + wordType + ", available: " + availableWords.size() + ", word: " + availableWords.get(randomIndex).getText());
 				syllables -= availableWords.get(randomIndex).getNumberOfSyllables();
 				if(syllables <= 0){
 					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
@@ -453,7 +437,7 @@ public class FindSentenceThread extends Thread{
 					return availableWords.get(randomIndex).getText();
 				}
 				// not the last object
-				returnString = getStructureWithSyllablesInner(theRest);
+				returnString = getSentenceInner(theRest);
 				if(returnString == null){
 					// the rest of the sentence can not be completed with this word
 					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
@@ -480,7 +464,6 @@ public class FindSentenceThread extends Thread{
 				// we have found a complete sentence!
 				return availableWords.get(randomIndex).getText() + " " + returnString;
 			}
-			//Log.i("TAG", "back");
 			return null; // no words with the right word types and syllables exist in the bin
 		}
 		else if(structure.charAt(0) == '['){
@@ -496,7 +479,6 @@ public class FindSentenceThread extends Thread{
 			if(syllables <= 0){
 				// there are more objects, but all syllables are used. Since this is the inner method there will be more objects!
 				syllables += syll;
-				//Log.i("TAG", "back");
 				return null;
 			}
 			if(theRest == null){
@@ -504,9 +486,8 @@ public class FindSentenceThread extends Thread{
 			}
 			// theRest != null
 			// not all syllables are used and the structure isn't finished
-			returnString = getStructureWithSyllablesInner(theRest);
+			returnString = getSentenceInner(theRest);
 			if(returnString == null){
-				//Log.i("TAG", "back");
 				syllables += syll;
 				return null;
 			}
@@ -514,7 +495,6 @@ public class FindSentenceThread extends Thread{
 				return structure.substring(1, syllIndexS) + " " + returnString;
 			}
 		}
-		//Log.i("TAG", "back");
 		return null;
 	}
 	
@@ -591,7 +571,6 @@ public class FindSentenceThread extends Thread{
 				Log.i("TAG", "ERROR: Word " + words.get(i) + " was not found!");
 			}
 		}
-		//Log.i("TAG", "GIVE back: " + numberOfSyllables + " syllables with sentence " + sentence);
 		return numberOfSyllables;
 	}
 }

@@ -1,6 +1,6 @@
-package haiku.top.view;
+package haiku.top.view.date;
 
-import haiku.top.model.YearMonth;
+import haiku.top.model.date.YearMonth;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;

@@ -1,8 +1,9 @@
-package haiku.top.model;
+package haiku.top.model.smshandler;
 
 import haiku.top.HaikuActivity;
+import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.sql.DatabaseHandler;
-import haiku.top.view.MainView;
+import haiku.top.view.main.MainView;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
-package haiku.top.view;
+package haiku.top.view.bin;
 
-import haiku.top.model.SMS;
 import haiku.top.model.SMSBinWord;
 import haiku.top.model.Word;
+import haiku.top.model.smshandler.SMS;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -94,6 +94,18 @@ public class BinSMSView extends LinearLayout{
 		message = "<font color='black'>" + sms.getMessage() + "</font>";
 		textView.setText(Html.fromHtml(message), TextView.BufferType.SPANNABLE);
 		//TODO test!!
+		int times = randomGenerator.nextInt(5);
+		ArrayList<Integer> pos = new ArrayList<Integer>();
+		for(int i = 0; i < words.size(); i++){
+			pos.add(i);
+		}
+		int index;
+		for(int i = 0; i < times && !pos.isEmpty(); i++){
+			index = randomGenerator.nextInt(pos.size());
+			setUsedWordAtPos(pos.get(index));
+			pos.remove(index);
+		}
+		
 //		if(words.size() > 5){
 //			setUsedWordAtPos(5);
 //		}

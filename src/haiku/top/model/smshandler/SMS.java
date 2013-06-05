@@ -1,7 +1,11 @@
-package haiku.top.model;
+package haiku.top.model.smshandler;
 
 import haiku.top.HaikuActivity;
-import haiku.top.view.DateView;
+import haiku.top.model.Word;
+import haiku.top.model.date.Month;
+import haiku.top.model.date.YearMonth;
+import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.view.date.DateView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

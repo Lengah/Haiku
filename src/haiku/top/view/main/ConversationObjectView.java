@@ -1,4 +1,4 @@
-package haiku.top.view;
+package haiku.top.view.main;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +18,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +58,10 @@ public class ConversationObjectView extends LinearLayout{
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
 		nameView.setText(name);
 		
-		setPadding(5, 2, 5, 2); //TODO dp!
+		int paddingTopAndBottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
+		int paddingLeftAndRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, getResources().getDisplayMetrics());
+		
+		setPadding(paddingLeftAndRight, paddingTopAndBottom, paddingLeftAndRight, paddingTopAndBottom);
 		
 //		picture = HaikuActivity.getContactPhoto(context, name);
 //		picture = HaikuActivity.getImage(context, name);

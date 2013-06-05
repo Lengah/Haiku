@@ -1,7 +1,6 @@
 package haiku.top.model;
 
-public class CreateSamplesContact
-{
+public class CreateSamplesContact{
 	public String name;
 	public String phoneNumber;
 	

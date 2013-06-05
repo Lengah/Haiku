@@ -1,11 +1,12 @@
-package haiku.top.view;
+package haiku.top.view.date;
 
 // OnLongClick and onTouch doesn't seem to work at the same time
 
 import haiku.top.HaikuActivity;
-import haiku.top.model.HaikuGenerator;
-import haiku.top.model.Month;
-import haiku.top.model.YearMonth;
+import haiku.top.model.date.Month;
+import haiku.top.model.date.YearMonth;
+import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.view.main.MainView;
 
 import java.util.ArrayList;
 

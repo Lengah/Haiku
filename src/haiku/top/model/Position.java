@@ -1,11 +1,10 @@
-package haiku.top.view;
+package haiku.top.model;
 
 public class Position {
 	private float xPos;
 	private float yPos;
 	
-	public Position(){
-	}
+	public Position(){}
 	
 	public Position(float xPos, float yPos){
 		this.xPos = xPos;

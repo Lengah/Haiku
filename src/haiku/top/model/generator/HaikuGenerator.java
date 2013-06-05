@@ -1,11 +1,18 @@
-package haiku.top.model;
+package haiku.top.model.generator;
 
 import haiku.top.HaikuActivity;
-import haiku.top.view.BinView;
-import haiku.top.view.ConversationObjectView;
-import haiku.top.view.DateView;
-import haiku.top.view.MainView;
-import haiku.top.view.SMSObjectView;
+import haiku.top.model.PartOfSpeech;
+import haiku.top.model.Theme;
+import haiku.top.model.Word;
+import haiku.top.model.date.YearMonth;
+import haiku.top.model.smshandler.AddSmsThread;
+import haiku.top.model.smshandler.AddSmsesThread;
+import haiku.top.model.smshandler.SMS;
+import haiku.top.view.bin.BinView;
+import haiku.top.view.date.DateView;
+import haiku.top.view.main.ConversationObjectView;
+import haiku.top.view.main.MainView;
+import haiku.top.view.main.SMSObjectView;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

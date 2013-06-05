@@ -1,14 +1,19 @@
-package haiku.top.view;
+package haiku.top.view.bin;
 
 import java.util.ArrayList;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
-import haiku.top.model.Haiku;
-import haiku.top.model.HaikuGenerator;
-import haiku.top.model.SMS;
+import haiku.top.model.Position;
+import haiku.top.model.SMSBinWord;
 import haiku.top.model.Theme;
-import haiku.top.model.YearMonth;
+import haiku.top.model.date.YearMonth;
+import haiku.top.model.generator.Haiku;
+import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.smshandler.SMS;
+import haiku.top.view.ThemeObjectView;
+import haiku.top.view.date.YearMonthView;
+import haiku.top.view.main.MainView;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -60,6 +65,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private LinearLayout textList;
 	
 	private ImageButton saveButton;
+	
+	private LinearLayout haikuView;
+	private TextView row1;
+	private TextView row2;
+	private TextView row3;
 	
 	private ArrayList<YearMonthView> datesView = new ArrayList<YearMonthView>();
 	private ArrayList<BinSMSView> smsView = new ArrayList<BinSMSView>();
@@ -153,10 +163,15 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int TEXT_WIDTH = 478;
 	private static final int TEXT_HEIGHT = 750;
 	
+	// the haiku
+	private static final Position HAIKU_UPPER_LEFT = new Position(240, 600);
+	private static final int HAIKU_WIDTH = 478;
+	private static final int HAIKU_HEIGHT = 250;
+	
 	// the save button
-	private static final Position SAVE_UPPER_LEFT = new Position(518, 1010);
-	private static final int SAVE_WIDTH = 200;
-	private static final int SAVE_HEIGHT = 200;
+	private static final Position SAVE_UPPER_LEFT = new Position(468, 960);
+	private static final int SAVE_WIDTH = 250;
+	private static final int SAVE_HEIGHT = 250;
 	
 	// the date list
 	private static final Position DATE_UPPER_LEFT = new Position(70, 870);
@@ -181,6 +196,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private View viewBeingDragged = null;
 	
 	private boolean haikuFinished = false;
+	
+	public ArrayList<String> wordsRemoved = new ArrayList<String>(); // so that the haikus know which words they cannot use
+	public ArrayList<SMSBinWord> lastChanged = new ArrayList<SMSBinWord>(); // used by undo
 	
 	public BinView(Context context) {
 		super(context);
@@ -251,8 +269,42 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		int contactNameHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
 		contactName.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, contactNameHeight));
 		
+		// HAIKU
+		int	haikuWidth = (int)(((double)HAIKU_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		int haikuHeight = (int)(((double)HAIKU_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
 		
+		int haikuMarginLeft = (int)(((double)HAIKU_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		int haikuMarginTop = (int)(((double)HAIKU_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
+		
+		haikuView = new LinearLayout(context);
+		row1 = new TextView(context);
+		row2 = new TextView(context);
+		row3 = new TextView(context);
+		
+		haikuView.setOrientation(LinearLayout.VERTICAL);
+		
+		row1.setGravity(CENTER_VERTICAL);
+		row2.setGravity(CENTER_VERTICAL);
+		row3.setGravity(CENTER_VERTICAL);
+		row1.setTextColor(Color.BLACK);
+		row2.setTextColor(Color.BLACK);
+		row3.setTextColor(Color.BLACK);
+		row1.setTextSize(17);
+		row2.setTextSize(17);
+		row3.setTextSize(17);
+		
+		LayoutParams haikuParams = new RelativeLayout.LayoutParams(haikuWidth, haikuHeight);
+		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		haikuParams.setMargins(haikuMarginLeft, haikuMarginTop, 0, 0);
+		haikuView.setLayoutParams(haikuParams);
+		haikuView.addView(row1);
+		haikuView.addView(row2);
+		haikuView.addView(row3);
+		addView(haikuView);
+		haikuView.setVisibility(GONE);
 	
+		
 		// SAVE BUTTON
 		int saveWidth = (int)(((double)SAVE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
 		int saveHeight = (int)(((double)SAVE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
@@ -267,7 +319,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		saveParams.setMargins(saveMarginLeft, saveMarginTop, 0, 0);
 		saveButton.setLayoutParams(saveParams);
 		addView(saveButton);
-//		saveButton.setImageResource(R.drawable.save_button);
+//		saveButton.setImageResource(R.drawable.save_button_default);
+		saveButton.setBackgroundResource(R.drawable.save_button_default);
 		
 		
 		// DATE
@@ -478,8 +531,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		HaikuGenerator.createHaikus();
 	}
 	
-	public void updateProgress(){
+	public void reset(){
 		progressBar.resetProgress();
+		haikuView.setVisibility(GONE);
+		textScroll.setVisibility(VISIBLE);
+		saveButton.setVisibility(GONE);
+		updateContactName();
+		haikuFinished = false;
 //		progressBar.setMaxProgress(smsView.size()*10); //TODO
 	}
 	
@@ -672,7 +730,14 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public void haikuReady(){
 		//TODO
+		Haiku haiku = HaikuGenerator.getRandomReadyHaiku();
+		row1.setText(haiku.getRow(1));
+		row2.setText(haiku.getRow(2));
+		row3.setText(haiku.getRow(3));
+		haikuView.setVisibility(VISIBLE);
+		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
+		contactName.setVisibility(GONE);
 	}
 	
 	public void haikuIsFinished(){

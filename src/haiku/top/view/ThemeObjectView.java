@@ -3,6 +3,7 @@ package haiku.top.view;
 import java.util.DuplicateFormatFlagsException;
 
 import haiku.top.model.Theme;
+import haiku.top.view.bin.BinView;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;

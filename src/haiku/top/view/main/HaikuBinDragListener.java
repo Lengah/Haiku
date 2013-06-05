@@ -1,11 +1,13 @@
-package haiku.top.view;
+package haiku.top.view.main;
 
 import java.util.ArrayList;
 
 import haiku.top.R;
-import haiku.top.model.HaikuGenerator;
 import haiku.top.model.Theme;
-import haiku.top.model.YearMonth;
+import haiku.top.model.date.YearMonth;
+import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.view.ThemeObjectView;
+import haiku.top.view.date.QuarterCircle;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;

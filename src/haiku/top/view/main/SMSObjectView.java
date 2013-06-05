@@ -1,12 +1,12 @@
-package haiku.top.view;
+package haiku.top.view.main;
 
 import java.util.Date;
 import java.util.DuplicateFormatFlagsException;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
-import haiku.top.model.SMS;
 import haiku.top.model.Theme;
+import haiku.top.model.smshandler.SMS;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;

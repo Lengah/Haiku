@@ -1,4 +1,4 @@
-package haiku.top.model;
+package haiku.top.model.date;
 
 public enum Month {
 	January,

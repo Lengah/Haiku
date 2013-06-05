@@ -1,7 +1,7 @@
-package haiku.top.model;
+package haiku.top.model.generator;
 
 
-import haiku.top.view.BinView;
+import haiku.top.view.bin.BinView;
 
 import java.util.ArrayList;
 

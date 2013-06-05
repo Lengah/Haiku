@@ -6,14 +6,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
-import haiku.top.model.Contact;
-import haiku.top.model.Haiku;
-import haiku.top.model.HaikuGenerator;
 import haiku.top.model.PartOfSpeech;
-import haiku.top.model.SMS;
 import haiku.top.model.SMSBinWord;
 import haiku.top.model.Theme;
 import haiku.top.model.Word;
+import haiku.top.model.generator.Haiku;
+import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.smshandler.SMS;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;

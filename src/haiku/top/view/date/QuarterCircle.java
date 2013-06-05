@@ -1,7 +1,8 @@
-package haiku.top.view;
+package haiku.top.view.date;
 
 import haiku.top.R;
-import haiku.top.model.Month;
+import haiku.top.model.Position;
+import haiku.top.model.date.Month;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;

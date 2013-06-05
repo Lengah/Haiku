@@ -1,4 +1,4 @@
-package haiku.top.view;
+package haiku.top.view.bin;
 
 import haiku.top.R;
 import android.content.Context;
@@ -70,6 +70,7 @@ public class HaikuProgressBar extends View{
 		progress++;
 		if(progress > maxProgress){
 			progress = maxProgress;
+			BinView.getInstance().haikuReady();
 		}
 		updateXpos();
 		invalidate();
@@ -94,5 +95,6 @@ public class HaikuProgressBar extends View{
 	
 	public void resetProgress(){
 		progress = 0;
+		
 	}
 }

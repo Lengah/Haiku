@@ -1,5 +1,6 @@
-package haiku.top.model;
+package haiku.top.model.smshandler;
 
+import haiku.top.model.generator.HaikuGenerator;
 import android.util.Log;
 
 public class AddSmsThread extends Thread{

@@ -1,4 +1,4 @@
-package haiku.top.view;
+package haiku.top.view.main;
 
 import java.util.ArrayList;
 
@@ -37,11 +37,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import haiku.top.HaikuActivity;
 import haiku.top.R;
-import haiku.top.model.HaikuGenerator;
-import haiku.top.model.SMS;
 import haiku.top.model.Theme;
+import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.smshandler.SMS;
+import haiku.top.model.smshandler.ShowSMSESThread;
 import haiku.top.model.sql.DatabaseHandler;
-import haiku.top.view.adapters.ContactListAdapter;
+import haiku.top.view.ThemeObjectView;
+import haiku.top.view.bin.BinView;
+import haiku.top.view.date.DateView;
 
 public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
 	private static MainView mv;
@@ -461,7 +464,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		haikuBinViewExtended.update();
 		HaikuGenerator.createHaikus();
 		haikuBinViewExtended.resetHaikuFinished();
-		haikuBinViewExtended.updateProgress();
+//		haikuBinViewExtended.reset();
 		binViewClosed = false;
 		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(GONE);

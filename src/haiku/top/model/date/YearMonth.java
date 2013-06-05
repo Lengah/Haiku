@@ -1,4 +1,5 @@
-package haiku.top.model;
+package haiku.top.model.date;
+
 
 public class YearMonth {
 	private int year;
