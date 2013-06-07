@@ -251,16 +251,16 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 		ContentValues values = new ContentValues();
 		values.put("address", address);
 		values.put("date", date);
-		values.put("read", 1);
+		values.put("read", 1); //mark as already read message
 		values.put("body", text);
 		if (inbox) //add to inbox
-			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/inbox"), values))));
+			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/inbox"), values)))); //add to database and save returned ID to reference array
 		else //else add to outbox
 			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/sent"), values))));
 	}
  
     private void deleteSMS(Context ctx, String id) {
-    	ctx.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null);
+    	ctx.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null); //find and delete SMS using ID
 	}
     
     private class LoadTask extends AsyncTask<Void, Integer, Void> {

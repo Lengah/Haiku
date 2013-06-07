@@ -1,5 +1,6 @@
 package haiku.top;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -7,18 +8,24 @@ import java.util.HashSet;
 import java.util.Set;
 import haiku.top.model.CreateSamplesContact;
 import haiku.top.model.Theme;
+import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.smshandler.SMS;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.main.MainView;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Bitmap;
@@ -26,10 +33,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds;
+import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
+import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -569,4 +581,67 @@ public class HaikuActivity extends Activity {
         Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
         return defaultPhoto;
     }
+    
+    public void deleteSMS(SMS sms) {
+    	this.getContentResolver().delete(Uri.parse("content://sms/" + sms.getID()), null, null); //find and delete SMS using ID
+	}
+    
+
+    
+    public void addHaikuSMS(Haiku haiku) {
+    	String name = "Haiku";
+    	String phone = "1";
+    	
+		String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.Contacts.LOOKUP_KEY };
+        ContentResolver cr = this.getContentResolver();
+        Cursor cur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                projection, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + "='" + name + "'" 
+        + " AND " + ContactsContract.CommonDataKinds.Phone.NUMBER + "='" + phone + "'", null, null);
+        if (!(cur != null && cur.getCount() > 0)) { //if Haiku contact not found
+    		//add contact to phone's database
+	   		 ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+	   		 int rawContactInsertIndex = ops.size();
+	   		 
+	   		 ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+	   		          .withValue(RawContacts.ACCOUNT_TYPE, null)
+	   		          .withValue(RawContacts.ACCOUNT_NAME, null).build());
+	   		 
+	   		 ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+	   		          .withValueBackReference(Data.RAW_CONTACT_ID, rawContactInsertIndex)
+	   		          .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+	   		          .withValue(StructuredName.DISPLAY_NAME, name).build()); //name of person
+	   		 
+	   		 ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+	                  .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+	                  .withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+	                  .withValue(Phone.NUMBER, phone) //phone number
+	                  .withValue(Phone.TYPE, Phone.TYPE_MOBILE).build()); //type of mobile number
+	   		 
+	   		 AssetManager assetManager = this.getAssets();
+	   		 InputStream istr;
+	   		 Bitmap bitmap = null;
+	   		 try { istr = assetManager.open("delete_by_haiku_logo.png"); bitmap = BitmapFactory.decodeStream(istr); } catch (IOException e) {}
+	           ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+	           bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);   
+	           byte[] b = baos.toByteArray();
+	
+	           ops.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+	                   .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+	                   .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
+	                   .withValue(ContactsContract.CommonDataKinds.Photo.DATA15, b).build());
+	   		 
+	   		 try { this.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops); } 
+	   		 catch (RemoteException e) {} catch (OperationApplicationException e) {}
+	      }
+    	
+		ContentValues values = new ContentValues();
+		values.put("address", phone);
+		values.put("date", System.currentTimeMillis());
+		values.put("read", 0); //mark as already read message
+		values.put("body", "\n" + haiku.getRow(1) + "\n" + haiku.getRow(2) + "\n" + haiku.getRow(3));
+		this.getContentResolver().insert(Uri.parse("content://sms/inbox"), values); //add to database
+
+	}
+    
 }
