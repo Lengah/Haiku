@@ -51,34 +51,13 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String TABLE_THEMEWORD = "theme_word";
 
     // Column names
-    private static final String KEY_SENTENCE_ID = "_id"; //INTEGER PRIMARY KEY
-    private static final String KEY_SENTENCE_TEXT = "text"; //TEXT
-    private static final String KEY_SENTENCE_SMSID = "smsid"; //INTEGER (foreign key to predefined table "SMS")
-    
     private static final String KEY_PARTOFSPEECH_ID = "_id"; //INTEGER PRIMARY KEY
     private static final String KEY_PARTOFSPEECH_TYPE = "type"; //TEXT
     
-    private static final String KEY_WORDPARTOFSPEECH_ID = "_id"; //INTEGER PRIMARY KEY
-    private static final String KEY_WORDPARTOFSPEECH_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
-    private static final String KEY_WORDPARTOFSPEECH_PARTOFSPEECHID = "partofspeechid"; //INTEGER, Foreign key partofspeech(_id)
-
     private static final String KEY_WORD_ID = "_id"; //INTEGER PRIMARY KEY
     private static final String KEY_WORD_TEXT = "text"; //TEXT
     private static final String KEY_WORD_SYLLABLES = "syllables"; //TEXT
     private static final String KEY_WORD_PARTOFSPEECHID = "partofspeechid";
-
-    private static final String KEY_WORDINSENTENCE_ID = "_id"; //INTEGER PRIMARY KEY
-    private static final String KEY_WORDINSENTENCE_POSITION = "position"; //INTEGER
-    private static final String KEY_WORDINSENTENCE_SENTENCEID = "sentenceid"; //INTEGER, Foreign key sentence(_id)
-    private static final String KEY_WORDINSENTENCE_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
-    
-    private static final String KEY_SMSWORD_ID = "_id"; //INTEGER PRIMARY KEY
-    private static final String KEY_SMSWORD_SMSID = "smsid"; //foreign key to predefined table "SMS"
-    private static final String KEY_SMSWORD_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
-
-    private static final String KEY_SENTENCETHEME_ID = "_id"; //INTEGER PRIMARY KEY
-    private static final String KEY_SENTENCETHEME_SENTENCEID = "sentenceid"; //INTEGER, Foreign key sentence(_id)
-    private static final String KEY_SENTENCETHEME_THEMEID = "themeid"; //INTEGER, Foreign key theme(_id)
 
     private static final String KEY_THEME_ID = "_id"; //INTEGER PRIMARY KEY
     private static final String KEY_THEME_NAME = "name"; //TEXT
@@ -380,17 +359,17 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		return wordids;
 	}
 	
-	public ArrayList<String> getWordsInSMS(String smsID) {
-		ArrayList<String> words = new ArrayList<String>();
-		Cursor cursor = myDataBase.rawQuery("SELECT " + KEY_SMSWORD_WORDID + " FROM " + TABLE_SMSWORD + " WHERE " + KEY_SMSWORD_SMSID + " = " + smsID  + ";", null);
-	    if (cursor.moveToFirst()) {
-	        do {
-	        	words.add(cursor.getString(0));
-	        } while (cursor.moveToNext());
-	    }
-	    cursor.close();
-	    return words;
-	}
+//	public ArrayList<String> getWordsInSMS(String smsID) {
+//		ArrayList<String> words = new ArrayList<String>();
+//		Cursor cursor = myDataBase.rawQuery("SELECT " + KEY_SMSWORD_WORDID + " FROM " + TABLE_SMSWORD + " WHERE " + KEY_SMSWORD_SMSID + " = " + smsID  + ";", null);
+//	    if (cursor.moveToFirst()) {
+//	        do {
+//	        	words.add(cursor.getString(0));
+//	        } while (cursor.moveToNext());
+//	    }
+//	    cursor.close();
+//	    return words;
+//	}
 	
 	public Theme getTheAllTheme() {
 	    Cursor cursor = myDataBase.query(TABLE_THEME, new String[] { KEY_THEME_ID }, KEY_THEME_NAME + "=?", new String[] { "all" }, null, null, null, null);

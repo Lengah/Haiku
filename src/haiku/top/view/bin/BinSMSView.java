@@ -18,8 +18,6 @@ import android.widget.TextView;
 public class BinSMSView extends LinearLayout{
 	private ArrayList<SMSBinWord> words = new ArrayList<SMSBinWord>(); // doesn't have to be "real" words, so it isn't of the type Word
 	private ArrayList<Integer> usedWordsIndexes = new ArrayList<Integer>();
-	private static final int COLOR_DEFAULT = Color.BLACK;
-	private static final int COLOR_REMOVED = Color.GRAY;
 	private SMS sms;
 	private TextView textView;
 	private String message;
@@ -93,19 +91,27 @@ public class BinSMSView extends LinearLayout{
 //		updateMessage();
 		message = "<font color='black'>" + sms.getMessage() + "</font>";
 		textView.setText(Html.fromHtml(message), TextView.BufferType.SPANNABLE);
-		//TODO test!!
-		int times = randomGenerator.nextInt(5);
-		ArrayList<Integer> pos = new ArrayList<Integer>();
-		for(int i = 0; i < words.size(); i++){
-			pos.add(i);
-		}
-		int index;
-		for(int i = 0; i < times && !pos.isEmpty(); i++){
-			index = randomGenerator.nextInt(pos.size());
-			setUsedWordAtPos(pos.get(index));
-			pos.remove(index);
-		}
 		
+		ArrayList<String> stringWords = new ArrayList<String>();
+		for(int i = 0; i < words.size(); i++){
+			stringWords.add(words.get(i).getWord());
+		}
+		BinView.getInstance().addWords(stringWords);
+		
+		//TODO test!!
+//		int times = randomGenerator.nextInt(5);
+//		ArrayList<Integer> pos = new ArrayList<Integer>();
+//		for(int i = 0; i < words.size(); i++){
+//			pos.add(i);
+//		}
+//		int index;
+//		for(int i = 0; i < times && !pos.isEmpty(); i++){
+//			index = randomGenerator.nextInt(pos.size());
+//			setUsedWordAtPos(pos.get(index));
+//			pos.remove(index);
+//		}
+		
+		// Another test!
 //		if(words.size() > 5){
 //			setUsedWordAtPos(5);
 //		}
@@ -115,6 +121,15 @@ public class BinSMSView extends LinearLayout{
 //		}
 		// /test
 	}
+	
+	public ArrayList<String> getWordsAsStrings(){
+		ArrayList<String> stringWords = new ArrayList<String>();
+		for(int i = 0; i < words.size(); i++){
+			stringWords.add(words.get(i).getWord());
+		}
+		return stringWords;
+	}
+	
 	
 	public void updateMessage(){
 		message = "";
@@ -145,7 +160,7 @@ public class BinSMSView extends LinearLayout{
 				break;
 			}
 		}
-		lastIndexSetToUsed = index;
+		lastIndexesSetToUsed.add(index);
 		updateMessage();
 	}
 	
@@ -160,27 +175,50 @@ public class BinSMSView extends LinearLayout{
 	}
 	
 	private static Random randomGenerator = new Random();
+	public static final int CHANCE_TO_SET = 10; // in %
 	
 	/**
 	 * 
-	 * @return the index of the text set to used
+	 * @return The strings of the texts that are set to used
 	 */
-	public void setUsedWordAtRandom(){
+	public ArrayList<String> setUsedWordsAtRandom(){
+		lastIndexesSetToUsed.clear();
+		ArrayList<String> setWords = new ArrayList<String>();
 		ArrayList<Integer> notUsed = new ArrayList<Integer>();
 		for(int i = 0; i < words.size(); i++){
 			notUsed.add(i);
 		}
 		notUsed.removeAll(usedWordsIndexes);
-		int randomIndex = randomGenerator.nextInt(notUsed.size());
-		setUsedWordAtPos(usedWordsIndexes.get(randomIndex));
+		for(int i = 0; i < notUsed.size(); i++){
+			if(randomGenerator.nextInt(100) < CHANCE_TO_SET){
+				setUsedWordAtPos(notUsed.get(i));
+				setWords.add(words.get(notUsed.get(i)).getWord());
+			}
+		}
+		return setWords;
+		
+		
+//		setUsedWordAtPos(notUsed.get(randomIndex));
+//		return words.get(notUsed.get(randomIndex)).getWord();
+//		
+//		int randomIndex = randomGenerator.nextInt(notUsed.size());
 	}
 	
-	private int lastIndexSetToUsed = -1;
+	private ArrayList<Integer> lastIndexesSetToUsed = new ArrayList<Integer>();
 	
 	public void undoLast(){
-		if(lastIndexSetToUsed != -1){ // if -1, then nothing has been done -> nothing to undo
-			unsetUsedWordAtPos(lastIndexSetToUsed);
+		for(int i = lastIndexesSetToUsed.size() - 1; i >= 0; i--){
+			unsetUsedWordAtPos(lastIndexesSetToUsed.get(i));
 		}
+		lastIndexesSetToUsed.clear();
+//		if(lastIndexSetToUsed != -1){ // if -1, then nothing has been done -> nothing to undo
+//			unsetUsedWordAtPos(lastIndexSetToUsed);
+//		}
+	}
+	
+	public void undoIndex(int index){
+		unsetUsedWordAtPos(lastIndexesSetToUsed.get(index));
+		lastIndexesSetToUsed.remove(index);
 	}
 
 }

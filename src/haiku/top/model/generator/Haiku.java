@@ -1,6 +1,7 @@
 package haiku.top.model.generator;
 
 
+import haiku.top.model.WordAndNumber;
 import haiku.top.view.bin.BinView;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ public class Haiku {
 	private boolean haikuFinished = false;
 	private double startTime = System.currentTimeMillis();
 	private boolean themes;
+	private ArrayList<String> wordsUsed = new ArrayList<String>();
 	
 	public Haiku(boolean themes){
 		this.themes = themes;
@@ -52,7 +54,25 @@ public class Haiku {
 		if(haikuFinished){
 			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
 			print();
+			initWordsUsed();
 			BinView.getInstance().haikuIsFinished();
+		}
+	}
+	
+	public ArrayList<String> getWordsUsed(){
+		return wordsUsed;
+	}
+	
+	public void initWordsUsed(){
+		wordsUsed.addAll(HaikuGenerator.getWords(row1));
+		wordsUsed.addAll(HaikuGenerator.getWords(row2));
+		wordsUsed.addAll(HaikuGenerator.getWords(row3));
+		ArrayList<String> wordsRemoved = BinView.getInstance().getAllWordsRemoved();
+		for(int i = 0; i < wordsRemoved.size(); i++){
+			if(wordsUsed.contains(wordsRemoved.get(i)) && !HaikuGenerator.getRulesWords().contains(wordsRemoved.get(i))){
+				HaikuGenerator.removeHaiku(this);
+				return;
+			}
 		}
 	}
 	

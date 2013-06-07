@@ -1,12 +1,14 @@
 package haiku.top.view.bin;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
 import haiku.top.model.Position;
 import haiku.top.model.SMSBinWord;
 import haiku.top.model.Theme;
+import haiku.top.model.WordAndNumber;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
@@ -22,6 +24,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable.Orientation;
 import android.net.Uri;
+import android.provider.UserDictionary.Words;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
@@ -197,8 +200,17 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private boolean haikuFinished = false;
 	
-	public ArrayList<String> wordsRemoved = new ArrayList<String>(); // so that the haikus know which words they cannot use
-	public ArrayList<SMSBinWord> lastChanged = new ArrayList<SMSBinWord>(); // used by undo
+	private static Random randomGenerator = new Random();
+	public static final int PERCENTAGE_TO_CHANGE = 50;
+	private ArrayList<WordAndNumber> wordsUsed = new ArrayList<WordAndNumber>(); // to know when a word is completely removed
+	private ArrayList<String> allWordsRemoved = new ArrayList<String>(); // so that the haikus know which words they can't use
+	private ArrayList<WordAndNumber> wordsRemovedLast = new ArrayList<WordAndNumber>(); // to easily undo last change and to check if some haikus are no longer valid
+	private ArrayList<BinSMSView> lastChanged = new ArrayList<BinSMSView>(); // used by undo
+	
+	private Haiku safeHaiku;
+	private boolean showHaiku = false;
+	private Haiku endHaiku;
+	private boolean stateChanged = false; // If the user closes the bin and then opens it without adding new SMS, there is no need to generate new SMS
 	
 	public BinView(Context context) {
 		super(context);
@@ -321,6 +333,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		addView(saveButton);
 //		saveButton.setImageResource(R.drawable.save_button_default);
 		saveButton.setBackgroundResource(R.drawable.save_button_default);
+		saveButton.setOnClickListener(this);
+		saveButton.setVisibility(GONE);
 		
 		
 		// DATE
@@ -351,7 +365,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < 8; i++){
 			themeViews.add(new LinearLayout(context));
 			addView(themeViews.get(i));
-			themeViews.get(i).setVisibility(GONE);
+//			themeViews.get(i).setVisibility(GONE);
 		}
 		int theme1MarginLeft = (int)(((double)THEME1_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int theme1MarginTop = (int)(((double)THEME1_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
@@ -446,7 +460,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		themeViews.get(7).setRotation(THEME_ROTATION);
 		
 		
-		saveButton.setVisibility(GONE);
 		setOnClickListener(this);
 		setOnTouchListener(this);
 		setOnDragListener(this);
@@ -496,21 +509,25 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		if(smsView.size() == 1){
 			// Only sms! -> show contact
 			updateContactName();
-			
 		}
 		else if(showingContactName && contactID != sms.getContactID()){
 			showingContactName = false;
 			contactName.setVisibility(GONE);
 		}
-		
+		stateChanged = true;
 	}
 	
 	public void removeSMS(BinSMSView sms){
+		removeWords(sms.getWordsAsStrings());
 		textList.removeView(sms);
 		smsView.remove(sms);
 		updateContactName();
-		resetHaikuFinished();
-		HaikuGenerator.createHaikus();
+		HaikuGenerator.checkIfHaikusAreValid(allWordsRemoved);
+		if(HaikuGenerator.getRandomReadyHaiku() == null){
+			HaikuGenerator.updateWordsUsed();
+			resetHaikuFinished();
+			HaikuGenerator.createHaikus();
+		}
 	}
 	
 	public void addSMSES(ArrayList<SMS> smses){
@@ -522,13 +539,18 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public void removeSMSES(ArrayList<SMS> smses){
 		for(int i = smsView.size() -1 ; i >= 0; i--){
 			if(smses.contains(smsView.get(i).getSMS())){
+				removeWords(smsView.get(i).getWordsAsStrings());
 				textList.removeView(smsView.get(i));
 				smsView.remove(i);
 			}	
 		}
 		updateContactName();
-		resetHaikuFinished();
-		HaikuGenerator.createHaikus();
+		HaikuGenerator.checkIfHaikusAreValid(allWordsRemoved);
+		if(HaikuGenerator.getRandomReadyHaiku() == null){
+			HaikuGenerator.updateWordsUsed();
+			resetHaikuFinished();
+			HaikuGenerator.createHaikus();
+		}
 	}
 	
 	public void reset(){
@@ -536,9 +558,73 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		haikuView.setVisibility(GONE);
 		textScroll.setVisibility(VISIBLE);
 		saveButton.setVisibility(GONE);
-		updateContactName();
 		haikuFinished = false;
-//		progressBar.setMaxProgress(smsView.size()*10); //TODO
+		showHaiku = false;
+		wordsUsed.clear();
+		allWordsRemoved.clear();
+		wordsRemovedLast.clear();
+		lastChanged.clear();
+		datesView.clear();
+		smsView.clear();
+		themesView.clear();
+		textList.removeAllViews();
+		dateList.removeAllViews();
+		safeHaiku = null;
+		endHaiku = null;
+		for(int i = 0; i < themeViews.size(); i++){
+			themeViews.get(i).removeAllViews();
+			themeViews.get(i).setVisibility(GONE);
+		}
+		HaikuGenerator.reset();
+		updateContactName();
+		MainView.getInstance().updateConversations();
+		MainView.getInstance().updateThemeView();
+//		progressBar.setMaxProgress(smsView.size()*10); //TODO not here
+	}
+	
+	public void onOpen(){
+		if(!stateChanged){
+			// the bin was closed and then opened, but the contents did not change -> nothing needs to be done
+			return;
+		}
+		if(stateChanged && haikuFinished){
+			// new SMS has been added to the bin. If new haikus are not generated, they will not be used
+			resetHaikuFinished();
+			HaikuGenerator.updateWordsUsed();
+		}
+		// this is the first time the bin is opened ever or since the last change
+		HaikuGenerator.createHaikus();
+	}
+	
+	public void addWords(ArrayList<String> words){
+		boolean found;
+		for(int i = 0; i < words.size(); i++){
+			found = false;
+			for(int a = 0; a < wordsUsed.size(); a++){
+				if(wordsUsed.get(a).getWord().equals(words.get(i))){
+					found = true;
+					wordsUsed.get(a).increase();
+					break;
+				}
+			}
+			if(!found){
+				wordsUsed.add(new WordAndNumber(words.get(i)));
+			}
+		}
+	}
+	
+	public void removeWords(ArrayList<String> words){
+		for(int i = 0; i < words.size(); i++){
+			for(int a = wordsUsed.size() - 1; a >= 0; a--){
+				if(wordsUsed.get(a).getWord().equals(words.get(i))){
+					if(wordsUsed.get(a).decrease()){
+						wordsUsed.remove(a);
+						allWordsRemoved.add(words.get(i));
+					}
+					break;
+				}
+			}
+		}
 	}
 	
 	/**
@@ -582,19 +668,26 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public void addTheme(Theme theme){
 		ThemeObjectView tob = new ThemeObjectView(context, theme, true);
 		themesView.add(tob);
-		int index = themesView.indexOf(tob);
-		themeViews.get(index).addView(tob);
-		themeViews.get(index).setVisibility(VISIBLE);
 		tob.setOnTouchListener(this);
+		stateChanged = true;
+		updateThemeView();
 	}
 	
 	public void removeTheme(ThemeObjectView tob){
-		int index = themesView.indexOf(tob);
 		themesView.remove(tob);
-		themeViews.get(index).removeAllViews();
-		themeViews.get(index).setVisibility(GONE);
+		updateThemeView();
 		resetHaikuFinished();
+		HaikuGenerator.updateWordsUsed();
 		HaikuGenerator.createHaikus();
+	}
+	
+	public void updateThemeView(){
+		for(int i = 0; i < themeViews.size(); i++){
+			themeViews.get(i).removeAllViews();
+		}
+		for(int i = 0; i < themesView.size(); i++){
+			themeViews.get(i).addView(themesView.get(i));
+		}
 	}
 	
 	/**
@@ -659,8 +752,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		dragLine2M2 = line2Dot2.getYPos() - line2Dot2.getXPos()*dragLine2K2;
 		dragLine2M3 = line2Dot3.getYPos() - line2Dot3.getXPos()*dragLine2K3;
 	}
-	
-	
+		
 	public boolean isOutOfBinView(Position pos){
 		// Line 1
 		if(pos.getXPos() < line1Dot2.getXPos()){
@@ -729,15 +821,87 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void haikuReady(){
-		//TODO
-		Haiku haiku = HaikuGenerator.getRandomReadyHaiku();
-		row1.setText(haiku.getRow(1));
-		row2.setText(haiku.getRow(2));
-		row3.setText(haiku.getRow(3));
+		endHaiku = HaikuGenerator.getRandomReadyHaiku(); //TODO
+		row1.setText(endHaiku.getRow(1));
+		row2.setText(endHaiku.getRow(2));
+		row3.setText(endHaiku.getRow(3));
 		haikuView.setVisibility(VISIBLE);
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
 		contactName.setVisibility(GONE);
+		showHaiku = true;
+	}
+	
+	public void undoLastChange(){
+		for(int i = 0; i < lastChanged.size(); i++){
+			lastChanged.get(i).undoLast();
+		}
+		for(int i = allWordsRemoved.size() - 1; i >= 0; i--){
+			for(int a = 0; a < wordsRemovedLast.size(); a++){
+				if(allWordsRemoved.get(i).equals(wordsRemovedLast.get(a).getWord())){
+					allWordsRemoved.remove(i);
+					break;
+				}
+			}
+		}
+		boolean found;
+		for(int a = 0; a < wordsRemovedLast.size(); a++){
+			found = false;
+			for(int i = 0; i < wordsUsed.size(); i++){
+				if(wordsUsed.get(i).getWord().equals(wordsRemovedLast.get(a).getWord())){
+					found = true;
+					wordsUsed.get(i).increase(wordsRemovedLast.get(a).getNumberOf());
+					break;
+				}
+			}
+			if(!found){
+				wordsUsed.add(new WordAndNumber(wordsRemovedLast.get(a).getWord(), wordsRemovedLast.get(a).getNumberOf()));
+			}
+		}
+		wordsRemovedLast.clear();
+		HaikuGenerator.undo();
+	}
+	
+	public void resetUndo(){
+		lastChanged.clear();
+		wordsRemovedLast.clear();
+		HaikuGenerator.resetHaikusRemoved();
+	}
+	
+	public void removeWord(String word){
+		boolean found = false;
+		for(int i = 0; i < wordsRemovedLast.size(); i++){
+			if(wordsRemovedLast.get(i).getWord().equals(word)){
+				found = true;
+				wordsRemovedLast.get(i).increase();
+				break;
+			}
+		}
+		if(!found){
+			wordsRemovedLast.add(new WordAndNumber(word));
+		}
+		found = false;
+		for(int i = 0; i < allWordsRemoved.size(); i++){
+			if(allWordsRemoved.get(i).equals(word)){
+				found = true;
+				return;
+			}
+		}
+		if(!found){
+			for(int i = 0; i < wordsUsed.size(); i++){
+				if(wordsUsed.get(i).getWord().equals(word)){
+					found = true;
+					break;
+				}
+			}
+			if(!found){
+				allWordsRemoved.add(word);
+			}
+		}
+	}
+	
+	public ArrayList<String> getAllWordsRemoved(){
+		return allWordsRemoved;
 	}
 	
 	public void haikuIsFinished(){
@@ -769,6 +933,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final double WAIT_TIME = 100; //ms
 	
 	private boolean canUndo = false;
+	private int eventsNeededForDelete = 5;
+	private int eventCounter = 0;
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -801,6 +967,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		else if(event.getAction() == MotionEvent.ACTION_UP){
 			if(!twoFingers && MainView.CLICK_TIME > System.currentTimeMillis()-startTime){
 				// Click!
+				stateChanged = false;
 				MainView.getInstance().closeBinView();
 				twoFingers = false;
 			}
@@ -817,16 +984,68 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					// first distance check
 					oldDistance = distance;
 				}
-				else if(Math.abs(distance-oldDistance) > deleteDistance && haikuFinished){ //TODO
+				else if(Math.abs(distance-oldDistance) > deleteDistance && haikuFinished && !showHaiku){
 					if(distance < oldDistance){
 						// delete
+						eventCounter++;
 						progressBar.incProgress();
-						canUndo = true;
+						if(eventCounter == eventsNeededForDelete){
+							resetUndo();
+							safeHaiku = HaikuGenerator.getRandomReadyHaiku();
+							String temp;
+							ArrayList<String> tempWords;
+							for(int i = 0; i < smsView.size(); i++){
+								if(randomGenerator.nextInt(100) < PERCENTAGE_TO_CHANGE){
+									tempWords = smsView.get(i).setUsedWordsAtRandom();
+									for(int t = tempWords.size() - 1; t >= 0; t--){
+										temp = tempWords.get(t);
+										if(safeHaiku.getWordsUsed().contains(temp)){
+											for(int a = 0; a < wordsUsed.size(); a++){ // MUST be somewhere here, otherwise there is something wrong somewhere else in the code
+												if(wordsUsed.get(a).getWord().equals(temp)){
+													if(wordsUsed.get(a).getNumberOf() == 1){
+														// can not remove this word
+														smsView.get(i).undoIndex(t);
+													}
+													else{
+														// can remove it
+														wordsUsed.get(a).decrease();
+														removeWord(temp);
+														lastChanged.add(smsView.get(i));
+													}
+													break;
+												}
+											}
+										}
+										else{
+											for(int a = wordsUsed.size() - 1; a >= 0; a--){
+												if(wordsUsed.get(a).getWord().equals(temp)){
+													removeWord(temp);
+													lastChanged.add(smsView.get(i));
+													if(wordsUsed.get(a).decrease()){
+														allWordsRemoved.add(wordsUsed.get(a).getWord());
+														wordsUsed.remove(a);
+													}
+													break;
+												}
+											}
+										}
+									}
+								}
+							}
+							HaikuGenerator.checkIfHaikusAreValid(allWordsRemoved);
+							canUndo = true;
+							eventCounter = 0;
+						}
 					}
 					else if(canUndo){
 						// undo
-						canUndo = false;
+						eventCounter--;
 						progressBar.decProgress();
+						if(eventCounter == -eventsNeededForDelete){
+							canUndo = false;
+							undoLastChange();
+							eventCounter = 0;
+						}
 					}
 					oldDistance = distance;
 				}
@@ -861,13 +1080,32 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 
 	@Override
-	public boolean onLongClick(View arg0) {
+	public boolean onLongClick(View v) {
 		return false;
 	}
 
 	@Override
 	public void onClick(View v) {
-		MainView.getInstance().closeBinView();
+		if(v.equals(saveButton)){
+			//TODO
+			Log.i("TAG", "save!");
+			if(!HaikuActivity.getInstance().isSafeMode()){
+				// safe mode is off!
+				// DELETE
+				ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
+				for(int i = 0; i < smsView.size(); i++){
+					smsToDelete.add(smsView.get(i).getSMS());
+				}
+//				HaikuActivity.getInstance().deleteSMS(smsToDelete); //TODO
+			}
+//			HaikuActivity.getInstance().saveHaiku(endHaiku); //TODO
+			reset();
+		}
+		else{
+			// close bin view
+			stateChanged = false;
+			MainView.getInstance().closeBinView();
+		}
 	}
 
 	@Override

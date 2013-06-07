@@ -95,6 +95,7 @@ public class HaikuProgressBar extends View{
 	
 	public void resetProgress(){
 		progress = 0;
-		
+		updateXpos();
+		invalidate();
 	}
 }
