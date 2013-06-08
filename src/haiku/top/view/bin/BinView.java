@@ -873,6 +873,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		showHaiku = true;
 	}
 	
+	public boolean isShowingHaiku(){
+		return showHaiku;
+	}
+	
 	public void undoLastChange(){
 		for(int i = 0; i < lastChanged.size(); i++){
 			lastChanged.get(i).undoLast();

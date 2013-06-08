@@ -42,7 +42,8 @@ public class HaikuGenerator {
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
-	private static final int NUMBER_OF_GENERATIONS = 3;
+	private static final int NUMBER_OF_GENERATIONS = 10;
+	private static int generationsCounter;
 	
 	private static ArrayList<PartOfSpeech> allWordTypes = new ArrayList<PartOfSpeech>();
 	
@@ -508,9 +509,15 @@ public class HaikuGenerator {
 		
 	public static void createHaikus(){
 		haikus.clear();
-		for(int i = 0; i < NUMBER_OF_GENERATIONS; i++){
+		generationsCounter = 1;
+		haikus.add(new Haiku(!themes.isEmpty()));
+	}
+	
+	public static void nextHaiku(){
+		if(generationsCounter < NUMBER_OF_GENERATIONS && !BinView.getInstance().isShowingHaiku()){
+			updateWordsUsed();
+			generationsCounter++;
 			haikus.add(new Haiku(!themes.isEmpty()));
-			haikus.get(i).generate();
 		}
 	}
 	

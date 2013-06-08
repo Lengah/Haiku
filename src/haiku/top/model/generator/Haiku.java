@@ -19,6 +19,7 @@ public class Haiku {
 	
 	public Haiku(boolean themes){
 		this.themes = themes;
+		generate();
 	}
 	
 	public boolean containsThemes(){
@@ -56,6 +57,7 @@ public class Haiku {
 			print();
 			initWordsUsed();
 			BinView.getInstance().haikuIsFinished();
+			HaikuGenerator.nextHaiku();
 		}
 	}
 	
