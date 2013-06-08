@@ -229,99 +229,25 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		return partOfSpeeches;
 	}
 	
-//	public ArrayList<Word> getWords(ArrayList<String> texts){
-//		Log.i("TAG", "getWords(): check " + texts.size() + " words");
-//		double startTime = System.currentTimeMillis();
-//		String selection = "";
-//		if(!texts.isEmpty()){
-//			selection += KEY_WORD_TEXT +" = '" + texts.get(0) + "'";
-//		}
-//		for(int i = 1; i < texts.size(); i++){
-//			selection += " OR " + KEY_WORD_TEXT + " = '" + texts.get(i) + "'";
-//		}
-//	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  }, selection, null, null, null, null, null);
-//	    ArrayList<Word> words = new ArrayList<Word>();
-//	    
-//	    if(cursor.moveToFirst()){
-//	    	long id;
-//	    	String syllables;
-//	    	String text;
-//	    	do {
-//	    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
-//	    		text = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // TODO text and syllables are swapped for some reason (there is a test a few rows down)
-//	    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_TEXT));
-//	    		words.add(new Word(id, syllables, text));
-//	    	}while(cursor.moveToNext());
-//	    }
-//	    cursor.close();
-////	    //TEST
-////	    for(int i = 0; i < words.size(); i++){
-////	    	Log.i("TAG", "Syllables: " + words.get(i).getSyllables() + ", text: " + words.get(i).getText());
-////	    }
-////	    // /TEST
-//	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
-//	    startTime = System.currentTimeMillis();
-//	    if(words.isEmpty()){
-//	    	return words; // no words were found
-//	    }
-//	    selection = KEY_WORDPARTOFSPEECH_WORDID + " = " + words.get(0).getID();
-//	    for(int i = 1; i < words.size(); i++){
-//			selection += " OR " + KEY_WORDPARTOFSPEECH_WORDID + "= " + words.get(i).getID();
-//		}
-//	    cursor = myDataBase.query(TABLE_WORDPARTOFSPEECH, new String[] {KEY_WORDPARTOFSPEECH_PARTOFSPEECHID, KEY_WORDPARTOFSPEECH_WORDID, }, selection, null, null, null, null, null);
-//	    
-//	    if(cursor.moveToFirst()){
-//	    	long partOfSpeechID;
-//	    	long wordID;
-//	    	do {
-//	    		partOfSpeechID = cursor.getLong(0);
-//	    		wordID = cursor.getLong(1);
-//	    		for(int i = 0; i < words.size(); i++){
-//	    			if(words.get(i).getID() == wordID){
-//	    				words.get(i).addWordType(HaikuGenerator.getPartOfSpeechWithID(partOfSpeechID));
-//	    				break;
-//	    			}
-//	    		}
-//	    	}while(cursor.moveToNext());
-//	    }
-//	    Log.i("TAG", "getWords(): Setting the word types on the words: " + (System.currentTimeMillis() - startTime));
-//	    cursor.close();
-//	    return words;
-//	}
-	
-	// Updated version with the new database (2/6 - 2013), but this method will probably not be used
-//	public ArrayList<Word> getWord(String text) { //return null if word not found
-//		double startTime = System.currentTimeMillis();
-//		ArrayList<Word> words = new ArrayList<Word>();
-//	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_SYLLABLES, KEY_WORD_PARTOFSPEECHID }, KEY_WORD_TEXT + "=?", new String[] { text }, null, null, null, null);
-//	    if(cursor.moveToFirst()){
-//	    	long id;
-//	    	String syllables;
-//	    	long partOfSpeechID;
-//	    	do {
-//	    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
-//	    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // TODO text and syllables are swapped?
-//	    		partOfSpeechID = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_PARTOFSPEECHID));
-//	    		words.add(new Word(id, syllables, text, HaikuGenerator.getPartOfSpeechWithID(partOfSpeechID).getType()));
-//	    	}while(cursor.moveToNext());
-//	    }
-//	    cursor.close();
-//	    Log.i("TAG", "getWord(): Getting all the words: " + (System.currentTimeMillis() - startTime));
-//	    return words;
-//	}
-	
 	public ArrayList<Word> getWords(ArrayList<String> texts){
+		ArrayList<Word> words = new ArrayList<Word>();
 		Log.i("TAG", "getWords(): check " + texts.size() + " words");
-		double startTime = System.currentTimeMillis();
+//		double startTime = System.currentTimeMillis();
 		String selection = "";
-		if(!texts.isEmpty()){
-			selection += KEY_WORD_TEXT +" = '" + texts.get(0) + "'";
+		if(texts.isEmpty()){
+			return words;
 		}
+		selection += KEY_WORD_TEXT + " IN ( ?";
 		for(int i = 1; i < texts.size(); i++){
-			selection += " OR " + KEY_WORD_TEXT + " = '" + texts.get(i) + "'";
+			selection += ", ?";
 		}
-	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  KEY_WORD_PARTOFSPEECHID, }, selection, null, null, null, null, null);
-	    ArrayList<Word> words = new ArrayList<Word>();
+		selection += ")";
+		String[] selectionArg = new String[texts.size()];
+		for(int i = 0; i < selectionArg.length; i++){
+			selectionArg[i] = texts.get(i);
+		}
+		
+	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  KEY_WORD_PARTOFSPEECHID, }, selection, selectionArg, null, null, null, null);
 	    
 	    if(cursor.moveToFirst()){
 	    	long id;
@@ -337,12 +263,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    	}while(cursor.moveToNext());
 	    }
 	    cursor.close();
-//	    //TEST
-//	    for(int i = 0; i < words.size(); i++){
-//	    	Log.i("TAG", "Syllables: " + words.get(i).getSyllables() + ", text: " + words.get(i).getText());
-//	    }
-//	    // /TEST
-	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
+//	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
 	    return words;
 	}
 	
@@ -358,18 +279,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    cursor.close();
 		return wordids;
 	}
-	
-//	public ArrayList<String> getWordsInSMS(String smsID) {
-//		ArrayList<String> words = new ArrayList<String>();
-//		Cursor cursor = myDataBase.rawQuery("SELECT " + KEY_SMSWORD_WORDID + " FROM " + TABLE_SMSWORD + " WHERE " + KEY_SMSWORD_SMSID + " = " + smsID  + ";", null);
-//	    if (cursor.moveToFirst()) {
-//	        do {
-//	        	words.add(cursor.getString(0));
-//	        } while (cursor.moveToNext());
-//	    }
-//	    cursor.close();
-//	    return words;
-//	}
 	
 	public Theme getTheAllTheme() {
 	    Cursor cursor = myDataBase.query(TABLE_THEME, new String[] { KEY_THEME_ID }, KEY_THEME_NAME + "=?", new String[] { "all" }, null, null, null, null);
@@ -393,7 +302,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	}
 	
 	public void initSMSES(ArrayList<SMS> smses){
-		double startTime = System.currentTimeMillis();
+//		double startTime = System.currentTimeMillis();
 		ArrayList<String> wordsToFind = new ArrayList<String>();
 		ArrayList<String> tempList;
 		for(int i = 0; i < smses.size(); i++){
@@ -415,11 +324,11 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 				}
 			}
 		}
-		Log.i("TAG", "initSMSES(): finding all the real words in the smses: " + (System.currentTimeMillis()-startTime));
+//		Log.i("TAG", "initSMSES(): finding all the real words in the smses: " + (System.currentTimeMillis()-startTime));
 	}
 
 	public ArrayList<Word> initSMS(SMS sms) {
-		double startTime = System.currentTimeMillis();
+//		double startTime = System.currentTimeMillis();
 		ArrayList<String> words = sms.getNotRealWords();
 		ArrayList<String> wordsUnique = new ArrayList<String>(); // doing this so the sql request goes faster
 		for(int i = 0; i < words.size(); i++){
@@ -436,7 +345,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 				}
 			}
 		}
-		Log.i("TAG", "initSMS(): finding all the real words from the strings: " + (System.currentTimeMillis()-startTime));
+//		Log.i("TAG", "initSMS(): finding all the real words from the strings: " + (System.currentTimeMillis()-startTime));
 		return realWords;
 	}
 	
