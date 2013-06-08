@@ -85,6 +85,10 @@ public class HaikuProgressBar extends View{
 		invalidate();
 	}
 	
+	public float getProgress(){
+		return progress;
+	}
+	
 	private void updateXpos(){
 		xPos = (float) (sliderRadius - sliderRadius * Math.cos((1 - progress/maxProgress) * maxAngle)) + xPosOffset;
 	}

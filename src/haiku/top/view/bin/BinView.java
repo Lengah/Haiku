@@ -92,7 +92,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int screenWidth;
 	private int screenHeight;
 	
-	public static final int DELETE_DISTANCE = 5;
+	public static final int DELETE_DISTANCE = 2;
 	private int deleteDistance;
 	
 	// These positions are compared to the image width and height
@@ -591,7 +591,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		updateContactName();
 		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
-//		progressBar.setMaxProgress(smsView.size()*10); //TODO not here
 	}
 	
 	public void allThreadsReady(){
@@ -612,7 +611,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			endProgress.acquire();
 			if(HaikuGenerator.threadsAreRunning()){
 				threadProgressBar.show();
-				
 			}
 			else{
 				createHaikus();
@@ -628,10 +626,14 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			// the bin was closed and then opened, but the contents did not change -> nothing needs to be done
 			return;
 		}
-		if(stateChanged && haikuFinished){
+		if(haikuFinished){ // stateChanged is true here
 			// new SMS has been added to the bin. If new haikus are not generated, they will not be used
 			resetHaikuFinished();
 			HaikuGenerator.updateWordsUsed();
+		}
+		if(progressBar.getProgress() == 0){
+			// update the progressBar if it hasn't been moved
+			progressBar.setMaxProgress(50 + (int)(((double)smsView.size())*1.0)); //TODO
 		}
 		// this is the first time the bin is opened ever or since the last change
 		HaikuGenerator.createHaikus();
@@ -862,7 +864,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void haikuReady(){
-		endHaiku = HaikuGenerator.getRandomReadyHaiku(); //TODO
+		endHaiku = HaikuGenerator.getRandomReadyHaiku();
 		row1.setText(endHaiku.getRow(1));
 		row2.setText(endHaiku.getRow(2));
 		row3.setText(endHaiku.getRow(3));
@@ -978,7 +980,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final double WAIT_TIME = 100; //ms
 	
 	private boolean canUndo = false;
-	private int eventsNeededForDelete = 5;
+	private int eventsNeededForDelete = 10;
+	private int eventsNeededForUndo = 5;
 	private int eventCounter = 0;
 
 	@Override
@@ -1086,7 +1089,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						// undo
 						eventCounter--;
 						progressBar.decProgress();
-						if(eventCounter == -eventsNeededForDelete){
+						if(eventCounter == -eventsNeededForUndo){
 							canUndo = false;
 							undoLastChange();
 							eventCounter = 0;
@@ -1132,7 +1135,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	@Override
 	public void onClick(View v) {
 		if(v.equals(saveButton)){
-			//TODO
 			Log.i("TAG", "save!");
 			if(!HaikuActivity.getInstance().isSafeMode()){
 				// safe mode is off!
@@ -1143,7 +1145,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				}
 //				HaikuActivity.getInstance().deleteSMS(smsToDelete); //TODO
 			}
-			HaikuActivity.getInstance().addHaikuSMS(endHaiku); //TODO
+			HaikuActivity.getInstance().addHaikuSMS(endHaiku);
 			MainView.getInstance().updateConversations();
 			reset();
 		}

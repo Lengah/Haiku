@@ -28,4 +28,12 @@ public class Theme {
 		return name;
 	}
 	
+	@Override
+	public boolean equals(Object theme){
+		if(theme instanceof Theme && this.id == ((Theme)theme).getID()){
+			return true;
+		}
+		return false;
+	}
+	
 }

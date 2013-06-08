@@ -3,6 +3,7 @@ package haiku.top.view;
 import java.util.DuplicateFormatFlagsException;
 
 import haiku.top.model.Theme;
+import haiku.top.model.Word;
 import haiku.top.view.bin.BinView;
 import android.content.Context;
 import android.graphics.Color;
@@ -112,5 +113,13 @@ public class ThemeObjectView extends LinearLayout{
 	
 	public Theme getTheme(){
 		return theme;
+	}
+	
+	@Override
+	public boolean equals(Object themeObject){
+		if(themeObject instanceof ThemeObjectView && this.theme.equals(((ThemeObjectView)themeObject).getTheme())){
+			return true;
+		}
+		return false;
 	}
 }

@@ -175,7 +175,7 @@ public class BinSMSView extends LinearLayout{
 	}
 	
 	private static Random randomGenerator = new Random();
-	public static final int CHANCE_TO_SET = 10; // in %
+	public static final int CHANCE_TO_SET = 20; // in %
 	
 	/**
 	 * 

@@ -24,7 +24,7 @@ public class FindSentenceThread extends Thread{
 	private boolean themes;
 	
 	public static final String START_OBJECT = "<sentence>";
-	public static final double CHANCE_TO_START_WITH_THEME_LIST = 80; // in %
+	public static final double CHANCE_TO_START_WITH_THEME_LIST = 70; // in %
 	
 	public FindSentenceThread(int numberOfSyllables, Haiku haiku, int row){
 		this.syllables = numberOfSyllables;

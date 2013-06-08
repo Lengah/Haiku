@@ -42,7 +42,7 @@ public class HaikuGenerator {
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
-	private static final int NUMBER_OF_GENERATIONS = 10;
+	private static final int NUMBER_OF_GENERATIONS = 5;
 	private static int generationsCounter;
 	
 	private static ArrayList<PartOfSpeech> allWordTypes = new ArrayList<PartOfSpeech>();
@@ -195,6 +195,10 @@ public class HaikuGenerator {
 	}
 	
 	public static void addTheme(Theme theme){
+		if(themes.contains(theme)){
+			// no duplicates allowed!
+			return;
+		}
 		BinView.getInstance().addTheme(theme);
 		try {
 			smsSemaphore.acquire();
@@ -536,6 +540,9 @@ public class HaikuGenerator {
 			if(haikus.get(i).isHaikuFinished()){
 				tempHaikus.add(haikus.get(i));
 			}
+		}
+		if(tempHaikus.isEmpty()){
+			return null;
 		}
 		return tempHaikus.get(randomGenerator.nextInt(tempHaikus.size()));
 	}
