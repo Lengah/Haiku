@@ -32,5 +32,6 @@ public class AddSmsesThread extends Thread{
 			HaikuGenerator.addSMS(smses.get(i));
 		}
 		Log.i("TAG", "smses Worker executed in: " + (System.currentTimeMillis() - startTime) + " ms");
+		HaikuGenerator.removeThread(this);
 	}
 }

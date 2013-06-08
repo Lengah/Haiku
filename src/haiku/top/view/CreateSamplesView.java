@@ -5,6 +5,8 @@ import haiku.top.R;
 import haiku.top.R.id;
 import haiku.top.R.layout;
 import haiku.top.model.CreateSamplesContact;
+import haiku.top.view.bin.BinView;
+import haiku.top.view.main.MainView;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -401,6 +403,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 		@Override
 		protected void onPostExecute(Void result) {
 			progressDialog.dismiss();
+			MainView.getInstance().updateConversations();
 		} 	
     }
 }

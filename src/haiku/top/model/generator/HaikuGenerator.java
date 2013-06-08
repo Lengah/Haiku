@@ -51,6 +51,9 @@ public class HaikuGenerator {
 	
 	private static ArrayList<Haiku> haikusRemovedLast = new ArrayList<Haiku>();
 	
+	private static Semaphore threadSemaphore = new Semaphore(1);
+	private static ArrayList<Thread> addingSMSThreadsRunning = new ArrayList<Thread>();
+	
 	// allSmsLogWords, themes, smsLogWordsWithThemes, themeWordIDs
 	private static Semaphore smsSemaphore = new Semaphore(1);
 	
@@ -220,6 +223,10 @@ public class HaikuGenerator {
 		return themes;
 	}
 	
+	/**
+	 * A conversation, not an actual thread
+	 * @param threadID
+	 */
 	public static void addThread(int threadID){
 		thread_ids.add(threadID);
 		Cursor cursor = HaikuActivity.getThread(MainView.getInstance().getContext(), threadID);
@@ -237,11 +244,15 @@ public class HaikuGenerator {
 		}
 		calculateSMSes(threadSMS);
 	}
-
+	
+	/**
+	 * A conversation, not an actual thread
+	 * @param threadID
+	 */
 	public static void removeThread(int threadID){
 		Integer thread_id = threadID;
 		if(thread_ids.remove(thread_id)){
-			MainView.getInstance().updateConversations();
+			MainView.getInstance().updateConversationsVisibility();
 		}
 	}
 	
@@ -256,7 +267,9 @@ public class HaikuGenerator {
 	public static void calculateSMS(SMS sms){
 		smses.add(sms);
 		BinView.getInstance().addSMS(sms);
-		new AddSmsThread(sms).start();
+		AddSmsThread thread = new AddSmsThread(sms);
+		addThread(thread);
+		thread.start();
 	}
 	
 	public static void calculateSMSes(ArrayList<SMS> smses){
@@ -264,7 +277,44 @@ public class HaikuGenerator {
 		for(int i = 0; i < smses.size(); i++){
 			BinView.getInstance().addSMS(smses.get(i));
 		}
-		new AddSmsesThread(smses).start();
+		AddSmsesThread thread = new AddSmsesThread(smses);
+		addThread(thread);
+		thread.start();
+	}
+	
+	public static boolean threadsAreRunning(){
+		return !addingSMSThreadsRunning.isEmpty();
+	}
+	
+	/**
+	 * An actual thread, not a conversation
+	 * @param thread
+	 */
+	public static void addThread(Thread thread){
+		try {
+			threadSemaphore.acquire();
+			addingSMSThreadsRunning.add(thread);
+			threadSemaphore.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * An actual thread, not a conversation
+	 * @param thread
+	 */
+	public static void removeThread(Thread thread){
+		try {
+			threadSemaphore.acquire();
+			addingSMSThreadsRunning.remove(thread);
+			if(addingSMSThreadsRunning.isEmpty()){
+				BinView.getInstance().allThreadsReady();
+			}
+			threadSemaphore.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -437,7 +487,7 @@ public class HaikuGenerator {
 			}
 		}
 		if(update){
-			MainView.getInstance().updateConversations();
+			MainView.getInstance().updateConversationsVisibility();
 		}
 		Log.i("TAG", "Time to check if whole conversations were added: " + (System.currentTimeMillis() - startTime) + " ms");
 	}

@@ -2,6 +2,7 @@ package haiku.top.view.bin;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
@@ -16,6 +17,7 @@ import haiku.top.model.smshandler.SMS;
 import haiku.top.view.ThemeObjectView;
 import haiku.top.view.date.YearMonthView;
 import haiku.top.view.main.MainView;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -46,6 +48,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Space;
@@ -212,12 +215,21 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private Haiku endHaiku;
 	private boolean stateChanged = false; // If the user closes the bin and then opens it without adding new SMS, there is no need to generate new SMS
 	
+	private ProgressDialog threadProgressBar;
+	private static Semaphore endProgress = new Semaphore(1);
+	
 	public BinView(Context context) {
 		super(context);
 		this.context = context;
 		binView = this;
 		setBackgroundResource(R.drawable.haikubin_extended);
 		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		
+		threadProgressBar = new ProgressDialog(context);
+		threadProgressBar.setMessage("Loading...");
+		threadProgressBar.setCancelable(false);
+		threadProgressBar.setIndeterminate(true);
+		
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
 		Point size = new Point();
@@ -577,12 +589,41 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 		HaikuGenerator.reset();
 		updateContactName();
-		MainView.getInstance().updateConversations();
+		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
 //		progressBar.setMaxProgress(smsView.size()*10); //TODO not here
 	}
 	
+	public void allThreadsReady(){
+		try {
+			endProgress.acquire();
+			if(threadProgressBar.isShowing()){
+				threadProgressBar.dismiss();
+				createHaikus();
+			}
+			endProgress.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void onOpen(){
+		try {
+			endProgress.acquire();
+			if(HaikuGenerator.threadsAreRunning()){
+				threadProgressBar.show();
+				
+			}
+			else{
+				createHaikus();
+			}
+			endProgress.release();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void createHaikus(){
 		if(!stateChanged){
 			// the bin was closed and then opened, but the contents did not change -> nothing needs to be done
 			return;
@@ -1098,7 +1139,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				}
 //				HaikuActivity.getInstance().deleteSMS(smsToDelete); //TODO
 			}
-//			HaikuActivity.getInstance().saveHaiku(endHaiku); //TODO
+			HaikuActivity.getInstance().addHaikuSMS(endHaiku); //TODO
+			MainView.getInstance().updateConversations();
 			reset();
 		}
 		else{

@@ -160,20 +160,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 //		contactList.setAdapter(new ContactListAdapter(context, HaikuActivity.getThreads(context), true));
 		
-		Cursor cursor = HaikuActivity.getThreads(context);
-		if (cursor.moveToFirst()) {
-			do{
-				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
-				conversations.get(conversations.size()-1).setOnLongClickListener(this);
-				conversations.get(conversations.size()-1).setOnClickListener(this);
-				conversations.get(conversations.size()-1).setOnTouchListener(this);
-			}
-			while(cursor.moveToNext());
-		}
-		for(int i = 0; i < conversations.size(); i++){
-			contactList.addView(conversations.get(i));
-//			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
-		}
+		updateConversations();
 		ArrayList<Theme> themes;
 //		themes = DatabaseHandler.getAllThemes();
 		themes = new ArrayList<Theme>();
@@ -242,7 +229,32 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		viewBeingDragged = v;
 	}
 	
+	/**
+	 * A complete update of the conversations. Does a new database query and recreates all the conversation objects
+	 */
 	public void updateConversations(){
+		conversations.clear();
+		contactList.removeAllViews();
+		Cursor cursor = HaikuActivity.getThreads(context);
+		if (cursor.moveToFirst()) {
+			do{
+				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
+				conversations.get(conversations.size()-1).setOnLongClickListener(this);
+				conversations.get(conversations.size()-1).setOnClickListener(this);
+				conversations.get(conversations.size()-1).setOnTouchListener(this);
+			}
+			while(cursor.moveToNext());
+		}
+		for(int i = 0; i < conversations.size(); i++){
+			contactList.addView(conversations.get(i));
+//			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
+		}
+	}
+	
+	/**
+	 * Just sets the conversations' alpha
+	 */
+	public void updateConversationsVisibility(){
 		boolean isInGenerator;
 		for(int i = 0; i < conversations.size(); i++){
 			isInGenerator = false;
@@ -372,7 +384,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 	
 	public void closeSMSView(){
-		updateConversations();
+		updateConversationsVisibility();
 		contactScroll.setVisibility(VISIBLE);
 //		smsScroll.setVisibility(GONE); //TODO
 		smslayout.setVisibility(GONE);

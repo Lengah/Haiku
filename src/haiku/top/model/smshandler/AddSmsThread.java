@@ -15,5 +15,6 @@ public class AddSmsThread extends Thread{
 		sms.getWords();
 		HaikuGenerator.addSMS(sms);
 		Log.i("TAG", "sms Worker executed in: " + (System.currentTimeMillis() - startTime) + " ms");
+		HaikuGenerator.removeThread(this);
 	}
 }

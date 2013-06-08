@@ -78,7 +78,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    			MainView.getInstance().updateThemeView();
 	    		}
 	    		if(view instanceof ConversationObjectView){
-	    			MainView.getInstance().updateConversations();
+	    			MainView.getInstance().updateConversationsVisibility();
 	    		}
 	    		if(view instanceof SMSObjectView){
 	    			MainView.getInstance().updateSMSView();
