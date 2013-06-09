@@ -7,22 +7,16 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import haiku.top.model.PartOfSpeech;
-import haiku.top.model.SMSBinWord;
 import haiku.top.model.Theme;
 import haiku.top.model.Word;
-import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
 import android.util.Log;
 
 public class DatabaseHandler extends SQLiteOpenHelper{
@@ -40,13 +34,8 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	}
 
     // Table names
-    private static final String TABLE_SENTENCE = "sentence";
     private static final String TABLE_PARTOFSPEECH = "partofspeech";
-    private static final String TABLE_WORDPARTOFSPEECH = "word_partofspeech";   
     private static final String TABLE_WORD = "word";
-    private static final String TABLE_WORDINSENTENCE = "wordinsentence";
-    private static final String TABLE_SMSWORD = "sms_word";
-    private static final String TABLE_SENTENCETHEME = "sentence_theme";    
     private static final String TABLE_THEME = "theme";
     private static final String TABLE_THEMEWORD = "theme_word";
 
@@ -171,47 +160,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	    	return "";
 	    }
 	}
-//	/**
-//	 * 
-//	 * @param text
-//	 * @return null if word not found
-//	 */
-//	public Word getWord(String text) { //return null if word not found
-//		double startTime = System.currentTimeMillis();
-//	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_SYLLABLES }, KEY_WORD_TEXT + "=?",
-//	            new String[] { text }, null, null, null, null);
-//	    	    
-//	    if (cursor != null && cursor.getCount() > 0) { //if word found
-//		    cursor.moveToFirst();
-//		    long id = cursor.getLong(0);
-//		    String syllables = cursor.getString(1);
-//		    
-//		    //get partofspeech
-//		    double partOfSpeechTime = System.currentTimeMillis();
-//		    ArrayList<String> wordtypes = new ArrayList<String>();
-//		    Cursor cursor2 = myDataBase.rawQuery("SELECT " + KEY_WORDPARTOFSPEECH_PARTOFSPEECHID + " FROM " + TABLE_WORDPARTOFSPEECH + " WHERE " + KEY_WORDPARTOFSPEECH_WORDID + " = " + id  + ";", null);  
-//		    if (cursor2.moveToFirst()) {
-//		        do {
-//		        	
-//		        	String partofspeechid = cursor2.getString(0);
-//		    	    Cursor cursor3 = myDataBase.query(TABLE_PARTOFSPEECH, new String[] { KEY_PARTOFSPEECH_TYPE }, KEY_PARTOFSPEECH_ID + "=?", new String[] { partofspeechid }, null, null, null, null);
-//		    	    if (cursor3 != null) {
-//		    		    cursor3.moveToFirst();
-//		    		    String partofspeech = cursor3.getString(0);
-//		    		    wordtypes.add(partofspeech);
-//		    	    }
-//		    	    cursor3.close();
-//		        } while (cursor2.moveToNext());
-//		    }
-//		    cursor2.close();
-//		    Log.i("TAG", "part of speech time: " + (System.currentTimeMillis()-partOfSpeechTime));
-//		    Word word = new Word(id, text, syllables, wordtypes);
-//		    cursor.close();
-//		    Log.i("TAG", "getWord(" + text + ") time: " + (System.currentTimeMillis()-startTime));
-//		    return word;
-//	    }
-//	    return null;
-//	}
 	
 	public ArrayList<PartOfSpeech> getAllPartOfSpeeches(){
 		ArrayList<PartOfSpeech> partOfSpeeches = new ArrayList<PartOfSpeech>();

@@ -58,6 +58,11 @@ public class HaikuGenerator {
 	// allSmsLogWords, themes, smsLogWordsWithThemes, themeWordIDs
 	private static Semaphore smsSemaphore = new Semaphore(1);
 	
+	private static boolean inited = false;
+	private static ArrayList<Word> smsLogWordsWithThemesRemoved = new ArrayList<Word>();
+	private static ArrayList<Word> smsLogWordsWithTheAllThemeRemoved = new ArrayList<Word>();
+	private static ArrayList<Word> allSmsLogWordsRemoved = new ArrayList<Word>();
+	
 	public static void resetHaikusRemoved(){
 		haikusRemovedLast.clear();
 	}
@@ -74,16 +79,19 @@ public class HaikuGenerator {
 		for(int i = 0; i < wordsRemoved.size(); i++){
 			for(int a = allSmsLogWords.size() - 1; a >= 0; a--){
 				if(wordsRemoved.get(i).equals(allSmsLogWords.get(a).getText())){
+					allSmsLogWordsRemoved.add(allSmsLogWords.get(a));
 					allSmsLogWords.remove(a);
 				}
 			}
 			for(int a = smsLogWordsWithThemes.size() - 1; a >= 0; a--){
 				if(wordsRemoved.get(i).equals(smsLogWordsWithThemes.get(a).getText())){
+					smsLogWordsWithThemesRemoved.add(smsLogWordsWithThemes.get(a));
 					smsLogWordsWithThemes.remove(a);
 				}
 			}
 			for(int a = smsLogWordsWithTheAllTheme.size() - 1; a >= 0; a--){
 				if(wordsRemoved.get(i).equals(smsLogWordsWithTheAllTheme.get(a).getText())){
+					smsLogWordsWithTheAllThemeRemoved.add(smsLogWordsWithTheAllTheme.get(a));
 					smsLogWordsWithTheAllTheme.remove(a);
 				}
 			}
@@ -136,6 +144,19 @@ public class HaikuGenerator {
 	}
 	
 	public static void init(){
+		if(inited){
+			// The application was closed and the opened again
+			// The deleting process will reset and so must the words used
+			// Some words might have been deleted by updateWordsUsed()
+			allSmsLogWords.addAll(allSmsLogWordsRemoved);
+			smsLogWordsWithThemes.addAll(smsLogWordsWithThemesRemoved);
+			smsLogWordsWithTheAllTheme.addAll(smsLogWordsWithTheAllThemeRemoved);
+			allSmsLogWordsRemoved.clear();
+			smsLogWordsWithThemesRemoved.clear();
+			smsLogWordsWithTheAllThemeRemoved.clear();
+			return;
+		}
+		inited = true;
 		initPartOfSpeech();
 		initThemes();
 		initRulesWords();

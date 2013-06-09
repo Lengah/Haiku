@@ -357,7 +357,7 @@ public class HaikuActivity extends Activity {
 		        input = ContactsContract.Contacts.openContactPhotoInputStream(cr, uri);
 	       }
 	       if (input != null) {
-	    	   Log.i("TAG","Got pic from contact (contact_id): " + displayName);
+//	    	   Log.i("TAG","Got pic from contact (contact_id): " + displayName);
 	           return BitmapFactory.decodeStream(input);
 	       }
 	//        long photo_id = cursor.getLong(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
@@ -395,7 +395,7 @@ public class HaikuActivity extends Activity {
 	               c.close();
 	           }
 	           if (photoBytes != null){
-	        	   Log.i("TAG","Got pic from contact (photo id): " + displayName);
+//	        	   Log.i("TAG","Got pic from contact (photo id): " + displayName);
 	        	   return BitmapFactory.decodeByteArray(photoBytes,0,photoBytes.length);
 	           }
 	       }
@@ -408,7 +408,7 @@ public class HaikuActivity extends Activity {
 	//            	Log.i("TAG", "photobytes! " + (photoBytes==null));
 	        }
 	        if (photoBytes != null){
-	        	Log.i("TAG","Got pic from contact (photo): " + displayName);
+//	        	Log.i("TAG","Got pic from contact (photo): " + displayName);
 	            return BitmapFactory.decodeByteArray(photoBytes,0,photoBytes.length);
 	        }
 	        
@@ -562,11 +562,6 @@ public class HaikuActivity extends Activity {
         if (contact.moveToFirst()) {
             long userId = contact.getLong(contact.getColumnIndex(ContactsContract.Contacts._ID));
             photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
-
-        }
-        else {
-            Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
-            return defaultPhoto;
         }
         if (photoUri != null) {
             InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(
@@ -574,12 +569,8 @@ public class HaikuActivity extends Activity {
             if (input != null) {
                 return BitmapFactory.decodeStream(input);
             }
-        } else {
-            Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
-            return defaultPhoto;
         }
-        Bitmap defaultPhoto = BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
-        return defaultPhoto;
+        return null;
     }
     
     public void deleteSMS(ArrayList<SMS> sms) {

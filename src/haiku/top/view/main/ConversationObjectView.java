@@ -63,7 +63,7 @@ public class ConversationObjectView extends LinearLayout{
 		
 		setPadding(paddingLeftAndRight, paddingTopAndBottom, paddingLeftAndRight, paddingTopAndBottom);
 		
-//		picture = HaikuActivity.getContactPhoto(context, name);
+		picture = HaikuActivity.getContactPhoto(context, name); // this method works
 //		picture = HaikuActivity.getImage(context, name);
 //	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, threadID));
 //	    if (input != null) {

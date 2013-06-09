@@ -505,6 +505,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < themesRefresh.size(); i++){
 			addTheme(themesRefresh.get(i));
 		}
+		
 	}
 	
 	public static BinView getInstance(){
