@@ -261,8 +261,24 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 			sms.add(Long.toString(ContentUris.parseId(context.getContentResolver().insert(Uri.parse("content://sms/sent"), values))));
 	}
  
-    private void deleteSMS(Context ctx, String id) {
-    	ctx.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null); //find and delete SMS using ID
+    private void deleteSMS(Context ctx, ArrayList<String> ids) {
+    	double startTime = System.currentTimeMillis();
+    	String selection = "";
+		if(sms.isEmpty()){
+			return;
+		}
+		selection += "_id IN ( ?";
+		for(int i = 1; i < sms.size(); i++){
+			selection += ", ?";
+		}
+		selection += ")";
+		String[] selectionArg = new String[sms.size()];
+		for(int i = 0; i < selectionArg.length; i++){
+			selectionArg[i] = "" + sms.get(i);
+		}
+		ctx.getContentResolver().delete(Uri.parse("content://sms/"), selection, selectionArg); //find and delete SMS using ID
+//    	ctx.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null); //find and delete SMS using ID
+		Log.i("TAG", "Time to delete " + ids.size() +" sms: " + (System.currentTimeMillis() - startTime));
 	}
     
     private class LoadTask extends AsyncTask<Void, Integer, Void> {
@@ -384,12 +400,10 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 					publishProgress(++progress);
 				}
 				contacts.clear();
-				for (int i=0; i<sms.size(); i++) { //delete all loaded sms from this app
-					deleteSMS(context, sms.get(i));
-					publishProgress(++progress);
-				}
+				//delete all loaded sms from this app
+				deleteSMS(context, sms);
+				publishProgress(++progress);
 				sms.clear();
-				
 			}		
 			return null;
 		}

@@ -3,6 +3,6 @@
      <item android:state_pressed="true"
            android:drawable="@drawable/save_button_press" /> <!-- pressed -->
      <item android:state_focused="true"
-           android:drawable="@drawable/save_button" /> <!-- focused -->
-     <item android:drawable="@drawable/save_button" /> <!-- default -->
+           android:drawable="@drawable/save_button_default" /> <!-- focused -->
+     <item android:drawable="@drawable/save_button_default" /> <!-- default -->
  </selector>

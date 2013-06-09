@@ -174,6 +174,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		int height = 0;
 		for(int i = 0; i < themes.size(); i++){
 			themeObject = new ThemeObjectView(context, themes.get(i), false);
+			if(themeObjects.contains(themeObject)){
+				continue;
+			}
 			themeObjects.add(themeObject);
 			themeList.addView(themeObject);
 			themeObject.setOnLongClickListener(this);
@@ -205,6 +208,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		dateView.bringToFront();
 
 		haikuBinViewExtended.bringToFront();
+		
+		
+		// Needed for when the user closes the program and then later opens it
+		updateConversationsVisibility();
+		updateSMSView();
+		updateThemeView();
 	}
 	
 	public static synchronized MainView getInstance(){
@@ -346,8 +355,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	    		}        
 	        }
 	    });
-		
-		
 	}
 	
 	/**

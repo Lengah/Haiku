@@ -343,8 +343,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		saveParams.setMargins(saveMarginLeft, saveMarginTop, 0, 0);
 		saveButton.setLayoutParams(saveParams);
 		addView(saveButton);
-//		saveButton.setImageResource(R.drawable.save_button_default);
-		saveButton.setBackgroundResource(R.drawable.save_button_default);
+		saveButton.setBackgroundResource(R.drawable.save_button);
 		saveButton.setOnClickListener(this);
 		saveButton.setVisibility(GONE);
 		
@@ -490,6 +489,22 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					return isDeleting; // if false, the scrollview's own onTouch will handle the event
 			   }
 		});
+		
+		ArrayList<SMS> smsRefresh = HaikuGenerator.getAllSMS();
+		ArrayList<YearMonth> datesRefresh = HaikuGenerator.getDates();
+		ArrayList<Theme> themesRefresh = HaikuGenerator.getThemes();
+		
+		for(int i = 0; i < smsRefresh.size(); i++){
+			addSMS(smsRefresh.get(i));
+		}
+		
+		for(int i = 0; i < datesRefresh.size(); i++){
+			addDate(datesRefresh.get(i));
+		}
+		
+		for(int i = 0; i < themesRefresh.size(); i++){
+			addTheme(themesRefresh.get(i));
+		}
 	}
 	
 	public static BinView getInstance(){
@@ -1143,7 +1158,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				for(int i = 0; i < smsView.size(); i++){
 					smsToDelete.add(smsView.get(i).getSMS());
 				}
-//				HaikuActivity.getInstance().deleteSMS(smsToDelete); //TODO
+				HaikuActivity.getInstance().deleteSMS(smsToDelete);
 			}
 			HaikuActivity.getInstance().addHaikuSMS(endHaiku);
 			MainView.getInstance().updateConversations();

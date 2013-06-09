@@ -582,8 +582,23 @@ public class HaikuActivity extends Activity {
         return defaultPhoto;
     }
     
-    public void deleteSMS(SMS sms) {
-    	this.getContentResolver().delete(Uri.parse("content://sms/" + sms.getID()), null, null); //find and delete SMS using ID
+    public void deleteSMS(ArrayList<SMS> sms) {
+    	double startTime = System.currentTimeMillis();
+    	String selection = "";
+		if(sms.isEmpty()){
+			return;
+		}
+		selection += "_id IN ( ?";
+		for(int i = 1; i < sms.size(); i++){
+			selection += ", ?";
+		}
+		selection += ")";
+		String[] selectionArg = new String[sms.size()];
+		for(int i = 0; i < selectionArg.length; i++){
+			selectionArg[i] = "" + sms.get(i).getID();
+		}
+		this.getContentResolver().delete(Uri.parse("content://sms/"), selection, selectionArg); //find and delete SMS using ID
+    	Log.i("TAG", "Time to delete: " + (System.currentTimeMillis() - startTime));
 	}
     
 

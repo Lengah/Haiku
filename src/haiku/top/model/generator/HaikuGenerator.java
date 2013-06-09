@@ -62,6 +62,10 @@ public class HaikuGenerator {
 		haikusRemovedLast.clear();
 	}
 	
+	public static ArrayList<SMS> getAllSMS(){
+		return smses;
+	}
+	
 	/**
 	 * Should be called before a new batch of haikus are generated
 	 */
