@@ -51,12 +51,13 @@ public class YearMonthView extends View{
 		monthPaint = new Paint();
 		monthPaint.setStyle(Paint.Style.FILL);
 		monthPaint.setColor(Color.WHITE);
-		monthPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        monthPaint.setTypeface(adobeGaramondProRegular);
 		
 		yearPaint = new Paint();
 		yearPaint.setStyle(Paint.Style.FILL);
 		yearPaint.setColor(Color.WHITE);
-		yearPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+		yearPaint.setTypeface(adobeGaramondProRegular);
 		
 		updateMonthTextSize();
 		updateYearTextSize();

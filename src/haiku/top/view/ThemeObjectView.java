@@ -43,15 +43,12 @@ public class ThemeObjectView extends LinearLayout{
 		addView(themeText);
 		themeText.setGravity(Gravity.CENTER_VERTICAL);
 		setBackgroundColor(Color.rgb(251, 206, 13));
-		
-//		Paint textPaint = themeText.getPaint(); // "Please use this only to consult the Paint's properties and not to change them."
-//        textPaint.setColor(Color.WHITE);
-//        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
-		
+	
 		themeText.setText(theme.getName());
 		themeText.setTextColor(Color.WHITE);
 		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		themeText.setTypeface(Typeface.DEFAULT);
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		themeText.setTypeface(adobeGaramondProRegular);
 		
 //		themeText.setAlpha(MainView.OPACITY_FULL);
 		int maxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics());

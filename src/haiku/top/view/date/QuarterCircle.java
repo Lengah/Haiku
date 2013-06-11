@@ -67,7 +67,8 @@ public class QuarterCircle extends View{
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setColor(Color.WHITE);
-        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        textPaint.setTypeface(adobeGaramondProRegular);
         
         if(text.length() > 0){
         	updateTextSize();
@@ -89,7 +90,8 @@ public class QuarterCircle extends View{
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setColor(Color.WHITE);
-        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        textPaint.setTypeface(adobeGaramondProRegular);
         this.text = text;
         
         if(this.text.length() > 0){
@@ -114,7 +116,8 @@ public class QuarterCircle extends View{
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setColor(Color.WHITE);
-        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        textPaint.setTypeface(adobeGaramondProRegular);
 	}
 	
 	public QuarterCircle(Context context, int radius) {
@@ -133,7 +136,8 @@ public class QuarterCircle extends View{
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setColor(Color.WHITE);
-        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        textPaint.setTypeface(adobeGaramondProRegular);
 	}
 	
 	public QuarterCircle(Context context, Month month, int radius, int startAngle, int endAngle, int offset) {
@@ -155,7 +159,8 @@ public class QuarterCircle extends View{
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setColor(Color.WHITE);
-        textPaint.setTypeface(Typeface.DEFAULT); //TODO Adobe Garamond Pro
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        textPaint.setTypeface(adobeGaramondProRegular);
         
         this.month = month;
         this.text = month.toString();

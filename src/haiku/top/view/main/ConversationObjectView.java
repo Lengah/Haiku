@@ -57,6 +57,8 @@ public class ConversationObjectView extends LinearLayout{
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
 		nameView.setText(name);
+        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        nameView.setTypeface(adobeGaramondProRegular);
 		
 		int paddingTopAndBottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
 		int paddingLeftAndRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, getResources().getDisplayMetrics());
