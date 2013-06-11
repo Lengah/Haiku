@@ -599,10 +599,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		dateList.removeAllViews();
 		safeHaiku = null;
 		endHaiku = null;
-		for(int i = 0; i < themeViews.size(); i++){
-			themeViews.get(i).removeAllViews();
-			themeViews.get(i).setVisibility(GONE);
-		}
 		HaikuGenerator.reset();
 		updateContactName();
 		MainView.getInstance().updateConversationsVisibility();
