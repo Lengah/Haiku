@@ -178,6 +178,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		return partOfSpeeches;
 	}
 	
+	//TODO causes massive lag when many (1000+) words are added simultaneously
 	public ArrayList<Word> getWords(ArrayList<String> texts){
 		int textCounter = 0;
 		int maxQuery = 500; // cap the query at this number. If the query is too big, the program will crash.
@@ -187,7 +188,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		while(textCounter < texts.size()){
 			String selection = "";
 			selection += KEY_WORD_TEXT + " IN ( ?";
-			for(int i = textCounter + 1; i < texts.size() || i < maxQuery + textCounter; i++){ // Can not call the database with unlimited amount of words! It will crash if to many are used.
+			for(int i = textCounter + 1; i < texts.size() && i < maxQuery + textCounter; i++){ // Can not call the database with unlimited amount of words! It will crash if to many are used.
 				selection += ", ?";
 			}
 			selection += ")";

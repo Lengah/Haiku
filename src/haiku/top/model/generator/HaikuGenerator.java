@@ -495,7 +495,7 @@ public class HaikuGenerator {
 			allExists = true;
 			projection = new String[] {"_id"};
 			cursor =  MainView.getInstance().getContext().getContentResolver().query(uri, projection, "thread_id = '" + threadIDs.get(i) + "'", null, null);
-			if(cursor.moveToFirst()){
+			if(cursor != null && cursor.moveToFirst()){
 				do{
 					exists = false;
 					id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));

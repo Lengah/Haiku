@@ -399,11 +399,11 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 					deleteContact(context, contact.name, contact.phoneNumber);
 					publishProgress(++progress);
 				}
-				contacts.clear();
 				//delete all loaded sms from this app
+				publishProgress(contacts.size() + sms.size() -1);
 				deleteSMS(context, sms);
-				publishProgress(++progress);
 				sms.clear();
+				contacts.clear();
 			}		
 			return null;
 		}
