@@ -18,6 +18,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.TextView;
 
 public class DatabaseHandler extends SQLiteOpenHelper{
 	
@@ -178,39 +179,42 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	}
 	
 	public ArrayList<Word> getWords(ArrayList<String> texts){
+		int textCounter = 0;
+		int maxQuery = 500; // cap the query at this number. If the query is too big, the program will crash.
 		ArrayList<Word> words = new ArrayList<Word>();
-		Log.i("TAG", "getWords(): check " + texts.size() + " words");
 //		double startTime = System.currentTimeMillis();
-		String selection = "";
-		if(texts.isEmpty()){
-			return words;
+		Log.i("TAG", "getWords(): check " + texts.size() + " words");
+		while(textCounter < texts.size()){
+			String selection = "";
+			selection += KEY_WORD_TEXT + " IN ( ?";
+			for(int i = textCounter + 1; i < texts.size() || i < maxQuery + textCounter; i++){ // Can not call the database with unlimited amount of words! It will crash if to many are used.
+				selection += ", ?";
+			}
+			selection += ")";
+			String[] selectionArg = new String[Math.min(texts.size() - textCounter, maxQuery)];
+			Log.i("TAG", "getWords() inner: check " + selectionArg.length + " words");
+			for(int i = 0; i < selectionArg.length; i++){
+				selectionArg[i] = texts.get(textCounter + i);
+			}
+			textCounter += selectionArg.length;
+			
+		    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  KEY_WORD_PARTOFSPEECHID, }, selection, selectionArg, null, null, null, null);
+		    
+		    if(cursor.moveToFirst()){
+		    	long id;
+		    	String syllables;
+		    	String text;
+		    	long partOfSpeechID;
+		    	do {
+		    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
+		    		text = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // TODO text and syllables are swapped for some reason (there is a test a few rows down)
+		    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_TEXT));
+		    		partOfSpeechID = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_PARTOFSPEECHID));
+		    		words.add(new Word(id, syllables, text, HaikuGenerator.getPartOfSpeechWithID(partOfSpeechID).getType()));
+		    	}while(cursor.moveToNext());
+		    }
+		    cursor.close();
 		}
-		selection += KEY_WORD_TEXT + " IN ( ?";
-		for(int i = 1; i < texts.size(); i++){
-			selection += ", ?";
-		}
-		selection += ")";
-		String[] selectionArg = new String[texts.size()];
-		for(int i = 0; i < selectionArg.length; i++){
-			selectionArg[i] = texts.get(i);
-		}
-		
-	    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  KEY_WORD_PARTOFSPEECHID, }, selection, selectionArg, null, null, null, null);
-	    
-	    if(cursor.moveToFirst()){
-	    	long id;
-	    	String syllables;
-	    	String text;
-	    	long partOfSpeechID;
-	    	do {
-	    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
-	    		text = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // TODO text and syllables are swapped for some reason (there is a test a few rows down)
-	    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_TEXT));
-	    		partOfSpeechID = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_PARTOFSPEECHID));
-	    		words.add(new Word(id, syllables, text, HaikuGenerator.getPartOfSpeechWithID(partOfSpeechID).getType()));
-	    	}while(cursor.moveToNext());
-	    }
-	    cursor.close();
 //	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
 	    return words;
 	}

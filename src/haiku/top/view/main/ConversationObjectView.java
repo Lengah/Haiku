@@ -57,8 +57,9 @@ public class ConversationObjectView extends LinearLayout{
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
 		nameView.setText(name);
-        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
-        nameView.setTypeface(adobeGaramondProRegular);
+		// Adobe Garamond Pro looks weird for contact names.
+//        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+//        nameView.setTypeface(adobeGaramondProRegular);
 		
 		int paddingTopAndBottom = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics());
 		int paddingLeftAndRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, getResources().getDisplayMetrics());
@@ -87,7 +88,6 @@ public class ConversationObjectView extends LinearLayout{
 //				} catch (MalformedURLException e) {
 //					e.printStackTrace();
 //				} catch (IOException e) {
-//					// TODO Auto-generated catch block
 //					e.printStackTrace();
 //				}
 //			}
