@@ -314,9 +314,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		row1.setTextColor(Color.BLACK);
 		row2.setTextColor(Color.BLACK);
 		row3.setTextColor(Color.BLACK);
-		row1.setTextSize(17);
-		row2.setTextSize(17);
-		row3.setTextSize(17);
+		row1.setTextSize(15);
+		row2.setTextSize(15);
+		row3.setTextSize(15);
 		
 		LayoutParams haikuParams = new RelativeLayout.LayoutParams(haikuWidth, haikuHeight);
 		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
