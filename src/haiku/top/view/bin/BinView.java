@@ -170,8 +170,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int TEXT_HEIGHT = 750;
 	
 	// the haiku
-	private static final Position HAIKU_UPPER_LEFT = new Position(240, 600);
-	private static final int HAIKU_WIDTH = 478;
+	private static final Position HAIKU_UPPER_LEFT = new Position(200, 570);
+	private static final int HAIKU_WIDTH = 530;
 	private static final int HAIKU_HEIGHT = 250;
 	
 	// the save button
@@ -314,9 +314,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		row1.setTextColor(Color.BLACK);
 		row2.setTextColor(Color.BLACK);
 		row3.setTextColor(Color.BLACK);
-		row1.setTextSize(15);
-		row2.setTextSize(15);
-		row3.setTextSize(15);
+		row1.setTextSize(13);
+		row2.setTextSize(13);
+		row3.setTextSize(13);
 		
 		LayoutParams haikuParams = new RelativeLayout.LayoutParams(haikuWidth, haikuHeight);
 		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
@@ -603,6 +603,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		updateContactName();
 		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
+		updateThemeView();
 	}
 	
 	public void allThreadsReady(){
