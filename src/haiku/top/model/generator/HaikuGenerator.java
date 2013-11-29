@@ -6,6 +6,7 @@ import haiku.top.model.Theme;
 import haiku.top.model.Word;
 import haiku.top.model.WordAndNumber;
 import haiku.top.model.date.YearMonth;
+import haiku.top.model.date.YearMonthConvo;
 import haiku.top.model.smshandler.AddSmsThread;
 import haiku.top.model.smshandler.AddSmsesThread;
 import haiku.top.model.smshandler.SMS;
@@ -34,6 +35,7 @@ public class HaikuGenerator {
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
 	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
+	private static ArrayList<YearMonthConvo> datesFromThreads = new ArrayList<YearMonthConvo>();
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 	private static Theme theAllTheme;
 	private static ArrayList<Word> smsLogWordsWithThemes = new ArrayList<Word>();
@@ -438,6 +440,35 @@ public class HaikuGenerator {
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 	}
 	
+	public static void addYearFromSMSes(int year, int threadID){ //TODO
+		YearMonthConvo ym;
+		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+			ym = new YearMonthConvo(new YearMonth(year, DateView.MONTHS_NAME[i]), threadID);
+			if(!datesFromThreads.contains(ym)){
+				datesFromThreads.add(ym);
+				BinView.getInstance().addDate(ym.getYearMonth());
+			}
+		}
+		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+		SMS tempSMS;
+		if (cursor.moveToFirst()) {
+			do{
+				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+						threadID);
+				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
+					newSMSes.add(tempSMS);
+				}
+			}
+			while(cursor.moveToNext());
+		}
+		calculateSMSes(newSMSes);
+		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+	}
+	
 	public static void addDate(YearMonth date){
 		dates.add(date);
 		BinView.getInstance().addDate(date);
@@ -461,9 +492,37 @@ public class HaikuGenerator {
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 	}
 	
+	public static void addDateFromSMSes(YearMonth date, int threadID){
+		datesFromThreads.add(new YearMonthConvo(date, threadID));
+		BinView.getInstance().addDate(date);
+		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+		SMS tempSMS;
+		if (cursor.moveToFirst()) {
+			do{
+				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+						threadID);
+				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
+					newSMSes.add(tempSMS);
+				}
+			}
+			while(cursor.moveToNext());
+		}
+		calculateSMSes(newSMSes);
+		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+	}
+	
 	public static ArrayList<SMS> removeDate(YearMonth date){
 		ArrayList<SMS> removedSMS = new ArrayList<SMS>();
 		dates.remove(date);
+		for(int i = datesFromThreads.size()-1; i >= 0; i--){
+			if(datesFromThreads.get(i).getYearMonth().equals(date)){
+				datesFromThreads.remove(i);
+			}
+		}
 		for(int i = smses.size()-1; i >= 0; i--){
 			if(smses.get(i).getYearMonth().equals(date)){
 				removedSMS.add(smses.get(i));
@@ -524,6 +583,10 @@ public class HaikuGenerator {
 	
 	public static ArrayList<YearMonth> getDates(){
 		return dates;
+	}
+	
+	public static ArrayList<YearMonthConvo> getDateConvos(){
+		return datesFromThreads;
 	}
 	
 	public static ArrayList<Theme> getAllThemes(){

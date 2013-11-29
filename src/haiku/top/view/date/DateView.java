@@ -5,6 +5,7 @@ package haiku.top.view.date;
 import haiku.top.HaikuActivity;
 import haiku.top.model.date.Month;
 import haiku.top.model.date.YearMonth;
+import haiku.top.model.date.YearMonthConvo;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.view.main.MainView;
 
@@ -85,7 +86,9 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	}
 	
 	public void updateMonthWithIndex(int index){
-		if(HaikuGenerator.getDates().contains(new YearMonth(yearSelected, months.get(index).getMonth()))){
+		if(HaikuGenerator.getDates().contains(new YearMonth(yearSelected, months.get(index).getMonth()))
+				|| (MainView.getInstance().isShowingSMS() 
+						&& HaikuGenerator.getDateConvos().contains(new YearMonthConvo(new YearMonth(yearSelected, months.get(index).getMonth()), MainView.getInstance().getSelectedConvoThreadID())))){
 			months.get(index).setAlpha(MainView.OPACITY_USED_DATE);
 		}
 		else{
@@ -101,7 +104,9 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 		YearMonth ym;
 		for(int i = 0; i < months.size(); i++){
 			ym = new YearMonth(yearSelected, months.get(i).getMonth());
-			if(dates.contains(ym)){
+			if(dates.contains(ym)
+					|| (MainView.getInstance().isShowingSMS() 
+							&& HaikuGenerator.getDateConvos().contains(new YearMonthConvo(ym, MainView.getInstance().getSelectedConvoThreadID())))){
 				months.get(i).setAlpha(MainView.OPACITY_USED_DATE);
 			}
 			else{

@@ -65,10 +65,20 @@ public class HaikuBinDragListener implements OnDragListener{
 //	    						HaikuGenerator.addDate(yearMonth);
 //	    					}
 //	    				}
-	    				HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
+	    				if(MainView.getInstance().isShowingSMS()){
+	    					HaikuGenerator.addYearFromSMSes(MainView.getInstance().getSelectedYear(), MainView.getInstance().getSelectedConvoThreadID());
+	    				}
+	    				else{
+	    					HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
+	    				}
 	    			}
 	    			else{
-	    				HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()));
+	    				if(MainView.getInstance().isShowingSMS()){
+	    					HaikuGenerator.addDateFromSMSes(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()), MainView.getInstance().getSelectedConvoThreadID());
+	    				}
+	    				else{
+	    					HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()));
+	    				}
 		    		}
 	    		}
 	    		break;

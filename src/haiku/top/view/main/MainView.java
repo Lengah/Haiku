@@ -321,6 +321,15 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 	}
 	
+	public boolean isShowingSMS(){
+		// if 1 has a higher index than 0 it means that smses are being shown
+		return viewsOpenInOrder.indexOf(1) > viewsOpenInOrder.indexOf(0);
+	}
+	
+	public int getSelectedConvoThreadID(){
+		return chosenContact.getThreadID();
+	}
+	
 	public void setSMSView(int threadID){
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 		contactScroll.setVisibility(GONE);

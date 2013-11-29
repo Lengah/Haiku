@@ -21,6 +21,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -173,6 +174,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final Position HAIKU_UPPER_LEFT = new Position(200, 570);
 	private static final int HAIKU_WIDTH = 530;
 	private static final int HAIKU_HEIGHT = 250;
+	private int haikuWidth; // used to calculate the text size of the rows
 	
 	// the save button
 	private static final Position SAVE_UPPER_LEFT = new Position(468, 960);
@@ -294,7 +296,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		contactName.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, contactNameHeight));
 		
 		// HAIKU
-		int	haikuWidth = (int)(((double)HAIKU_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		haikuWidth = (int)(((double)HAIKU_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
 		int haikuHeight = (int)(((double)HAIKU_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
 		
 		int haikuMarginLeft = (int)(((double)HAIKU_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
@@ -513,6 +515,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void addDate(YearMonth ym){
+		if(datesView.contains(ym)){
+			return;
+		}
 		YearMonthView ymv = new YearMonthView(context, ym, dateWidth, dateObjectHeight);
 		datesView.add(ymv);
 		dateList.addView(ymv);
@@ -876,17 +881,60 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		return false;
 	}
 	
+	//TODO
 	public void haikuReady(){
 		endHaiku = HaikuGenerator.getRandomReadyHaiku();
 		setHaikuFonts();
 		row1.setText(endHaiku.getRow(1));
 		row2.setText(endHaiku.getRow(2));
 		row3.setText(endHaiku.getRow(3));
+		int size = getMaxTextSizeForHaiku();
+		row1.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+		row2.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+		row3.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
 		haikuView.setVisibility(VISIBLE);
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
 		contactName.setVisibility(GONE);
 		showHaiku = true;
+	}
+	
+	private int getMaxTextSizeForHaiku(){
+		int size1 = 0;
+		int size2 = 0;
+		int size3 = 0;
+		String text = (String) row1.getText();
+		Paint textPaint = row1.getPaint(); 
+		Rect textRect;
+	    do {
+	    	size1++;
+	    	textPaint.setTextSize(size1);
+	        textRect = new Rect();
+	        textPaint.getTextBounds(text, 0, text.length(), textRect);
+	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
+	    Log.i("TAG", "haikuWidth: " + haikuWidth);
+	    Log.i("TAG", "first width: " + textPaint.measureText(text));
+	    Log.i("TAG", "second width: " + textRect.width());
+	    
+	    text = (String) row2.getText();
+		textPaint = row2.getPaint(); 
+	    do {
+	    	size2++;
+	    	textPaint.setTextSize(size2);
+	        textRect = new Rect();
+	        textPaint.getTextBounds(text, 0, text.length(), textRect);
+	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
+	    
+	    text = (String) row3.getText();
+		textPaint = row3.getPaint(); 
+	    do {
+	    	size3++;
+	    	textPaint.setTextSize(size3);
+	        textRect = new Rect();
+	        textPaint.getTextBounds(text, 0, text.length(), textRect);
+	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
+	    
+		return Math.min(size1, Math.min(size2, size3));
 	}
 	
 	public boolean isShowingHaiku(){
