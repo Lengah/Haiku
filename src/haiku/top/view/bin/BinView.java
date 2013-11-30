@@ -515,8 +515,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void addDate(YearMonth ym){
-		if(datesView.contains(ym)){
-			return;
+		for(int i = 0; i < datesView.size(); i++){
+			if(datesView.get(i).getYearMonth().equals(ym)){
+				return;
+			}
 		}
 		YearMonthView ymv = new YearMonthView(context, ym, dateWidth, dateObjectHeight);
 		datesView.add(ymv);
@@ -881,7 +883,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		return false;
 	}
 	
-	//TODO
 	public void haikuReady(){
 		endHaiku = HaikuGenerator.getRandomReadyHaiku();
 		setHaikuFonts();

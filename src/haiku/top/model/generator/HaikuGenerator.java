@@ -438,9 +438,10 @@ public class HaikuGenerator {
 		}
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+		MainView.getInstance().updateConversationsVisibility();
 	}
 	
-	public static void addYearFromSMSes(int year, int threadID){ //TODO
+	public static void addYearFromSMSes(int year, int threadID){
 		YearMonthConvo ym;
 		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
 			ym = new YearMonthConvo(new YearMonth(year, DateView.MONTHS_NAME[i]), threadID);
@@ -467,6 +468,7 @@ public class HaikuGenerator {
 		}
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+		MainView.getInstance().updateSMSView();
 	}
 	
 	public static void addDate(YearMonth date){
@@ -490,6 +492,7 @@ public class HaikuGenerator {
 		}
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+		MainView.getInstance().updateConversationsVisibility();
 	}
 	
 	public static void addDateFromSMSes(YearMonth date, int threadID){
@@ -513,6 +516,7 @@ public class HaikuGenerator {
 		}
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+		MainView.getInstance().updateSMSView();
 	}
 	
 	public static ArrayList<SMS> removeDate(YearMonth date){
@@ -530,6 +534,7 @@ public class HaikuGenerator {
 				removeSMSWithoutUpdate(smses.get(i)); // new
 			}
 		}
+		MainView.getInstance().updateSMSView();
 		return removedSMS;
 	}
 	
@@ -551,6 +556,9 @@ public class HaikuGenerator {
 		boolean allExists;
 		boolean update = false;
 		for(int i = 0; i < threadIDs.size(); i++){
+			if(thread_ids.contains(threadIDs.get(i))){
+				continue;
+			}
 			allExists = true;
 			projection = new String[] {"_id"};
 			cursor =  MainView.getInstance().getContext().getContentResolver().query(uri, projection, "thread_id = '" + threadIDs.get(i) + "'", null, null);

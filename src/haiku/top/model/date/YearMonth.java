@@ -1,5 +1,7 @@
 package haiku.top.model.date;
 
+import android.util.Log;
+
 
 public class YearMonth {
 	private int year;
@@ -20,9 +22,6 @@ public class YearMonth {
 	
 	@Override
 	public boolean equals(Object yearMonth){
-		if(yearMonth instanceof YearMonth && this.year == ((YearMonth)yearMonth).getYear() && this.month == ((YearMonth)yearMonth).getMonth()){
-			return true;
-		}
-		return false;
+		return yearMonth instanceof YearMonth && this.year == ((YearMonth)yearMonth).getYear() && this.month.equals(((YearMonth)yearMonth).getMonth());
 	}
 }
