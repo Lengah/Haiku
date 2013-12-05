@@ -4,7 +4,7 @@ import java.util.DuplicateFormatFlagsException;
 
 import haiku.top.model.Theme;
 import haiku.top.model.Word;
-import haiku.top.view.bin.BinView;
+import haiku.top.view.binview.BinView;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;

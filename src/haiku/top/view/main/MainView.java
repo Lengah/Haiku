@@ -43,7 +43,7 @@ import haiku.top.model.smshandler.SMS;
 import haiku.top.model.smshandler.ShowSMSESThread;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.ThemeObjectView;
-import haiku.top.view.bin.BinView;
+import haiku.top.view.binview.BinView;
 import haiku.top.view.date.DateView;
 
 public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{

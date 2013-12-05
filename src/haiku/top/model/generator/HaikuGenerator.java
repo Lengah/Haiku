@@ -10,7 +10,7 @@ import haiku.top.model.date.YearMonthConvo;
 import haiku.top.model.smshandler.AddSmsThread;
 import haiku.top.model.smshandler.AddSmsesThread;
 import haiku.top.model.smshandler.SMS;
-import haiku.top.view.bin.BinView;
+import haiku.top.view.binview.BinView;
 import haiku.top.view.date.DateView;
 import haiku.top.view.main.ConversationObjectView;
 import haiku.top.view.main.MainView;

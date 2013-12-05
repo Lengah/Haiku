@@ -2,7 +2,7 @@ package haiku.top.model.generator;
 
 
 import haiku.top.model.WordAndNumber;
-import haiku.top.view.bin.BinView;
+import haiku.top.view.binview.BinView;
 
 import java.util.ArrayList;
 

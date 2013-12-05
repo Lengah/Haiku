@@ -1,4 +1,4 @@
-package haiku.top.view.bin;
+package haiku.top.view.binview;
 
 import haiku.top.model.SMSBinWord;
 import haiku.top.model.Word;

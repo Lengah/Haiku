@@ -1,4 +1,4 @@
-package haiku.top.view.bin;
+package haiku.top.view.binview;
 
 import java.util.ArrayList;
 import java.util.Random;
