@@ -1296,12 +1296,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						}
 					}
 					oldDistance = distance;
+//					Log.i("TAG", "numberOfWordsLeft: " + numberOfWordsLeft);
+//					Log.i("TAG", "stopAt: " + stopAt);
+//					Log.i("TAG", "progressBar.getMaxProgress(): " + progressBar.getMaxProgress());
+//					Log.i("TAG", "progress: " + ((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft)));
+					progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
 				}
-//				Log.i("TAG", "numberOfWordsLeft: " + numberOfWordsLeft);
-//				Log.i("TAG", "stopAt: " + stopAt);
-//				Log.i("TAG", "progressBar.getMaxProgress(): " + progressBar.getMaxProgress());
-//				Log.i("TAG", "progress: " + ((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft)));
-				progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
         		return true;
 			}
 			// not deleting

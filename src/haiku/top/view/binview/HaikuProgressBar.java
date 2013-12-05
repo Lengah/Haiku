@@ -70,7 +70,7 @@ public class HaikuProgressBar extends View{
 	public void setProgress(int progress){
 		this.progress = progress;
 		if(progress > maxProgress){
-			progress = (int) maxProgress;
+			this.progress = (int) maxProgress;
 			BinView.getInstance().haikuReady();
 		}
 		BinView.getInstance().updateBinOpacity();
