@@ -65,12 +65,29 @@ public class HaikuGenerator {
 	private static ArrayList<Word> smsLogWordsWithTheAllThemeRemoved = new ArrayList<Word>();
 	private static ArrayList<Word> allSmsLogWordsRemoved = new ArrayList<Word>();
 	
+	/**
+	 * An array of all characters a word can contain
+	 */
+	public static final Character[] ALL_WORD_CHARACTERS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 
+										'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 
+										's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'é', 
+										'è', 'å', 'ä', 'ö', '\''};
+	
 	public static void resetHaikusRemoved(){
 		haikusRemovedLast.clear();
 	}
 	
 	public static ArrayList<SMS> getAllSMS(){
 		return smses;
+	}
+	
+	public static boolean isAWordCharacter(char c){
+		for(int i = 0; i < ALL_WORD_CHARACTERS.length; i++){
+			if(ALL_WORD_CHARACTERS[i].equals(c)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**

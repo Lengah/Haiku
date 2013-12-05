@@ -210,7 +210,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private ArrayList<WordAndNumber> wordsUsed = new ArrayList<WordAndNumber>(); // to know when a word is completely removed
 	private ArrayList<String> allWordsRemoved = new ArrayList<String>(); // so that the haikus know which words they can't use
 	private ArrayList<WordAndNumber> wordsRemovedLast = new ArrayList<WordAndNumber>(); // to easily undo last change and to check if some haikus are no longer valid
-	private ArrayList<BinSMSView> lastChanged = new ArrayList<BinSMSView>(); // used by undo
+//	private ArrayList<BinSMSView> lastChanged = new ArrayList<BinSMSView>(); // used by undo
+	private ArrayList<BinSMSRowWord> lastChanged = new ArrayList<BinSMSRowWord>();
 	
 	private Haiku safeHaiku;
 	private boolean showHaiku = false;
@@ -219,6 +220,21 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private ProgressDialog threadProgressBar;
 	private static Semaphore endProgress = new Semaphore(1);
+	
+	/**
+	 * If the user has initiated deletion (if the SMSes has been combined)
+	 */
+	private boolean deletionInProgress = false;
+	
+	/**
+	 * The width of a row in PX
+	 */
+	private int rowWidth;
+	
+	private BinCombinedSMS binCombinedSMSView;
+	private static final float BIN_START_OPACITY = 50; //in %
+	private float numberOfWordsLeft;
+	private float stopAt;
 	
 	public BinView(Context context) {
 		super(context);
@@ -267,6 +283,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		// SMSES
 		int textWidth = (int)(((double)TEXT_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
 		int textHeight = (int)(((double)TEXT_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		
+		rowWidth = textWidth;
 		
 		int textMarginLeft = (int)(((double)TEXT_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int textMarginTop = (int)(((double)TEXT_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
@@ -507,11 +525,43 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < themesRefresh.size(); i++){
 			addTheme(themesRefresh.get(i));
 		}
-		
+		updateBinOpacity();
 	}
 	
 	public static BinView getInstance(){
 		return binView;
+	}
+	
+	/**
+	 * Returns the width of a (any) row in the SMS view in PX.
+	 * @return
+	 */
+	public int getWidthOfRow(){
+		return rowWidth;
+	}
+	
+	public boolean isDeleting(){
+		return deletionInProgress;
+	}
+	
+	public void startDeleting(){
+		deletionInProgress = true;
+		textList.removeAllViews();
+//		textScroll.removeAllViews();
+		binCombinedSMSView = new BinCombinedSMS(context);
+		textList.addView(binCombinedSMSView);
+		for(int i = 0; i < smsView.size(); i++){
+			binCombinedSMSView.addSMS(smsView.get(i).getSMS());
+		}
+		for(int i = 0; i < binCombinedSMSView.getRows().size(); i++){
+			numberOfWordsLeft += binCombinedSMSView.getRows().get(i).getWords().size();
+		}
+		//TODO
+		stopAt = 25;
+	}
+	
+	public BinCombinedSMS getBinCombinedSMSView(){
+		return binCombinedSMSView;
 	}
 	
 	public void addDate(YearMonth ym){
@@ -589,12 +639,15 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void reset(){
+		stopAt = 0;
+		numberOfWordsLeft = 0;
 		progressBar.resetProgress();
 		haikuView.setVisibility(GONE);
 		textScroll.setVisibility(VISIBLE);
 		saveButton.setVisibility(GONE);
 		haikuFinished = false;
 		showHaiku = false;
+		deletionInProgress = false;
 		wordsUsed.clear();
 		allWordsRemoved.clear();
 		wordsRemovedLast.clear();
@@ -606,6 +659,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		dateList.removeAllViews();
 		safeHaiku = null;
 		endHaiku = null;
+//		textScroll.removeAllViews();
+//		textScroll.addView(textList);
 		HaikuGenerator.reset();
 		updateContactName();
 		MainView.getInstance().updateConversationsVisibility();
@@ -653,7 +708,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 		if(progressBar.getProgress() == 0){
 			// update the progressBar if it hasn't been moved
-			progressBar.setMaxProgress(50 + (int)(((double)smsView.size())*1.0)); //TODO
+//			progressBar.setMaxProgress(50 + (int)(((double)smsView.size())*1.0)); //TODO
 		}
 		// this is the first time the bin is opened ever or since the last change
 		HaikuGenerator.createHaikus();
@@ -913,9 +968,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
 	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
-	    Log.i("TAG", "haikuWidth: " + haikuWidth);
-	    Log.i("TAG", "first width: " + textPaint.measureText(text));
-	    Log.i("TAG", "second width: " + textRect.width());
+//	    Log.i("TAG", "haikuWidth: " + haikuWidth);
+//	    Log.i("TAG", "first width: " + textPaint.measureText(text));
+//	    Log.i("TAG", "second width: " + textRect.width());
 	    
 	    text = (String) row2.getText();
 		textPaint = row2.getPaint(); 
@@ -943,8 +998,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void undoLastChange(){
+		numberOfWordsLeft += lastChanged.size();
 		for(int i = 0; i < lastChanged.size(); i++){
-			lastChanged.get(i).undoLast();
+//			lastChanged.get(i).undoLast();
+			lastChanged.get(i).undo();
 		}
 		for(int i = allWordsRemoved.size() - 1; i >= 0; i--){
 			for(int a = 0; a < wordsRemovedLast.size(); a++){
@@ -970,6 +1027,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 		wordsRemovedLast.clear();
 		HaikuGenerator.undo();
+		lastChanged.clear();
 	}
 	
 	public void resetUndo(){
@@ -1030,6 +1088,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public void setDraggedView(View v){
 		viewBeingDragged = v;
+	}
+	
+	public void updateBinOpacity(){ //TODO
+		setAlpha((BIN_START_OPACITY+(100-BIN_START_OPACITY)*progressBar.getProgress()/progressBar.getMaxProgress())/100);
 	}
 	
 	private int startX;
@@ -1101,43 +1163,118 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						eventCounter++;
 						progressBar.incProgress();
 						if(eventCounter == eventsNeededForDelete){
+							//TODO - just a deletion marker
+							if(!deletionInProgress){
+								startDeleting();
+								eventCounter = 0;
+								return true;
+							}
+							numberOfWordsLeft -= lastChanged.size();
+//							Log.i("TAG", "(delete) lastChanged.size(): " + lastChanged.size());
+							binCombinedSMSView.delete(lastChanged);
 							resetUndo();
 							safeHaiku = HaikuGenerator.getRandomReadyHaiku();
-							String temp;
-							ArrayList<String> tempWords;
-							for(int i = 0; i < smsView.size(); i++){
-								if(randomGenerator.nextInt(100) < PERCENTAGE_TO_CHANGE){
-									tempWords = smsView.get(i).setUsedWordsAtRandom();
-									for(int t = tempWords.size() - 1; t >= 0; t--){
-										temp = tempWords.get(t);
-										if(safeHaiku.getWordsUsed().contains(temp)){
-											for(int a = 0; a < wordsUsed.size(); a++){ // MUST be somewhere here, otherwise there is something wrong somewhere else in the code
-												if(wordsUsed.get(a).getWord().equals(temp)){
-													if(wordsUsed.get(a).getNumberOf() == 1){
-														// can not remove this word
-														smsView.get(i).undoIndex(t);
-													}
-													else{
-														// can remove it
-														wordsUsed.get(a).decrease();
-														removeWord(temp);
-														lastChanged.add(smsView.get(i));
-													}
-													break;
+//							String temp;
+//							ArrayList<String> tempWords;
+//							for(int i = 0; i < smsView.size(); i++){
+//								if(randomGenerator.nextInt(100) < PERCENTAGE_TO_CHANGE){
+//									tempWords = smsView.get(i).setUsedWordsAtRandom();
+//									for(int t = tempWords.size() - 1; t >= 0; t--){
+//										temp = tempWords.get(t);
+//										if(safeHaiku.getWordsUsed().contains(temp)){
+//											for(int a = 0; a < wordsUsed.size(); a++){ // MUST be somewhere here, otherwise there is something wrong somewhere else in the code
+//												if(wordsUsed.get(a).getWord().equals(temp)){
+//													if(wordsUsed.get(a).getNumberOf() == 1){
+//														// can not remove this word
+//														smsView.get(i).undoIndex(t);
+//													}
+//													else{
+//														// can remove it
+//														wordsUsed.get(a).decrease();
+//														removeWord(temp);
+//														lastChanged.add(smsView.get(i));
+//													}
+//													break;
+//												}
+//											}
+//										}
+//										else{
+//											for(int a = wordsUsed.size() - 1; a >= 0; a--){
+//												if(wordsUsed.get(a).getWord().equals(temp)){
+//													removeWord(temp);
+//													lastChanged.add(smsView.get(i));
+//													if(wordsUsed.get(a).decrease()){
+//														allWordsRemoved.add(wordsUsed.get(a).getWord());
+//														wordsUsed.remove(a);
+//													}
+//													break;
+//												}
+//											}
+//										}
+//									}
+//								}
+//							}
+							ArrayList<String> temps;
+							ArrayList<BinSMSRowWord> tempWords;
+							tempWords = binCombinedSMSView.setToBeDeleted();
+							boolean removed;
+							for(int t = tempWords.size() - 1; t >= 0; t--){
+								temps = tempWords.get(t).getRealWordStrings();
+								String temp;
+								removed = false;
+								if(temps.isEmpty()){
+									// no checks has to be made
+									// can remove it
+//									Log.i("TAG", "remove " + tempWords.get(t).getWord());
+									tempWords.get(t).setRemovedNext();
+									if(!lastChanged.contains(tempWords.get(t))){
+										lastChanged.add(tempWords.get(t));
+									}
+								}
+								for(int i = 0; i < temps.size(); i++){
+									if(removed){
+										break;
+									}
+									temp = temps.get(i);
+									if(safeHaiku.getWordsUsed().contains(temp)){
+										for(int a = 0; a < wordsUsed.size(); a++){ // MUST be somewhere here, otherwise there is something wrong somewhere else in the code
+											if(wordsUsed.get(a).getWord().equals(temp)){
+												if(wordsUsed.get(a).getNumberOf() == 1){
+													// can not remove this word
+//													Log.i("TAG", "don't remove " + tempWords.get(t).getWord());
+													tempWords.get(t).undo(); // The object might have been set to be removed earlier
+													tempWords.remove(t);
+													removed = true;
 												}
+												else{
+													// can remove it
+													wordsUsed.get(a).decrease();
+													removeWord(temp);
+													if(!lastChanged.contains(tempWords.get(t))){
+														lastChanged.add(tempWords.get(t));
+													}
+													tempWords.get(t).setRemovedNext();
+//													Log.i("TAG", "remove " + tempWords.get(t).getWord());
+												}
+												break;
 											}
 										}
-										else{
-											for(int a = wordsUsed.size() - 1; a >= 0; a--){
-												if(wordsUsed.get(a).getWord().equals(temp)){
-													removeWord(temp);
-													lastChanged.add(smsView.get(i));
-													if(wordsUsed.get(a).decrease()){
-														allWordsRemoved.add(wordsUsed.get(a).getWord());
-														wordsUsed.remove(a);
-													}
-													break;
+									}
+									else{
+										// can remove it
+//										Log.i("TAG", "remove " + tempWords.get(t).getWord());
+										tempWords.get(t).setRemovedNext();
+										if(!lastChanged.contains(tempWords.get(t))){
+											lastChanged.add(tempWords.get(t));
+										}
+										for(int a = wordsUsed.size() - 1; a >= 0; a--){
+											if(wordsUsed.get(a).getWord().equals(temp)){
+												removeWord(temp);
+												if(wordsUsed.get(a).decrease()){
+													allWordsRemoved.add(wordsUsed.get(a).getWord());
+													wordsUsed.remove(a);
 												}
+												break;
 											}
 										}
 									}
@@ -1160,6 +1297,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					}
 					oldDistance = distance;
 				}
+//				Log.i("TAG", "numberOfWordsLeft: " + numberOfWordsLeft);
+//				Log.i("TAG", "stopAt: " + stopAt);
+//				Log.i("TAG", "progressBar.getMaxProgress(): " + progressBar.getMaxProgress());
+//				Log.i("TAG", "progress: " + ((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft)));
+				progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
         		return true;
 			}
 			// not deleting
@@ -1168,7 +1310,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				return false;
 			}
 			double distance = Math.sqrt((eventX-startX)*(eventX-startX)+(eventY-startY)*(eventY-startY));
-			if(pressedDownOn instanceof BinSMSView || pressedDownOn instanceof YearMonthView){ // Because of scrolling
+			if(!deletionInProgress && (pressedDownOn instanceof BinSMSView || pressedDownOn instanceof YearMonthView)){ // Because of scrolling
 				if(startX != -1 && Math.abs(startX - ((int) event.getX())) > MainView.MOVE_TO_DRAG_RANGE
 						&& 45 > Math.acos(Math.abs(((int) event.getX()) - startX)
 								/Math.sqrt((((int) event.getX()) - startX) * (((int) event.getX()) - startX)
@@ -1179,7 +1321,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					return true;
 				}
 			}
-			else if(distance > MainView.MOVE_TO_DRAG_RANGE){
+			else if(distance > MainView.MOVE_TO_DRAG_RANGE && pressedDownOn instanceof ThemeObjectView){ // Themes can still be removed even if deletion is in progress 
 				// start drag
 				pressedDownOn.setAlpha(MainView.OPACITY_USED);
 				viewBeingDragged = pressedDownOn;

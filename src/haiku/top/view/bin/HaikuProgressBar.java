@@ -62,6 +62,18 @@ public class HaikuProgressBar extends View{
 
 	public void changeProgress(int progress){
 		this.progress += progress;
+		BinView.getInstance().updateBinOpacity();
+		updateXpos();
+		invalidate();
+	}
+	
+	public void setProgress(int progress){
+		this.progress = progress;
+		if(progress > maxProgress){
+			progress = (int) maxProgress;
+			BinView.getInstance().haikuReady();
+		}
+		BinView.getInstance().updateBinOpacity();
 		updateXpos();
 		invalidate();
 	}
@@ -72,6 +84,7 @@ public class HaikuProgressBar extends View{
 			progress = maxProgress;
 			BinView.getInstance().haikuReady();
 		}
+		BinView.getInstance().updateBinOpacity();
 		updateXpos();
 		invalidate();
 	}
@@ -81,6 +94,7 @@ public class HaikuProgressBar extends View{
 		if(progress < 0){
 			progress = 0;
 		}
+		BinView.getInstance().updateBinOpacity();
 		updateXpos();
 		invalidate();
 	}
@@ -97,8 +111,13 @@ public class HaikuProgressBar extends View{
 		this.maxProgress = maxProgress;
 	}
 	
+	public float getMaxProgress(){
+		return maxProgress;
+	}
+	
 	public void resetProgress(){
 		progress = 0;
+		BinView.getInstance().updateBinOpacity();
 		updateXpos();
 		invalidate();
 	}
