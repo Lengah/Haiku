@@ -232,7 +232,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int rowWidth;
 	
 	private BinCombinedSMS binCombinedSMSView;
-	private static final float BIN_START_OPACITY = 50; //in %
+	private static final float BIN_START_OPACITY = 75; //in %
 	private float numberOfWordsLeft;
 	private float stopAt;
 	
