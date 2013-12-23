@@ -11,9 +11,17 @@ import android.widget.RelativeLayout.LayoutParams;
 
 public class BinSMSRow extends RelativeLayout{
 	private ArrayList<BinSMSRowWord> words = new ArrayList<BinSMSRowWord>();
+	private int rowIndex;
+	private BinCombinedSMS parent;
 	
-	public BinSMSRow(Context context) {
+	public BinSMSRow(Context context, int rowIndex, BinCombinedSMS parent) {
 		super(context);
+		this.rowIndex = rowIndex;
+		this.parent = parent;
+	}
+	
+	public int getRowIndex(){
+		return rowIndex;
 	}
 	
 	/**
@@ -55,11 +63,109 @@ public class BinSMSRow extends RelativeLayout{
 		return words;
 	}
 	
+	/**
+	 * 
+	 * @param startPos - The last index of the word before the block
+	 * @param endPos - The first index of the word after the block
+	 * @return All the words in the block
+	 */
+	public ArrayList<BinSMSRowWord> getWordsOverBlock(float startPos, float endPos){
+		ArrayList<BinSMSRowWord> returnWords = new ArrayList<BinSMSRowWord>();
+		for(int i = 0; i < words.size(); i++){
+			if(words.get(i).getStartPos() > startPos && words.get(i).getStartPos() + words.get(i).getLength() < endPos){
+				returnWords.add(words.get(i));
+			}
+		}
+		return returnWords;
+	}
+	
 	public void delete(BinSMSRowWord word){
+		ArrayList<BinSMSRowWord> wordsAbove = null;
+		if(rowIndex!=0){
+			float startPos = 0;
+			float endPos = 99999;// fill out the rest of the view
+			for(int i = 0; i < words.size(); i++){
+				if(words.get(i).equals(word)){
+					if(i > 0){
+						startPos = words.get(i-1).getStartPos() + words.get(i-1).getLength();
+					}
+					if(i < words.size()-1){
+						endPos = words.get(i+1).getStartPos();
+					}
+					break;
+				}
+			}
+			wordsAbove = parent.getRows().get(rowIndex-1).getWordsOverBlock(startPos, endPos);
+		}
 		words.remove(word);
 		removeView(word);
-		if(words.isEmpty()){
-			BinView.getInstance().getBinCombinedSMSView().removeRow(this);
+		if(wordsAbove != null){
+			for(int i = 0; i < wordsAbove.size(); i++){
+				wordFallingDown(wordsAbove.get(i));
+			}
+		}
+//		if(words.isEmpty()){
+//			BinView.getInstance().getBinCombinedSMSView().removeRow(this);
+//		}
+	}
+	
+	/**
+	 * Deletes the word from its current row.
+	 * Checks if the word can fall down even further. If it can it calls this method on the row below with the same word,
+	 * if not the word it added to this row
+	 */
+	public void wordFallingDown(BinSMSRowWord word){
+		if(rowIndex != parent.getRows().size()-1 && parent.getRows().get(rowIndex+1).canAddWord(word)){
+			parent.getRows().get(rowIndex+1).wordFallingDown(word);
+		}
+		else{
+			BinSMSRowWord newWord = new BinSMSRowWord(getContext(), word.getWord(), word.getStartPos(), word.getLength(), word.getRealWords(), this);
+			addWord(newWord);
+			parent.addFallingDownWord(newWord, rowIndex - word.getRow().rowIndex);
+			word.delete();
+		}
+	}
+	
+	/**
+	 * 
+	 * @param word
+	 * @return True if the word fits on this row, false otherwise
+	 */
+	public boolean canAddWord(BinSMSRowWord word){
+		if(words.isEmpty()){ // shouldn't be necessary
+			return true;
+		}
+		for(int i = 0; i < words.size(); i++){
+			if(words.get(i).getStartPos() > word.getStartPos()){
+				if(i==0){
+					// does it at the start?
+					return words.get(i).getStartPos() > word.getStartPos() + word.getLength();
+				}
+				else{
+					// does it fit in between?
+					return (words.get(i).getStartPos() > word.getStartPos() + word.getLength()) && (word.getStartPos() > words.get(i-1).getStartPos() + words.get(i-1).getLength());
+				}
+			}
+		}
+		// does it fit at the end?
+		return word.getStartPos() > words.get(words.size()-1).getStartPos() + words.get(words.size()-1).getLength();
+	}
+	
+	/**
+	 * The words to the far right might not fill out the whole view. If that is the case, words above it can fall down.
+	 * This should be calculated when the view is created.
+	 */
+	public void init(){
+		if(rowIndex!=0){
+			float startPos = 0;
+			float endPos = 99999;// fill out the rest of the view
+			if(words.size() > 0){
+				startPos = words.get(words.size()-1).getStartPos() + words.get(words.size()-1).getLength();
+			}
+			ArrayList<BinSMSRowWord> wordsAbove = parent.getRows().get(rowIndex-1).getWordsOverBlock(startPos, endPos);
+			for(int i = 0; i < wordsAbove.size(); i++){
+				wordFallingDown(wordsAbove.get(i));
+			}
 		}
 	}
 	
@@ -73,5 +179,9 @@ public class BinSMSRow extends RelativeLayout{
 			return 0;
 		}
 		return words.get(words.size()-1).getStartPos() + words.get(words.size()-1).getLength();
+	}
+	
+	public BinCombinedSMS getBinCombinedSMSView(){
+		return parent;
 	}
 }

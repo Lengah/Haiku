@@ -42,6 +42,7 @@ public class BinSMSRowWord extends TextView{
 	public void undo(){
 		setTextColor(DEFAULT_COLOR);
 		willRemoveNext = false;
+		row.getBinCombinedSMSView().colorOfAWordUpdated(this);
 	}
 	
 	/**
@@ -50,6 +51,7 @@ public class BinSMSRowWord extends TextView{
 	public void setRemovedNext(){
 		setTextColor(REMOVE_COLOR);
 		willRemoveNext = true;
+		row.getBinCombinedSMSView().colorOfAWordUpdated(this);
 	}
 	
 	public boolean willRemoveNext(){
@@ -86,6 +88,10 @@ public class BinSMSRowWord extends TextView{
 	
 	public float getStartPos(){
 		return startPos;
+	}
+	
+	public BinSMSRow getRow(){
+		return row;
 	}
 	
 	@Override

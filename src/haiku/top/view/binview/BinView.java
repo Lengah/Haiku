@@ -93,7 +93,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int screenWidth;
 	private int screenHeight;
 	
-	public static final int DELETE_DISTANCE = 2;
+	public static final int DELETE_DISTANCE = 10;
 	private int deleteDistance;
 	
 	// These positions are compared to the image width and height
@@ -167,7 +167,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	// the smses
 	private static final Position TEXT_UPPER_LEFT = new Position(240, 330);
-	private static final int TEXT_WIDTH = 478;
+	private static final int TEXT_WIDTH = 470;
 	private static final int TEXT_HEIGHT = 750;
 	
 	// the haiku
@@ -556,6 +556,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < binCombinedSMSView.getRows().size(); i++){
 			numberOfWordsLeft += binCombinedSMSView.getRows().get(i).getWords().size();
 		}
+		binCombinedSMSView.init();
 		//TODO
 		stopAt = 25;
 	}
@@ -1090,7 +1091,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		viewBeingDragged = v;
 	}
 	
-	public void updateBinOpacity(){ //TODO
+	public void updateBinOpacity(){
 		setAlpha((BIN_START_OPACITY+(100-BIN_START_OPACITY)*progressBar.getProgress()/progressBar.getMaxProgress())/100);
 	}
 	
@@ -1172,6 +1173,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 							numberOfWordsLeft -= lastChanged.size();
 //							Log.i("TAG", "(delete) lastChanged.size(): " + lastChanged.size());
 							binCombinedSMSView.delete(lastChanged);
+//							ArrayList<BinSMSRowWord> lastChangedTemp = new ArrayList<BinSMSRowWord>();
+//							for(int i = 0; i < lastChanged.size(); i++){
+//								lastChangedTemp.add(lastChanged.get(i));
+//							}
 							resetUndo();
 							safeHaiku = HaikuGenerator.getRandomReadyHaiku();
 //							String temp;
@@ -1280,6 +1285,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 									}
 								}
 							}
+//							binCombinedSMSView.delete(lastChangedTemp); // Causes bugs, needs to be deleted before
 							HaikuGenerator.checkIfHaikusAreValid(allWordsRemoved);
 							canUndo = true;
 							eventCounter = 0;

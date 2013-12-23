@@ -6,16 +6,20 @@ import haiku.top.model.smshandler.SMS;
 
 import java.util.ArrayList;
 
+import android.R.anim;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class BinCombinedSMS extends LinearLayout{
+public class BinCombinedSMS extends RelativeLayout{
 	private Context context;
 	private ArrayList<BinSMSRow> rows = new ArrayList<BinSMSRow>();
 	
@@ -25,25 +29,92 @@ public class BinCombinedSMS extends LinearLayout{
 	
 	private Paint paint;
 	private int height;
+	private boolean started = false;
+	
+	private ArrayList<FallingWordAnimation> animations = new ArrayList<FallingWordAnimation>();
 	
 	public BinCombinedSMS(Context context) {
 		super(context);
 		this.context = context;
-		setOrientation(VERTICAL);
+//		setOrientation(VERTICAL);
 		addRow();
 		paint = (new TextView(context)).getPaint();// All rows have the same paint properties
 		lengthOfSpace = paint.measureText(" ");
 		
-//		Rect textRect = new Rect();
-//		String text = "abcdefghijABCDEFQT";
-//		paint.getTextBounds(text, 0, text.length(), textRect);
-//		height = textRect.height();
+		Rect textRect = new Rect();
+		String text = "abcdefghijABCDEFQT";
+		paint.getTextBounds(text, 0, text.length(), textRect);
+		height = (int) (textRect.height()*1.3);
+	}
+	
+	/**
+	 * The word should be placed at its new row before this method is called
+	 * @param word - The object that is falling
+	 * @param rows - How many rows it should fall
+	 */
+	public void addFallingDownWord(BinSMSRowWord word, int rows){
+		if(!started){
+			started = true;
+			for(int i = 0; i < animations.size(); i++){
+				removeView(animations.get(i).getMovingView());
+			}
+			animations.clear();
+		}
+		TextView movingView = new TextView(context);
+		movingView.setText(word.getWord());
+		movingView.setTextColor(word.getCurrentTextColor());
+		LayoutParams params = new RelativeLayout.LayoutParams((int) word.getLength(), height);
+		params.setMargins((int) word.getStartPos(), word.getRow().getRowIndex()*height, 0, 0);
+		addView(movingView, params);
+		
+		for(int i = 0; i < animations.size(); i++){
+			if(word.equals(animations.get(i).getWord()) && animations.get(i).getWord().getRow().getRowIndex() == word.getRow().getRowIndex()-rows){
+				removeView(animations.get(i).getMovingView());
+				animations.get(i).addRows(rows, word, movingView);
+				return;
+			}
+		}
+		
+		animations.add(new FallingWordAnimation(movingView, word, rows));
+	}
+	
+	public void colorOfAWordUpdated(BinSMSRowWord word){
+		for(int i = 0; i < animations.size(); i++){
+			if(animations.get(i).getWord().equals(word)){
+				animations.get(i).getMovingView().setTextColor(word.getCurrentTextColor());
+				return;
+			}
+		}
+	}
+	
+	/**
+	 * Starts all animations
+	 */
+	public void animateWords(){
+		Log.i("TAG", "Animations: " + animations.size());
+		for(int i = 0; i < animations.size(); i++){
+			animations.get(i).start();
+		}
+		started = false;
+//		animations.clear();
+	}
+	
+	/**
+	 * The words to the far right in a row might not fill out the whole view. If that is the case, words above it can fall down.
+	 * This should be calculated when the view is created.
+	 */
+	public void init(){
+		for(int i = rows.size()-1; i > 0; i--){ // start at the bottom. Don't have to do it on the top row
+			rows.get(i).init();
+		}
 	}
 	
 	private void addRow(){
-		BinSMSRow row = new BinSMSRow(context);
+		BinSMSRow row = new BinSMSRow(context, rows.size(), this);
 		rows.add(row);
-		addView(row);
+		LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, height);
+		params.setMargins(0, row.getRowIndex()*height, 0, 0);
+		addView(row, params);
 	}
 	
 	private boolean isWrongChar(char c){
@@ -65,9 +136,10 @@ public class BinCombinedSMS extends LinearLayout{
 	}
 	
 	public void delete(ArrayList<BinSMSRowWord> wordsToBeDeleted){
-		for(int i = 0; i < wordsToBeDeleted.size(); i++){
+		for(int i = wordsToBeDeleted.size()-1; i >= 0; i--){ // Start at the bottom
 			wordsToBeDeleted.get(i).delete();
 		}
+		animateWords();
 	}
 	
 	public ArrayList<BinSMSRow> getRows(){
