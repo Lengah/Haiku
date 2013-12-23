@@ -1,5 +1,6 @@
 package haiku.top.view.binview;
 
+import haiku.top.HaikuActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -13,6 +14,8 @@ public class FallingWordAnimation {
 	private int rows;
 	private TextView movingView;
 	private static final int TIME_TO_FALL_ONE_ROW = 200;
+	private boolean started = false;
+	private boolean finished = false;
 	
 	public FallingWordAnimation(TextView movingView, BinSMSRowWord word, int rows){
 		this.movingView = movingView;
@@ -35,6 +38,10 @@ public class FallingWordAnimation {
 	}
 	
 	public void start(){
+		if(started){
+			return;
+		}
+		started = true;
 		movingView.startAnimation(animation);
 		animation.setAnimationListener(new AnimationListener() {
 			public void onAnimationStart(Animation animation) {
@@ -45,8 +52,13 @@ public class FallingWordAnimation {
 			public void onAnimationEnd(Animation animation) {
 				word.setVisibility(View.VISIBLE);
 				movingView.setVisibility(View.GONE);
+				finished = true;
 			}
 		});
+	}
+	
+	public boolean isFinished(){
+		return finished;
 	}
 	
 	public BinSMSRowWord getWord(){

@@ -55,10 +55,12 @@ public class BinCombinedSMS extends RelativeLayout{
 	public void addFallingDownWord(BinSMSRowWord word, int rows){
 		if(!started){
 			started = true;
-			for(int i = 0; i < animations.size(); i++){
-				removeView(animations.get(i).getMovingView());
+			for(int i = animations.size()-1; i >= 0; i--){
+				if(animations.get(i).isFinished()){
+					removeView(animations.get(i).getMovingView());
+					animations.remove(i);
+				}
 			}
-			animations.clear();
 		}
 		TextView movingView = new TextView(context);
 		movingView.setText(word.getWord());
@@ -91,7 +93,7 @@ public class BinCombinedSMS extends RelativeLayout{
 	 * Starts all animations
 	 */
 	public void animateWords(){
-		Log.i("TAG", "Animations: " + animations.size());
+//		Log.i("TAG", "Animations: " + animations.size());
 		for(int i = 0; i < animations.size(); i++){
 			animations.get(i).start();
 		}
