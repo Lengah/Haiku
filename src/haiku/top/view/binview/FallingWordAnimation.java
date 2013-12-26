@@ -32,6 +32,7 @@ public class FallingWordAnimation {
 	}
 	
 	private void updateAnimation(){
+		word.setVisibility(View.GONE);
 		animation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,0,Animation.RELATIVE_TO_SELF,0,
 				Animation.RELATIVE_TO_SELF, (float)-rows, Animation.RELATIVE_TO_SELF, 0);
 		animation.setDuration(TIME_TO_FALL_ONE_ROW*rows);
@@ -45,7 +46,6 @@ public class FallingWordAnimation {
 		movingView.startAnimation(animation);
 		animation.setAnimationListener(new AnimationListener() {
 			public void onAnimationStart(Animation animation) {
-				word.setVisibility(View.GONE);
 			}
 			public void onAnimationRepeat(Animation animation) {
 			}

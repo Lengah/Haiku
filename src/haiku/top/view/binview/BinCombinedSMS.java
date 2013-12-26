@@ -47,6 +47,17 @@ public class BinCombinedSMS extends RelativeLayout{
 		height = (int) (textRect.height()*1.3);
 	}
 	
+	public void removeTopRow(){
+		removeAllViews();
+		rows.remove(0);
+		LayoutParams params;
+		for(int i = 0; i < rows.size(); i++){
+			params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, height);
+			params.setMargins(0, rows.get(i).getRowIndex()*height, 0, 0);
+			addView(rows.get(i), params);
+		}
+	}
+	
 	/**
 	 * The word should be placed at its new row before this method is called
 	 * @param word - The object that is falling
@@ -61,6 +72,9 @@ public class BinCombinedSMS extends RelativeLayout{
 					animations.remove(i);
 				}
 			}
+//			if(this.rows.get(0).getWords().isEmpty()){
+//				removeTopRow();
+//			}
 		}
 		TextView movingView = new TextView(context);
 		movingView.setText(word.getWord());
