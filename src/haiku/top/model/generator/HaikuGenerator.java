@@ -275,8 +275,9 @@ public class HaikuGenerator {
 	/**
 	 * A conversation, not an actual thread
 	 * @param threadID
+	 * @return The SMSes that are added
 	 */
-	public static void addThread(int threadID){
+	public static ArrayList<SMS> addThread(int threadID){
 		thread_ids.add(threadID);
 		Cursor cursor = HaikuActivity.getThread(MainView.getInstance().getContext(), threadID);
 		ArrayList<SMS> threadSMS = new ArrayList<SMS>();
@@ -292,6 +293,7 @@ public class HaikuGenerator {
 			}
 		}
 		calculateSMSes(threadSMS);
+		return threadSMS;
 	}
 	
 	/**
@@ -315,7 +317,12 @@ public class HaikuGenerator {
 	 */
 	public static void calculateSMS(SMS sms){
 		smses.add(sms);
-		BinView.getInstance().addSMS(sms);
+		if(!MainView.getInstance().getBinView().isDeleting()){
+			BinView.getInstance().addSMSBeforeDeletion(sms);
+		}
+		else{
+			BinView.getInstance().addSMSDuringDeletion(sms);
+		}
 		AddSmsThread thread = new AddSmsThread(sms);
 		addThread(thread);
 		thread.start();
@@ -324,7 +331,12 @@ public class HaikuGenerator {
 	public static void calculateSMSes(ArrayList<SMS> smses){
 		HaikuGenerator.smses.addAll(smses);
 		for(int i = 0; i < smses.size(); i++){
-			BinView.getInstance().addSMS(smses.get(i));
+			if(!MainView.getInstance().getBinView().isDeleting()){
+				BinView.getInstance().addSMSBeforeDeletion(smses.get(i));
+			}
+			else{
+				BinView.getInstance().addSMSDuringDeletion(smses.get(i));
+			}
 		}
 		AddSmsesThread thread = new AddSmsesThread(smses);
 		addThread(thread);
@@ -428,7 +440,7 @@ public class HaikuGenerator {
 		return smses;
 	}
 	
-	public static void addYear(int year){
+	public static ArrayList<SMS> addYear(int year){
 		YearMonth ym;
 		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
 			ym = new YearMonth(year, DateView.MONTHS_NAME[i]);
@@ -456,9 +468,10 @@ public class HaikuGenerator {
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 		MainView.getInstance().updateConversationsVisibility();
+		return orderSMSByDate(newSMSes);
 	}
 	
-	public static void addYearFromSMSes(int year, int threadID){
+	public static ArrayList<SMS> addYearFromSMSes(int year, int threadID){
 		YearMonthConvo ym;
 		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
 			ym = new YearMonthConvo(new YearMonth(year, DateView.MONTHS_NAME[i]), threadID);
@@ -486,9 +499,10 @@ public class HaikuGenerator {
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 		MainView.getInstance().updateSMSView();
+		return orderSMSByDate(newSMSes);
 	}
 	
-	public static void addDate(YearMonth date){
+	public static ArrayList<SMS> addDate(YearMonth date){
 		dates.add(date);
 		BinView.getInstance().addDate(date);
 		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
@@ -510,9 +524,10 @@ public class HaikuGenerator {
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 		MainView.getInstance().updateConversationsVisibility();
+		return orderSMSByDate(newSMSes);
 	}
 	
-	public static void addDateFromSMSes(YearMonth date, int threadID){
+	public static ArrayList<SMS> addDateFromSMSes(YearMonth date, int threadID){
 		datesFromThreads.add(new YearMonthConvo(date, threadID));
 		BinView.getInstance().addDate(date);
 		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
@@ -534,6 +549,34 @@ public class HaikuGenerator {
 		calculateSMSes(newSMSes);
 		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
 		MainView.getInstance().updateSMSView();
+		return orderSMSByDate(newSMSes);
+	}
+	
+	public static ArrayList<SMS> orderSMSByDate(ArrayList<SMS> sms){
+		ArrayList<SMS> sortedSMS = new ArrayList<SMS>();
+		SMS[] smsList = new SMS[sms.size()];
+		for(int i = 0; i < sms.size(); i++){
+			smsList[i] = sms.get(i);
+		}
+		
+		SMS temp;
+		int location;
+		for(int i = 1; i < smsList.length; i++){
+			if(Long.parseLong(smsList[i].getDate()) > Long.parseLong(smsList[i-1].getDate())){
+				temp = smsList[i];
+				location = i;
+				do {
+					smsList[location] = smsList[location-1];
+	                location--;
+	            }
+	            while (location > 0 && Long.parseLong(smsList[location-1].getDate()) < Long.parseLong(temp.getDate()));
+				smsList[location] = temp;
+			}
+		}
+		for(int i = 0; i < smsList.length; i++){
+			sortedSMS.add(smsList[i]);
+		}
+		return sortedSMS;
 	}
 	
 	public static ArrayList<SMS> removeDate(YearMonth date){

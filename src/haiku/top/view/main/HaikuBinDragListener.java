@@ -7,6 +7,7 @@ import haiku.top.model.Theme;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.view.ThemeObjectView;
+import haiku.top.view.binview.BinView;
 import haiku.top.view.date.QuarterCircle;
 import android.content.Context;
 import android.graphics.Color;
@@ -24,14 +25,17 @@ public class HaikuBinDragListener implements OnDragListener{
 	private int inBinColor = Color.GREEN;
 	private int notInBinColor = Color.rgb(255, 236, 142);
 	
-	private View binView;
-
-	public HaikuBinDragListener(View binView) {
-		this.binView = binView;
+	private boolean isAddingDuringDeletion = false;
+	
+	public void resetDeletionAddingFlag(){
+		isAddingDuringDeletion = false;
 	}
 
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
+		if(isAddingDuringDeletion){
+			return false; // The BinView is handling the event -> don't do anything here.
+		}
 		int action = event.getAction();
 		View view;
 	    switch (action) {
@@ -39,6 +43,13 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		inBinRange = true;
+	    		view = MainView.getInstance().getDraggedView();
+	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObjectView || view instanceof QuarterCircle)){
+	    			// Since deletion has started the user should be able to place the dragged object in the bin
+	    			isAddingDuringDeletion = true;
+	    			MainView.getInstance().getBinView().setAddingObjectDuringDeletion(view);
+	    			MainView.getInstance().openBinViewToAdd();
+	    		}
 	    		break;
 	    	case DragEvent.ACTION_DRAG_EXITED:        
 	    		inBinRange = false;

@@ -1,8 +1,10 @@
 package haiku.top.view.binview;
 
 import haiku.top.model.Word;
+import haiku.top.model.WordAndNumber;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
+import haiku.top.view.main.MainView;
 
 import java.util.ArrayList;
 
@@ -37,7 +39,6 @@ public class BinCombinedSMS extends RelativeLayout{
 		super(context);
 		this.context = context;
 //		setOrientation(VERTICAL);
-		addRow();
 		paint = (new TextView(context)).getPaint();// All rows have the same paint properties
 		lengthOfSpace = paint.measureText(" ");
 		
@@ -45,6 +46,15 @@ public class BinCombinedSMS extends RelativeLayout{
 		String text = "abcdefghijABCDEFQT";
 		paint.getTextBounds(text, 0, text.length(), textRect);
 		height = (int) (textRect.height()*1.3);
+		addRow();
+	}
+	
+	public int getHeightOfRow(){
+		return height;
+	}
+	
+	public float getLengthOfSpace(){
+		return lengthOfSpace;
 	}
 	
 	public void removeTopRow(){
@@ -116,13 +126,14 @@ public class BinCombinedSMS extends RelativeLayout{
 	}
 	
 	/**
-	 * The words to the far right in a row might not fill out the whole view. If that is the case, words above it can fall down.
+	 * Check all words and see if they can fall down
 	 * This should be calculated when the view is created.
 	 */
 	public void init(){
 		for(int i = rows.size()-1; i > 0; i--){ // start at the bottom. Don't have to do it on the top row
 			rows.get(i).init();
 		}
+		animateWords();
 	}
 	
 	private void addRow(){
@@ -165,6 +176,135 @@ public class BinCombinedSMS extends RelativeLayout{
 	public void removeRow(BinSMSRow row){
 		rows.remove(row);
 		removeView(row);
+	}
+	
+	public void addSMSesAtPosition(ArrayList<SMS> smses, int rowIndex, int xPos){
+		ArrayList<BinSMSRowWord> wordsReplaced = new ArrayList<BinSMSRowWord>();
+		int firstOffset = rows.get(rowIndex).calculateOffsetOfWords(xPos);
+		String message = "";
+		if(rows.get(rowIndex).isTextAt(xPos-1)){
+			// If there is no space before one needs to be added
+			message += " ";
+		}
+		for(int i = 0; i < smses.size(); i++){
+			if(i > 0){
+				message += " ";
+			}
+			message += smses.get(i).getMessage(); 
+		}
+		if(firstOffset > paint.measureText(message) + lengthOfSpace){ // There needs to be a space between words
+			// the added words fit in the available space. There is no need to calculate new positions, just add those words.
+			int pLength = 0;
+			for(int i = 0; i < smses.size(); i++){
+				pLength += addMessageAtRowStartingAtPos(smses.get(i), rowIndex, xPos + pLength);
+			}
+			animateWords();
+			MainView.getInstance().getBinView().updateNumberOfWordsLeft();
+			return;
+		}
+		
+		// The added words do not fit -> all words after needs to be recalculated.
+		wordsReplaced.addAll(rows.get(rowIndex).removeAfterPos(xPos));
+		for(int i = rowIndex+1; i < rows.size(); i++){
+			rows.get(i).calculateOffsetOfWords();
+			wordsReplaced.addAll(rows.get(i).getWords());
+		}
+		while(rows.size() > rowIndex+1){
+			removeView(rows.get(rowIndex+1));
+			rows.remove(rowIndex+1);
+		}
+		for(int i = 0; i < smses.size(); i++){
+			addSMS(smses.get(i));
+		}
+		for(int i = 0; i < wordsReplaced.size(); i++){
+			addWord(wordsReplaced.get(i));
+		}
+//		for(int i = 0; i < rows.size(); i++){
+//			rows.get(i).setRowIndex(i);
+//		}
+		MainView.getInstance().getBinView().updateNumberOfWordsLeft();
+		init();
+	}
+	
+	public int availablePosition(int row, int xPos){
+//		Log.i("TAG", "check row: " + row);
+		for(int i = 0; i < rows.get(row).getWords().size(); i++){
+			if(rows.get(row).getWords().get(i).getStartPos() <= xPos
+					&& rows.get(row).getWords().get(i).getStartPos() + rows.get(row).getWords().get(i).getLength() > xPos){
+				// on a word -> change the xPos so it points on the end of the word
+//				Log.i("TAG", "holding over word: " + rows.get(row).getWords().get(i).getWord());
+				return (int) (rows.get(row).getWords().get(i).getStartPos() + rows.get(row).getWords().get(i).getLength());
+			}
+		}
+		// not on a word -> the inputed xPos works
+		return xPos;
+	}
+	
+	private int addMessageAtRowStartingAtPos(SMS sms, int rowIndex, int xPos){
+		int returnLength = 0;
+		String message = " " + sms.getMessage();
+		float offset;
+		String temp;
+		int pos;
+		float length;
+		while(message.length() > 0){
+			offset = 0;
+			while(message.length() > 0 && isWrongChar(message.charAt(0))){
+				offset += lengthOfSpace;
+				message = message.substring(1);
+			}
+			if(!(message.length() > 0)){
+				break;
+			}
+			pos = 0;
+			while(message.length() > pos && !isWrongChar(message.charAt(pos))){
+				pos++;
+			}
+			temp = message.substring(0, pos);
+			message = message.substring(pos);
+			length = paint.measureText(temp);
+			ArrayList<Word> realWordsInBlock = new ArrayList<Word>();
+			String tempWordText;
+			int tempInt;
+			boolean exists;
+			for(int i = 0; i < sms.getWords().size(); i++){
+				tempWordText = sms.getWords().get(i).getText().toLowerCase();
+				exists = false;
+				for(int a = 0; a < realWordsInBlock.size(); a++){ // It didn't like my contains check
+					if(realWordsInBlock.get(a).getText().equalsIgnoreCase(tempWordText)){
+						exists = true;
+						break;
+					}
+				}
+				if(exists){
+					continue;
+				}
+				if(temp.toLowerCase().contains(tempWordText)
+						&& ((tempInt = temp.toLowerCase().indexOf(tempWordText.charAt(0))) == 0 
+										|| !HaikuGenerator.isAWordCharacter(temp.toLowerCase().charAt(tempInt-1))) // It must either be the start of the word or the character before it is not a charcter used in a word (can be / for example)
+						&& ((tempInt = temp.toLowerCase().indexOf(tempWordText.charAt(tempWordText.length()-1))) == temp.length()-1 
+										|| !HaikuGenerator.isAWordCharacter(temp.toLowerCase().charAt(tempInt+1)))){ // It must either be the end of the word or the character after it is not a charcter used in a word (can be ! for example)
+					realWordsInBlock.add(sms.getWords().get(i));
+				}
+			}
+			BinSMSRowWord wordAdded = new BinSMSRowWord(context, temp, returnLength + xPos + offset, length, realWordsInBlock, rows.get(rowIndex));
+			returnLength += length + offset;
+			//TODO
+			if(rowIndex < rows.size()-1){
+				// there are rows below where this word might be able to fall down to
+				int rowsToFall = 0;
+				while(rowIndex + rowsToFall + 1 < rows.size() && rows.get(rowIndex + rowsToFall + 1).canAddWord(wordAdded)){
+					rowsToFall++;
+				}
+				rows.get(rowIndex + rowsToFall).addWord(wordAdded);
+				wordAdded.setRow(rows.get(rowIndex + rowsToFall));
+				if(rowsToFall > 0){
+					// It fell down
+					addFallingDownWord(wordAdded, rowsToFall);
+				}
+			}
+		}
+		return returnLength;
 	}
 	
 	public void addSMS(SMS sms){
@@ -220,5 +360,15 @@ public class BinCombinedSMS extends RelativeLayout{
 			}
 			rows.get(rows.size()-1).addWord(new BinSMSRowWord(context, temp, rows.get(rows.size()-1).getCurrentOffset() + offset, length, realWordsInBlock, rows.get(rows.size()-1)));
 		}
+	}
+	
+	private void addWord(BinSMSRowWord word){
+		float spaceLeft = BinView.getInstance().getWidthOfRow() - rows.get(rows.size()-1).getCurrentOffset();
+		if(spaceLeft < word.getLength() + word.getOffset()){
+			addRow();
+			word.setOffset((int) (word.getOffset()-spaceLeft));
+		}
+		float startPos = rows.get(rows.size()-1).getCurrentOffset() + word.getOffset();
+		rows.get(rows.size()-1).addWord(new BinSMSRowWord(context, word.getWord(), startPos, word.getLength(), word.getRealWords(), rows.get(rows.size()-1)));
 	}
 }

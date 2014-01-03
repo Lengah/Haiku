@@ -1,6 +1,7 @@
 package haiku.top.view.binview;
 
 import haiku.top.model.Word;
+import haiku.top.view.main.MainView;
 
 import java.util.ArrayList;
 
@@ -20,6 +21,12 @@ public class BinSMSRowWord extends TextView{
 	private static final int DEFAULT_COLOR = Color.BLACK;
 	private static final int REMOVE_COLOR = Color.GRAY;
 	
+	/**
+	 * Used when the word is redeployed. The offset is the distance in pixels from the word before it (or where the user decided to add the words (the pointer position)).
+	 * If the word is the first word of its row, the offset will be the what's left of the top row plus the distance to the left side.
+	 */
+	private int offset;
+	
 	public BinSMSRowWord(Context context, String word, float startPos, float length, ArrayList<Word> realWords, BinSMSRow row){
 		super(context);
 //		Log.i("TAG", "add word: " + word + ", startPos: " + startPos + ", length: " + length + ", realwords: " + realWords.size());
@@ -36,6 +43,10 @@ public class BinSMSRowWord extends TextView{
 		setTextColor(DEFAULT_COLOR);
 	}
 	
+	public void setRow(BinSMSRow row){
+		this.row = row;
+	}
+	
 	/**
 	 * Updates the color and a variable
 	 */
@@ -43,6 +54,17 @@ public class BinSMSRowWord extends TextView{
 		setTextColor(DEFAULT_COLOR);
 		willRemoveNext = false;
 		row.getBinCombinedSMSView().colorOfAWordUpdated(this);
+	}
+	
+	public void setOffset(int offset){
+		if(offset < 0){
+			offset = 0;
+		}
+		this.offset = offset;
+	}
+	
+	public int getOffset(){
+		return offset;
 	}
 	
 	/**

@@ -15,8 +15,11 @@ import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.view.ThemeObjectView;
+import haiku.top.view.date.QuarterCircle;
 import haiku.top.view.date.YearMonthView;
+import haiku.top.view.main.ConversationObjectView;
 import haiku.top.view.main.MainView;
+import haiku.top.view.main.SMSObjectView;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
@@ -236,6 +239,19 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private float numberOfWordsLeft;
 	private float stopAt;
 	
+	private View addingObjectDuringDeletion = null;
+	
+	private int textWidth;
+	private int textHeight;
+	
+	private int textMarginLeft;
+	private int textMarginTop;
+	
+	private LinearLayout pointerView;
+	
+	private int contactNameHeight;
+	private static final double SCROLL_HEIGHT = 0.1; // 10% of the text area's height
+	
 	public BinView(Context context) {
 		super(context);
 		this.context = context;
@@ -247,6 +263,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		threadProgressBar.setMessage("Loading...");
 		threadProgressBar.setCancelable(false);
 		threadProgressBar.setIndeterminate(true);
+		
+		pointerView = new LinearLayout(context);
+		pointerView.setBackgroundColor(Color.BLACK);
 		
 		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
@@ -281,13 +300,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		addView(progressBar);
 		
 		// SMSES
-		int textWidth = (int)(((double)TEXT_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
-		int textHeight = (int)(((double)TEXT_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		textWidth = (int)(((double)TEXT_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		textHeight = (int)(((double)TEXT_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
 		
 		rowWidth = textWidth;
 		
-		int textMarginLeft = (int)(((double)TEXT_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
-		int textMarginTop = (int)(((double)TEXT_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
+		textMarginLeft = (int)(((double)TEXT_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		textMarginTop = (int)(((double)TEXT_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
 		LinearLayout nameAndTextLayout = new LinearLayout(context);
 		textScroll = new ScrollView(context);
@@ -310,7 +329,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textScroll.addView(textList);
 		addView(nameAndTextLayout);
 		
-		int contactNameHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
+		contactNameHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
 		contactName.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, contactNameHeight));
 		
 		// HAIKU
@@ -515,7 +534,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		ArrayList<Theme> themesRefresh = HaikuGenerator.getThemes();
 		
 		for(int i = 0; i < smsRefresh.size(); i++){
-			addSMS(smsRefresh.get(i));
+			addSMSBeforeDeletion(smsRefresh.get(i));
 		}
 		
 		for(int i = 0; i < datesRefresh.size(); i++){
@@ -532,6 +551,16 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		return binView;
 	}
 	
+	public void setAddingObjectDuringDeletion(View addingObjectDuringDeletion){
+		this.addingObjectDuringDeletion = addingObjectDuringDeletion;
+		this.addingObjectDuringDeletion.startDrag(null, new DragShadowBuilder(this.addingObjectDuringDeletion), null, 0);
+	}
+	
+	public void resetAddingObjectDuringDeletion(){
+		this.addingObjectDuringDeletion = null;
+		MainView.getInstance().getHaikuDragListener().resetDeletionAddingFlag();
+	}
+	
 	/**
 	 * Returns the width of a (any) row in the SMS view in PX.
 	 * @return
@@ -540,6 +569,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		return rowWidth;
 	}
 	
+	/**
+	 * If the user has initiated deletion (if the SMSes has been combined)
+	 * @return
+	 */
 	public boolean isDeleting(){
 		return deletionInProgress;
 	}
@@ -553,12 +586,17 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < smsView.size(); i++){
 			binCombinedSMSView.addSMS(smsView.get(i).getSMS());
 		}
+		stopAt = 25; //TODO
+		updateNumberOfWordsLeft();
+		binCombinedSMSView.init();
+	}
+	
+	public void updateNumberOfWordsLeft(){
+		numberOfWordsLeft = 0;
 		for(int i = 0; i < binCombinedSMSView.getRows().size(); i++){
 			numberOfWordsLeft += binCombinedSMSView.getRows().get(i).getWords().size();
 		}
-		binCombinedSMSView.init();
-		//TODO
-		stopAt = 25;
+		progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
 	}
 	
 	public BinCombinedSMS getBinCombinedSMSView(){
@@ -586,17 +624,56 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private boolean showingContactName = false;
 	private long contactID;
 	
-	public void addSMS(SMS sms){
+	public void addSMSBeforeDeletion(SMS sms){
+		//Before date change
+//		BinSMSView tv = new BinSMSView(context, sms);
+//		tv.setPadding(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
+//		textList.addView(tv);
+//		tv.setOnTouchListener(this);
+//		smsView.add(tv);
+//		if(smsView.size() == 1){
+//			// Only sms! -> show contact
+//			updateContactName();
+//		}
+//		else if(showingContactName && contactID != sms.getContactID()){
+//			showingContactName = false;
+//			contactName.setVisibility(GONE);
+//		}
+//		stateChanged = true;
+		
 		BinSMSView tv = new BinSMSView(context, sms);
 		tv.setPadding(0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
-		textList.addView(tv);
+		boolean added = false;
+		for(int i = 0; i < smsView.size(); i++){
+			if(Long.parseLong(smsView.get(i).getSMS().getDate()) < Long.parseLong(sms.getDate())){
+				smsView.add(i, tv);
+				textList.addView(tv, i);
+				added = true;
+				break;
+			}
+		}
+		if(!added){
+			smsView.add(tv);
+			textList.addView(tv);
+		}
 		tv.setOnTouchListener(this);
-		smsView.add(tv);
 		if(smsView.size() == 1){
 			// Only sms! -> show contact
 			updateContactName();
 		}
 		else if(showingContactName && contactID != sms.getContactID()){
+			showingContactName = false;
+			contactName.setVisibility(GONE);
+		}
+		stateChanged = true;
+	}
+	
+	/**
+	 * Just checks the contact name
+	 * @param sms
+	 */
+	public void addSMSDuringDeletion(SMS sms){
+		if(showingContactName && contactID != sms.getContactID()){
 			showingContactName = false;
 			contactName.setVisibility(GONE);
 		}
@@ -618,7 +695,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public void addSMSES(ArrayList<SMS> smses){
 		for(int i = 0; i < smses.size(); i++){
-			addSMS(smses.get(i));
+			addSMSBeforeDeletion(smses.get(i));
 		}
 	}
 	
@@ -660,12 +737,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		dateList.removeAllViews();
 		safeHaiku = null;
 		endHaiku = null;
-//		textScroll.removeAllViews();
+//		textScroll.removeAllViews();ssf
 //		textScroll.addView(textList);
 		HaikuGenerator.reset();
 		updateContactName();
 		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
+		MainView.getInstance().updateSMSView();
 		updateThemeView();
 	}
 	
@@ -1366,12 +1444,88 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			MainView.getInstance().closeBinView();
 		}
 	}
+	
+	private int rowIndex = 0;
+	private int xIndex = 0;
+	
+	private ScrollThread scrollThread;
+	public static final int SCROLL_TIME = 400; // in ms
+	
+	public void scrollUp(){
+		if(textScroll.getScrollY() > 0){
+			textScroll.scrollBy(0, -binCombinedSMSView.getHeightOfRow());
+			if(textScroll.getScrollY() < 0){
+				textScroll.scrollTo(0, 0);
+			}
+			updateTextArea(lastX, lastY);
+		}
+	}
+	
+	public void scrollDown(){
+		int maxScroll = binCombinedSMSView.getRows().size()*binCombinedSMSView.getHeightOfRow()-textHeight;
+		if(textScroll.getScrollY() < maxScroll){
+			textScroll.scrollBy(0, binCombinedSMSView.getHeightOfRow());
+			if(textScroll.getScrollY() > maxScroll){
+				textScroll.scrollTo(0, maxScroll);
+			}
+			updateTextArea(lastX, lastY);
+		}
+	}
+	
+	private float lastX;
+	private float lastY;
+	
+	public void updateTextArea(float x, float y){
+		if(ended){
+			return;
+		}
+		lastX = x;
+		lastY = y;
+		// pointer is in the SMS view
+		boolean below0 = false;
+		if(showingContactName){
+			rowIndex = (int) ((textScroll.getScrollY() + y - textMarginTop - contactNameHeight)/binCombinedSMSView.getHeightOfRow());
+			if(rowIndex < 0){
+				below0 = true;
+				rowIndex = 0;
+			}
+		}
+		else{
+			rowIndex = (int) ((textScroll.getScrollY() + y - textMarginTop)/binCombinedSMSView.getHeightOfRow());
+		}
+		if(rowIndex > binCombinedSMSView.getRows().size()-1){
+			rowIndex = binCombinedSMSView.getRows().size()-1;
+			xIndex = (int) binCombinedSMSView.getRows().get(rowIndex).getCurrentOffset();
+		}
+		else{
+			if(below0){
+				xIndex = 0;
+			}
+			else{
+				xIndex = binCombinedSMSView.availablePosition(rowIndex, (int) (x - textMarginLeft));
+			}
+		}
+		removeView(pointerView);
+		LayoutParams params = new RelativeLayout.LayoutParams((int) binCombinedSMSView.getLengthOfSpace(), binCombinedSMSView.getHeightOfRow());
+		params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		if(showingContactName){
+			params.setMargins(xIndex + textMarginLeft, (rowIndex*binCombinedSMSView.getHeightOfRow() + textMarginTop - textScroll.getScrollY() + contactNameHeight), 0, 0);
+		}
+		else{
+			params.setMargins(xIndex + textMarginLeft, (rowIndex*binCombinedSMSView.getHeightOfRow() + textMarginTop - textScroll.getScrollY()), 0, 0);
+		}
+		addView(pointerView, params);
+	}
 
+	private boolean ended = false;
+	
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
 		int action = event.getAction();
 	    switch (action) {
 	    	case DragEvent.ACTION_DRAG_STARTED:
+	    		ended = false;
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		break;
@@ -1394,8 +1548,80 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    				MainView.getInstance().resetBinColor();
 	    			}
 	    		}
+	    		if(addingObjectDuringDeletion != null){
+	    			if(x > textMarginLeft && x < textMarginLeft + textWidth && event.getY() > textMarginTop && event.getY() < textMarginTop + textHeight){
+	    				updateTextArea(x, event.getY());
+	    				//TODO
+	    				//scroll
+	    				if((!showingContactName && event.getY() < textMarginTop + textHeight*SCROLL_HEIGHT)
+	    						|| (showingContactName && event.getY() < (textMarginTop+contactNameHeight) + (textHeight-contactNameHeight)*SCROLL_HEIGHT)){
+	    					if(scrollThread == null){
+	    						// Start scroll up
+		    					scrollThread = new ScrollThread(true);
+		    					scrollThread.start();
+	    					}
+	    				}
+	    				else if(event.getY() > textMarginTop + textHeight - textHeight*SCROLL_HEIGHT){
+	    					if(scrollThread == null){
+	    						// Start scroll down
+	    						scrollThread = new ScrollThread(false);
+		    					scrollThread.start();
+	    					}
+	    				}
+	    				else{
+	    					// stop any current scroll
+	    					if(scrollThread != null){
+	    						scrollThread.stopScrolling();
+	    						scrollThread = null;
+	    					}
+	    				}
+	    			}
+	    			else{
+	    				// stop any current scroll
+	    				if(scrollThread != null){
+    						scrollThread.stopScrolling();
+    						scrollThread = null;
+    					}
+	    			}
+	    		}
 	    		break;
 	    	case DragEvent.ACTION_DROP:
+	    		if(addingObjectDuringDeletion != null){
+	    			if(!inDropRange){ // drop range is outside of the bin view. To add an object it must be within it.
+	    				ArrayList<SMS> smses = new ArrayList<SMS>();
+	    				if(addingObjectDuringDeletion instanceof ConversationObjectView){
+	    					smses = HaikuGenerator.addThread(((ConversationObjectView)addingObjectDuringDeletion).getThreadID());
+	    				}
+	    				if(addingObjectDuringDeletion instanceof SMSObjectView){
+	    					smses.add(((SMSObjectView)addingObjectDuringDeletion).getSMS());
+	    					HaikuGenerator.calculateSMS(((SMSObjectView)addingObjectDuringDeletion).getSMS());
+	    				}
+	    				if(addingObjectDuringDeletion instanceof QuarterCircle){
+	    					if(((QuarterCircle) addingObjectDuringDeletion).isYearView()){
+	    	    				if(MainView.getInstance().isShowingSMS()){
+	    	    					smses = HaikuGenerator.addYearFromSMSes(MainView.getInstance().getSelectedYear(), MainView.getInstance().getSelectedConvoThreadID());
+	    	    				}
+	    	    				else{
+	    	    					smses = HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
+	    	    				}
+	    	    			}
+	    	    			else{
+	    	    				if(MainView.getInstance().isShowingSMS()){
+	    	    					smses = HaikuGenerator.addDateFromSMSes(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)addingObjectDuringDeletion).getMonth()), MainView.getInstance().getSelectedConvoThreadID());
+	    	    				}
+	    	    				else{
+	    	    					smses = HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)addingObjectDuringDeletion).getMonth()));
+	    	    				}
+	    		    		}
+	    				}
+	    				binCombinedSMSView.addSMSesAtPosition(smses, rowIndex, xIndex);
+	    				onOpen();
+	    			}
+	    			else{
+	    				addingObjectDuringDeletion.setAlpha(MainView.OPACITY_DEFAULT);
+	    			}
+	    			break;
+	    		}
 	    		if(inDropRange){
 	    			if(viewBeingDragged instanceof BinSMSView){
 	    				HaikuGenerator.removeSMS(((BinSMSView)viewBeingDragged).getSMS());
@@ -1416,7 +1642,17 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    		}
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENDED:
-	    		if(!inDropRange){
+	    		ended = true;
+	    		if(addingObjectDuringDeletion != null){
+	    			// stop any current scroll
+    				if(scrollThread != null){
+						scrollThread.stopScrolling();
+						scrollThread = null;
+					}
+	    			resetAddingObjectDuringDeletion();
+		    		removeView(pointerView);
+	    		}
+	    		else if(!inDropRange){
 	    			viewBeingDragged.setAlpha(MainView.OPACITY_FULL);
 	    		}
 	    		inDropRange = false;

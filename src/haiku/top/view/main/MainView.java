@@ -82,6 +82,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LinearLayout smsList;
 	
 	private ImageView haikuBinViewSmall;
+	private HaikuBinDragListener haikuBinDragListener;
 	private BinView haikuBinViewExtended;
 	
 	private View viewBeingDragged = null;
@@ -146,7 +147,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
 		themeScroll.setRotation(THEME_ROTATION);
 		
-		haikuBinViewSmall.setOnDragListener(new HaikuBinDragListener(haikuBinViewSmall));
+		haikuBinDragListener = new HaikuBinDragListener();
+		haikuBinViewSmall.setOnDragListener(haikuBinDragListener);
 		haikuBinViewSmall.bringToFront();
 		
 		haikuBinViewExtended = new BinView(context);
@@ -233,6 +235,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public void setDraggedView(View v){
 		viewBeingDragged = v;
+	}
+	
+	public HaikuBinDragListener getHaikuDragListener(){
+		return haikuBinDragListener;
 	}
 	
 	/**
@@ -498,11 +504,25 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 	}
 	
+	public void openBinViewToAdd(){ //TODO
+		binViewClosed = false;
+		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
+		haikuBinViewSmall.setVisibility(GONE);
+		haikuBinViewExtended.setVisibility(VISIBLE);
+		if(!dateViewClosed){
+			closeDateView();
+		}
+	}
+	
 	public void closeBinView(){
 		binViewClosed = true;
 		removeViewElement(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(VISIBLE);
 		haikuBinViewExtended.setVisibility(GONE);
+	}
+	
+	public BinView getBinView(){
+		return haikuBinViewExtended;
 	}
 	
 	public boolean isBinViewClosed(){
