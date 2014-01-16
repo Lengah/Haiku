@@ -1453,7 +1453,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public void scrollUp(){
 		if(textScroll.getScrollY() > 0){
-			textScroll.scrollBy(0, -binCombinedSMSView.getHeightOfRow());
+			textScroll.smoothScrollBy(0, -binCombinedSMSView.getHeightOfRow());
 			if(textScroll.getScrollY() < 0){
 				textScroll.scrollTo(0, 0);
 			}
@@ -1464,11 +1464,76 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public void scrollDown(){
 		int maxScroll = binCombinedSMSView.getRows().size()*binCombinedSMSView.getHeightOfRow()-textHeight;
 		if(textScroll.getScrollY() < maxScroll){
-			textScroll.scrollBy(0, binCombinedSMSView.getHeightOfRow());
+//			textScroll.scrollBy(0, binCombinedSMSView.getHeightOfRow());
+			textScroll.smoothScrollBy(0, binCombinedSMSView.getHeightOfRow());
 			if(textScroll.getScrollY() > maxScroll){
 				textScroll.scrollTo(0, maxScroll);
 			}
 			updateTextArea(lastX, lastY);
+		}
+	}
+	
+	public void scrollDown(int rows){
+		if(rows == 0){
+			return;
+		}
+    	int maxScroll = binCombinedSMSView.getRows().size()*binCombinedSMSView.getHeightOfRow()-textHeight;
+		if(textScroll.getScrollY() < maxScroll){
+			textScroll.smoothScrollBy(0, binCombinedSMSView.getHeightOfRow()*rows);
+			if(textScroll.getScrollY() > maxScroll){
+				textScroll.scrollTo(0, maxScroll);
+			}
+		}
+	}
+	
+	public void scrollDownD(int distance){
+		if(distance == 0){
+			return;
+		}
+    	int maxScroll = binCombinedSMSView.getRows().size()*binCombinedSMSView.getHeightOfRow()-textHeight;
+		if(textScroll.getScrollY() < maxScroll){
+			textScroll.smoothScrollBy(0, distance);
+			if(textScroll.getScrollY() > maxScroll){
+				textScroll.scrollTo(0, maxScroll);
+			}
+		}
+	}
+	
+	public int getRowIndexAtTop(){
+		return textScroll.getScrollY()/binCombinedSMSView.getHeightOfRow();
+	}
+	
+	public int getCurrentScrollPos(){
+		return textScroll.getScrollY();
+	}
+	
+	public void instantScrollTo(int scrollY){
+		textScroll.scrollTo(0, scrollY);
+	}
+	
+	public int getHeightOfText(){
+		return textHeight;
+	}
+	
+	public void smoothScrollToTop(){
+		int offset = textScroll.getScrollY();
+		scrollDownD(offset);
+	}
+	
+	public void smoothScrollTo(int scrollY){
+		textScroll.smoothScrollTo(0, scrollY);
+	}
+	
+	public void instantScrollDown(int rows){
+		if(rows == 0){
+			return;
+		}
+		int maxScroll = binCombinedSMSView.getRows().size()*binCombinedSMSView.getHeightOfRow()-textHeight;
+		if(textScroll.getScrollY() < maxScroll){
+			textScroll.scrollBy(0, binCombinedSMSView.getHeightOfRow()*rows);
+			if(textScroll.getScrollY() > maxScroll){
+				textScroll.scrollTo(0, maxScroll);
+			}
 		}
 	}
 	

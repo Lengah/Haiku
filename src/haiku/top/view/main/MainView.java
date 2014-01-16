@@ -32,6 +32,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.OverScroller;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -136,6 +137,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		contactScroll = (ScrollView)findViewById(R.id.scrollofcontacts);
 		contactList = (LinearLayout)findViewById(R.id.listofcontacts);
+		contactScroll.setOverScrollMode(OVER_SCROLL_ALWAYS);
+		contactList.setOverScrollMode(OVER_SCROLL_ALWAYS);
 		
 		smslayout = (LinearLayout)findViewById(R.id.smslayout);
 		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
@@ -213,6 +216,56 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		updateConversationsVisibility();
 		updateSMSView();
 		updateThemeView();
+		
+//		contactScroll.setOnTouchListener(new OnTouchListener() {
+//			   @Override
+//			   public boolean onTouch(View v, MotionEvent event) {
+//				   if(event.getAction() == MotionEvent.ACTION_DOWN){
+//						isScrollingPastTop = false;
+//						lastY = event.getY();
+//					}
+//				   if(event.getAction() == MotionEvent.ACTION_UP){
+//						if(shouldSnapBack){
+//							//TODO snapback!
+//							Log.i("TAG", "snapback!");
+//							contactScroll.post(new Runnable() { 
+//						        public void run() { 
+//						        	contactScroll.smoothScrollTo(0, fillerHeight);
+//						        }
+//							});
+//							return true;
+//						}
+//					}
+//				   if(event.getAction() == MotionEvent.ACTION_MOVE){
+//						// Scrolling
+//						Log.i("TAG", "scrolling");
+//						if(!isScrollingPastTop && lastY < event.getY() && contactScroll.getScrollY() <= fillerHeight){
+//							isScrollingPastTop = true;
+//							shouldSnapBack = true;
+//						}
+//						if(isScrollingPastTop && contactScroll.getScrollY() > fillerHeight){
+//							isScrollingPastTop = false;
+//							shouldSnapBack = false;
+//						}
+//						if(isScrollingPastTop){
+//							Log.i("TAG", "custom scroll down");
+//							contactScroll.scrollBy(0, (int) (lastY - event.getY()));
+//							lastY = event.getY();
+//							return true;
+//						}
+//					}
+//					if(!isScrollingPastTop && contactScroll.getScrollY() < fillerHeight){
+//						Log.i("TAG", "too far!");
+//						contactScroll.post(new Runnable() { 
+//					        public void run() {
+//					        	contactScroll.smoothScrollTo(0, fillerHeight);
+//					        } 
+//						});
+//						return true;
+//					}
+//					return false;
+//			   }
+//		});
 	}
 	
 	public static synchronized MainView getInstance(){
@@ -257,10 +310,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			}
 			while(cursor.moveToNext());
 		}
+//		contactList.addView(filler); //TODO
 		for(int i = 0; i < conversations.size(); i++){
 			contactList.addView(conversations.get(i));
 //			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
 		}
+//		contactScroll.post(new Runnable() { 
+//	        public void run() { 
+//	        	contactScroll.scrollBy(0, fillerHeight);
+//	        } 
+//		});
 	}
 	
 	/**
@@ -463,12 +522,18 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return false;
 	}
 
-	int startX;
-	int startY;
+	private int startX;
+	private int startY;
+	
+	private float lastY;
+	
+	private boolean shouldSnapBack = false;
+	private boolean isScrollingPastTop = false;
 	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
+			isScrollingPastTop = false;
 			startX = (int) event.getX();
 			startY = (int) event.getY();
 		}
@@ -504,7 +569,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 	}
 	
-	public void openBinViewToAdd(){ //TODO
+	public void openBinViewToAdd(){
 		binViewClosed = false;
 		viewsOpenInOrder.add(VIEW_SHOWN_BIN);
 		haikuBinViewSmall.setVisibility(GONE);

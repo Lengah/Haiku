@@ -1,5 +1,6 @@
 package haiku.top.view.binview;
 
+import haiku.top.HaikuActivity;
 import haiku.top.model.Word;
 import haiku.top.model.WordAndNumber;
 import haiku.top.model.generator.HaikuGenerator;
@@ -32,6 +33,8 @@ public class BinCombinedSMS extends RelativeLayout{
 	private Paint paint;
 	private int height;
 	private boolean started = false;
+	private int stopWhenNRows;
+	private static final double STOP_WHEN_SPACE_BOTTOM = 0.7; // 30% of text area's height
 	
 	private ArrayList<FallingWordAnimation> animations = new ArrayList<FallingWordAnimation>();
 	
@@ -47,6 +50,8 @@ public class BinCombinedSMS extends RelativeLayout{
 		paint.getTextBounds(text, 0, text.length(), textRect);
 		height = (int) (textRect.height()*1.3);
 		addRow();
+		
+		stopWhenNRows = (int)(STOP_WHEN_SPACE_BOTTOM*BinView.getInstance().getHeightOfText())/height;
 	}
 	
 	public int getHeightOfRow(){
@@ -57,15 +62,84 @@ public class BinCombinedSMS extends RelativeLayout{
 		return lengthOfSpace;
 	}
 	
-	public void removeTopRow(){
-		removeAllViews();
-		rows.remove(0);
+	private Thread scrollThread;
+	
+	public void animationsStarting(){
+		if(scrollThread != null || rows.size() < stopWhenNRows){
+			return;
+		}
+		scrollThread = new Thread(){
+			public void run(){
+				while(true){
+					ArrayList<FallingWordAnimation> anims = new ArrayList<FallingWordAnimation>(animations);
+					for(int i = anims.size()-1; i >= 0; i--){
+						if(anims.get(i).isFinished()){
+							anims.remove(i);
+						}
+					}
+					if(anims.isEmpty()){
+						break;
+					}
+					try {
+						Thread.sleep(FallingWordAnimation.TIME_TO_FALL_ONE_ROW/2);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				int rowsToFall = 0;
+				while(rows.get(rowsToFall).getWords().isEmpty()){
+					rowsToFall++;
+				}
+				if(BinView.getInstance().getRowIndexAtTop() < rowsToFall){
+					final int scrollD = rowsToFall*height-BinView.getInstance().getCurrentScrollPos();
+					HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+				        public void run() {
+				        	BinView.getInstance().scrollDownD(scrollD);
+				        }
+					});
+					int lastY = -1;
+					int newY;
+					while(true){
+						newY = BinView.getInstance().getCurrentScrollPos();
+						if(lastY != -1 && lastY == newY){
+							break;
+						}
+						lastY = newY;
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				final int rowsToF = rowsToFall;
+				HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+			        public void run() {
+		        		removeRowsFromTheTop(rowsToF);
+			        }
+				});
+				
+				scrollThread = null;
+			}
+		};
+		scrollThread.start();
+	}
+	
+	public void removeRowsFromTheTop(int numberOfRows){
+		int currentScroll = BinView.getInstance().getCurrentScrollPos();
+		
+		for(int i = 0; i < numberOfRows; i++){
+			removeView(rows.get(0));
+			rows.remove(0);
+		}
 		LayoutParams params;
 		for(int i = 0; i < rows.size(); i++){
 			params = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, height);
-			params.setMargins(0, rows.get(i).getRowIndex()*height, 0, 0);
-			addView(rows.get(i), params);
+			params.setMargins(0, i*height, 0, 0);
+			rows.get(i).setLayoutParams(params);
+			rows.get(i).setRowIndex(i);
 		}
+		BinView.getInstance().instantScrollTo(currentScroll-numberOfRows*height);
 	}
 	
 	/**
@@ -82,9 +156,6 @@ public class BinCombinedSMS extends RelativeLayout{
 					animations.remove(i);
 				}
 			}
-//			if(this.rows.get(0).getWords().isEmpty()){
-//				removeTopRow();
-//			}
 		}
 		TextView movingView = new TextView(context);
 		movingView.setText(word.getWord());
@@ -122,6 +193,7 @@ public class BinCombinedSMS extends RelativeLayout{
 			animations.get(i).start();
 		}
 		started = false;
+		animationsStarting();
 //		animations.clear();
 	}
 	

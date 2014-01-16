@@ -13,7 +13,7 @@ public class FallingWordAnimation {
 	private TranslateAnimation animation;
 	private int rows;
 	private TextView movingView;
-	private static final int TIME_TO_FALL_ONE_ROW = 200;
+	public static final int TIME_TO_FALL_ONE_ROW = 200;
 	private boolean started = false;
 	private boolean finished = false;
 	
