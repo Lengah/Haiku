@@ -14,6 +14,7 @@ import haiku.top.model.smshandler.SMS;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.main.MainView;
+import haiku.top.view.main.SMSObjectView;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentProviderOperation;
@@ -238,6 +239,15 @@ public class HaikuActivity extends Activity {
         }
     }
     
+    public void shareMessage(String message){
+		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND); 
+	    sharingIntent.setType("text/plain");
+	    String shareBody = message;
+	    sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
+	    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+	    startActivity(Intent.createChooser(sharingIntent, "Share via"));
+    }
+    
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event ) {
     if(keycode == KeyEvent.KEYCODE_BACK){
@@ -299,6 +309,15 @@ public class HaikuActivity extends Activity {
 	public static Cursor getThread(Context context, int thread_id){
 		Uri uri = Uri.parse(ALLBOXES);
 		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id = '" + thread_id + "'", null, SORT_ORDER_INV);
+		if(cursor!=null){
+			return cursor;
+		}
+		return null;
+	}
+	
+	public static Cursor getHaikuThread(Context context, int thread_id){
+		Uri uri = Uri.parse(ALLBOXES);
+		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id = '" + thread_id + "'", null, SORT_ORDER);
 		if(cursor!=null){
 			return cursor;
 		}

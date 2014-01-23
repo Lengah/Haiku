@@ -75,6 +75,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private LinearLayout textList;
 	
 	private ImageButton saveButton;
+	private ImageButton shareButton;
 	
 	private LinearLayout haikuView;
 	private TextView row1;
@@ -183,6 +184,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final Position SAVE_UPPER_LEFT = new Position(468, 960);
 	private static final int SAVE_WIDTH = 250;
 	private static final int SAVE_HEIGHT = 250;
+	
+	// the share button is just as big as the save button
+	private static final Position SHARE_UPPER_LEFT = new Position(168, 960);
 	
 	// the date list
 	private static final Position DATE_UPPER_LEFT = new Position(70, 870);
@@ -385,6 +389,21 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		saveButton.setBackgroundResource(R.drawable.save_button);
 		saveButton.setOnClickListener(this);
 		saveButton.setVisibility(GONE);
+		
+		
+		// SHARE BUTTON
+		int shareMarginLeft = (int)(((double)SHARE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		
+		shareButton = new ImageButton(context);
+		LayoutParams shareParams = new RelativeLayout.LayoutParams(saveWidth, saveHeight);
+		shareParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		shareParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		shareParams.setMargins(shareMarginLeft, saveMarginTop, 0, 0); // same margin top as save
+		shareButton.setLayoutParams(shareParams);
+		addView(shareButton);
+		shareButton.setBackgroundResource(R.drawable.save_button); //TODO need an image
+		shareButton.setOnClickListener(this);
+		shareButton.setVisibility(GONE);
 		
 		
 		// DATE
@@ -723,6 +742,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		haikuView.setVisibility(GONE);
 		textScroll.setVisibility(VISIBLE);
 		saveButton.setVisibility(GONE);
+		shareButton.setVisibility(GONE);
 		haikuFinished = false;
 		showHaiku = false;
 		deletionInProgress = false;
@@ -824,6 +844,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 	}
 	
+	public boolean isShowingContactName(){
+		return showingContactName;
+	}
+	
 	/**
 	 * Checks if the contact name should be shown and shows it if so.
 	 * Called when an sms is removed from the view
@@ -833,6 +857,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			if(smsView.isEmpty()){ // but shouldn't be
 				showingContactName = false;
 				contactName.setVisibility(GONE);
+				if(deletionInProgress && binCombinedSMSView != null){
+					binCombinedSMSView.updateStopWhenNRows();
+				}
 			}
 			return;
 		}
@@ -901,6 +928,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	 */
 	public static int getThemeObjectHeight(){
 		return themeObjectHeight;
+	}
+	
+	public int getContactNameHeight(){
+		return contactNameHeight;
 	}
 	
 	public void calculateOutOfBinView(){
@@ -1030,6 +1061,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		haikuView.setVisibility(VISIBLE);
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
+		shareButton.setVisibility(VISIBLE);
 		contactName.setVisibility(GONE);
 		showHaiku = true;
 	}
@@ -1420,23 +1452,33 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public boolean onLongClick(View v) {
 		return false;
 	}
+	
+	public void save(){
+		if(!HaikuActivity.getInstance().isSafeMode()){
+			// safe mode is off!
+			// DELETE
+			ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
+			for(int i = 0; i < smsView.size(); i++){
+				smsToDelete.add(smsView.get(i).getSMS());
+			}
+			HaikuActivity.getInstance().deleteSMS(smsToDelete);
+		}
+		HaikuActivity.getInstance().addHaikuSMS(endHaiku);
+		MainView.getInstance().updateConversations();
+		reset();
+	}
+	
+	public void share(){//TODO
+		HaikuActivity.getInstance().shareMessage(endHaiku.getHaikuPoem());
+	}
 
 	@Override
 	public void onClick(View v) {
 		if(v.equals(saveButton)){
-			Log.i("TAG", "save!");
-			if(!HaikuActivity.getInstance().isSafeMode()){
-				// safe mode is off!
-				// DELETE
-				ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
-				for(int i = 0; i < smsView.size(); i++){
-					smsToDelete.add(smsView.get(i).getSMS());
-				}
-				HaikuActivity.getInstance().deleteSMS(smsToDelete);
-			}
-			HaikuActivity.getInstance().addHaikuSMS(endHaiku);
-			MainView.getInstance().updateConversations();
-			reset();
+			save();
+		}
+		else if(v.equals(shareButton)){
+			share();
 		}
 		else{
 			// close bin view

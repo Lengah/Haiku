@@ -10,14 +10,22 @@ import android.util.Log;
 public class ShowSMSESThread extends Thread{
 	private int threadID;
 	private boolean stop = false;
+	private boolean lookingAtHaikus;
 	
-	public ShowSMSESThread(int threadID){
+	public ShowSMSESThread(int threadID, boolean lookingAtHaikus){
 		this.threadID = threadID;
+		this.lookingAtHaikus = lookingAtHaikus;
 	}
 	
 	public void run(){
 		Context context = MainView.getInstance().getContext();
-		Cursor cursor = HaikuActivity.getThread(context, threadID);
+		Cursor cursor;
+		if(lookingAtHaikus){
+			cursor = HaikuActivity.getHaikuThread(context, threadID);
+		}
+		else{
+			cursor = HaikuActivity.getThread(context, threadID);
+		}
 		Log.i("TAG", "Count: " + cursor.getCount());
 		if (cursor.moveToFirst()) {
 			SMSObjectView smsObject;

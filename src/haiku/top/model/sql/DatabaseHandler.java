@@ -217,6 +217,41 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		    cursor.close();
 		}
 //	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
+//		Log.i("TAG3", "Number of words not found: " + (texts.size()-words.size()));
+		Log.i("TAG3", "Words to look for");
+		for(int i = 0; i < texts.size(); i++){
+			Log.i("TAG3", texts.get(i));
+		}
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "Words found");
+		for(int i = 0; i < words.size(); i++){
+			Log.i("TAG3", words.get(i).getText() + ", " + words.get(i).getwordType());
+		}
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "Words not found");
+		boolean found;
+		for(int t = 0; t < texts.size(); t++){
+			found = false;
+			for(int i = 0; i < words.size(); i++){
+				if(texts.get(t).equalsIgnoreCase(words.get(i).getText())){
+					found = true;
+					break;
+				}
+			}
+			if(!found){
+				Log.i("TAG3", texts.get(t));
+			}
+		}
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
+		Log.i("TAG3", "--------------------------");
 	    return words;
 	}
 	

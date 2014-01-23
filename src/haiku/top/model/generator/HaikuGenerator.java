@@ -71,7 +71,7 @@ public class HaikuGenerator {
 	public static final Character[] ALL_WORD_CHARACTERS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 
 										'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 
 										's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'é', 
-										'è', 'å', 'ä', 'ö', '\''};
+										'è', 'å', 'ä', 'ö'};//, '\''}; // ' doesn't seem to work
 	
 	public static void resetHaikusRemoved(){
 		haikusRemovedLast.clear();
@@ -799,6 +799,10 @@ public class HaikuGenerator {
 			else{
 				break;
 			}
+		}
+		Log.i("TAG2", "sentence: " + sentence);
+		for(int i = 0; i < notRealWords.size(); i++){
+			Log.i("TAG2", notRealWords.get(i));
 		}
 		return notRealWords;
 	}

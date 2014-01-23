@@ -51,7 +51,16 @@ public class BinCombinedSMS extends RelativeLayout{
 		height = (int) (textRect.height()*1.3);
 		addRow();
 		
-		stopWhenNRows = (int)(STOP_WHEN_SPACE_BOTTOM*BinView.getInstance().getHeightOfText())/height;
+		updateStopWhenNRows();
+	}
+	
+	public void updateStopWhenNRows(){
+		if(BinView.getInstance().isShowingContactName()){
+			stopWhenNRows = (int)(STOP_WHEN_SPACE_BOTTOM*(BinView.getInstance().getHeightOfText()-BinView.getInstance().getContactNameHeight()))/height;
+		}
+		else{
+			stopWhenNRows = (int)(STOP_WHEN_SPACE_BOTTOM*BinView.getInstance().getHeightOfText())/height;
+		}
 	}
 	
 	public int getHeightOfRow(){
@@ -317,6 +326,7 @@ public class BinCombinedSMS extends RelativeLayout{
 		String message = " " + sms.getMessage();
 		float offset;
 		String temp;
+		ArrayList<String> tempArray;
 		int pos;
 		float length;
 		while(message.length() > 0){
@@ -333,35 +343,25 @@ public class BinCombinedSMS extends RelativeLayout{
 				pos++;
 			}
 			temp = message.substring(0, pos);
+			tempArray = findWordParts(temp.toLowerCase());
 			message = message.substring(pos);
 			length = paint.measureText(temp);
 			ArrayList<Word> realWordsInBlock = new ArrayList<Word>();
 			String tempWordText;
-			int tempInt;
-			boolean exists;
 			for(int i = 0; i < sms.getWords().size(); i++){
-				tempWordText = sms.getWords().get(i).getText().toLowerCase();
-				exists = false;
-				for(int a = 0; a < realWordsInBlock.size(); a++){ // It didn't like my contains check
-					if(realWordsInBlock.get(a).getText().equalsIgnoreCase(tempWordText)){
-						exists = true;
-						break;
-					}
-				}
-				if(exists){
+				if(realWordsInBlock.contains(sms.getWords().get(i))){
 					continue;
 				}
-				if(temp.toLowerCase().contains(tempWordText)
-						&& ((tempInt = temp.toLowerCase().indexOf(tempWordText.charAt(0))) == 0 
-										|| !HaikuGenerator.isAWordCharacter(temp.toLowerCase().charAt(tempInt-1))) // It must either be the start of the word or the character before it is not a charcter used in a word (can be / for example)
-						&& ((tempInt = temp.toLowerCase().indexOf(tempWordText.charAt(tempWordText.length()-1))) == temp.length()-1 
-										|| !HaikuGenerator.isAWordCharacter(temp.toLowerCase().charAt(tempInt+1)))){ // It must either be the end of the word or the character after it is not a charcter used in a word (can be ! for example)
-					realWordsInBlock.add(sms.getWords().get(i));
+				tempWordText = sms.getWords().get(i).getText().toLowerCase();
+				for(int a = 0; a < tempArray.size(); a++){
+					if(tempArray.get(a).equals(tempWordText)){
+						realWordsInBlock.add(sms.getWords().get(i));
+					}
 				}
+				
 			}
 			BinSMSRowWord wordAdded = new BinSMSRowWord(context, temp, returnLength + xPos + offset, length, realWordsInBlock, rows.get(rowIndex));
 			returnLength += length + offset;
-			//TODO
 			if(rowIndex < rows.size()-1){
 				// there are rows below where this word might be able to fall down to
 				int rowsToFall = 0;
@@ -380,10 +380,19 @@ public class BinCombinedSMS extends RelativeLayout{
 	}
 	
 	public void addSMS(SMS sms){
+		//TEST
+//		Log.i("TAG4", "SMS words");
+//		for(int i = 0; i < sms.getWords().size(); i++){
+//			Log.i("TAG4", "'" + sms.getWords().get(i).getText() + "', " + sms.getWords().get(i).getwordType());
+//		}
+//		Log.i("TAG4", "--------------------------");
+//		ArrayList<Word> testForPrint = new ArrayList<Word>();
+		// /TEST
 		float spaceLeft;
 		String message = " " + sms.getMessage();
 		float offset;
 		String temp;
+		ArrayList<String> tempArray;
 		int pos;
 		float length;
 		while(message.length() > 0){
@@ -401,6 +410,7 @@ public class BinCombinedSMS extends RelativeLayout{
 				pos++;
 			}
 			temp = message.substring(0, pos);
+			tempArray = findWordParts(temp.toLowerCase());
 			message = message.substring(pos);
 			length = paint.measureText(temp);
 			if(offset + length > spaceLeft){
@@ -408,30 +418,71 @@ public class BinCombinedSMS extends RelativeLayout{
 			}
 			ArrayList<Word> realWordsInBlock = new ArrayList<Word>();
 			String tempWordText;
-			int tempInt;
-			boolean exists;
 			for(int i = 0; i < sms.getWords().size(); i++){
-				tempWordText = sms.getWords().get(i).getText().toLowerCase();
-				exists = false;
-				for(int a = 0; a < realWordsInBlock.size(); a++){ // It didn't like my contains check
-					if(realWordsInBlock.get(a).getText().equalsIgnoreCase(tempWordText)){
-						exists = true;
-						break;
-					}
-				}
-				if(exists){
+				if(realWordsInBlock.contains(sms.getWords().get(i))){
 					continue;
 				}
-				if(temp.toLowerCase().contains(tempWordText)
-						&& ((tempInt = temp.toLowerCase().indexOf(tempWordText.charAt(0))) == 0 
-										|| !HaikuGenerator.isAWordCharacter(temp.toLowerCase().charAt(tempInt-1))) // It must either be the start of the word or the character before it is not a charcter used in a word (can be / for example)
-						&& ((tempInt = temp.toLowerCase().indexOf(tempWordText.charAt(tempWordText.length()-1))) == temp.length()-1 
-										|| !HaikuGenerator.isAWordCharacter(temp.toLowerCase().charAt(tempInt+1)))){ // It must either be the end of the word or the character after it is not a charcter used in a word (can be ! for example)
-					realWordsInBlock.add(sms.getWords().get(i));
+				tempWordText = sms.getWords().get(i).getText().toLowerCase();
+				for(int a = 0; a < tempArray.size(); a++){
+					if(tempArray.get(a).equals(tempWordText)){
+						realWordsInBlock.add(sms.getWords().get(i));
+					}
 				}
 			}
+//			testForPrint.addAll(realWordsInBlock);
 			rows.get(rows.size()-1).addWord(new BinSMSRowWord(context, temp, rows.get(rows.size()-1).getCurrentOffset() + offset, length, realWordsInBlock, rows.get(rows.size()-1)));
 		}
+//		Log.i("TAG4", "Words found");
+//		for(int i = 0; i < testForPrint.size(); i++){
+//			Log.i("TAG4", "'" + testForPrint.get(i).getText() + "', " + testForPrint.get(i).getwordType());
+//		}
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "Words not found");
+//		boolean found;
+//		for(int t = 0; t < sms.getWords().size(); t++){
+//			found = false;
+//			for(int i = 0; i < testForPrint.size(); i++){
+//				if(sms.getWords().get(t).equals(testForPrint.get(i))){
+//					found = true;
+//					break;
+//				}
+//			}
+//			if(!found){
+//				Log.i("TAG4", "'" + sms.getWords().get(t).getText() + "', " + sms.getWords().get(t).getwordType());
+//			}
+//		}
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+//		Log.i("TAG4", "--------------------------");
+	}
+	
+	public static ArrayList<String> findWordParts(String text){
+		ArrayList<String> returnArray = new ArrayList<String>();
+		int lastIndex = 0;
+		int currentIndex = 0;
+		while(currentIndex < text.length()){
+			if(!HaikuGenerator.isAWordCharacter(text.charAt(currentIndex))){
+				if(lastIndex < currentIndex){ // found a word
+					returnArray.add(text.substring(lastIndex, currentIndex));
+					lastIndex = currentIndex+1;
+				}
+				else{
+					lastIndex++; // more than one non character word
+				}
+			}
+			currentIndex++;
+		}
+		if(lastIndex < currentIndex){ // found a word
+			returnArray.add(text.substring(lastIndex, currentIndex));
+		}
+		return returnArray;
 	}
 	
 	private void addWord(BinSMSRowWord word){

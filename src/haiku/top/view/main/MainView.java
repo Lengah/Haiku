@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.R.xml;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -102,6 +103,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private boolean binViewClosed = true;
 	
 	private DateView dateView;
+	
+	private boolean lookingAtHaikus = false;
 	
 	public MainView(Context context) {
 		super(context);
@@ -304,7 +307,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		if (cursor.moveToFirst()) {
 			do{
 				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
-				conversations.get(conversations.size()-1).setOnLongClickListener(this);
+//				conversations.get(conversations.size()-1).setOnLongClickListener(this); // used for sharing instead - 18/1/2014
 				conversations.get(conversations.size()-1).setOnClickListener(this);
 				conversations.get(conversations.size()-1).setOnTouchListener(this);
 			}
@@ -406,13 +409,21 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
 		}
 		contactName.setText(chosenContact.getName());
-		workerThread = new ShowSMSESThread(threadID);
+		if(chosenContact.getName().equals("Haiku")){
+			lookingAtHaikus = true;
+		}
+		else{
+			lookingAtHaikus = false;
+		}
+		workerThread = new ShowSMSESThread(threadID, lookingAtHaikus);
 		workerThread.start();
 	}
 	
 	public synchronized void addSMSToView(final SMSObjectView smsObject){
 		smsObjects.add(smsObject);
-		smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+//		if(lookingAtHaikus){ // somehow cancels the touch?
+			smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+//		}
 		smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
 		HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
 	        @Override
@@ -511,29 +522,31 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 
 	@Override
-	public boolean onLongClick(View v) {
-		if(v.getAlpha() == OPACITY_USED){
-			// The view is already in the bin
-			return false;
+	public boolean onLongClick(View v) { //TODO
+		// Code for drag
+//		if(v.getAlpha() == OPACITY_USED){
+//			// The view is already in the bin
+//			return false;
+//		}
+//		v.setAlpha(OPACITY_USED);
+//		viewBeingDragged = v;
+//		v.startDrag(null, new DragShadowBuilder(v), null, 0);
+//		return false;
+		
+		// Code for sharing
+		if(lookingAtHaikus && v instanceof SMSObjectView){
+			// The user wants to share one of his haikus
+		    HaikuActivity.getInstance().shareMessage(((SMSObjectView)v).getSMS().getMessage());
 		}
-		v.setAlpha(OPACITY_USED);
-		viewBeingDragged = v;
-		v.startDrag(null, new DragShadowBuilder(v), null, 0);
 		return false;
 	}
 
 	private int startX;
 	private int startY;
 	
-	private float lastY;
-	
-	private boolean shouldSnapBack = false;
-	private boolean isScrollingPastTop = false;
-	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
-			isScrollingPastTop = false;
 			startX = (int) event.getX();
 			startY = (int) event.getY();
 		}
