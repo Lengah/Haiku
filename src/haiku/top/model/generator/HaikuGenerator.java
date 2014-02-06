@@ -44,13 +44,13 @@ public class HaikuGenerator {
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
-	private static final int NUMBER_OF_GENERATIONS = 5;
+	private static final int NUMBER_OF_GENERATIONS = 4;
 	private static int generationsCounter;
 	
 	private static ArrayList<PartOfSpeech> allWordTypes = new ArrayList<PartOfSpeech>();
 	
 	// for example [the(1)]
-	private static ArrayList<Word> wordsDefinedInRulesTextFile = new ArrayList<Word>();
+//	private static ArrayList<Word> wordsDefinedInRulesTextFile = new ArrayList<Word>();
 	
 	private static ArrayList<Haiku> haikusRemovedLast = new ArrayList<Haiku>();
 	
@@ -72,6 +72,30 @@ public class HaikuGenerator {
 										'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 
 										's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'é', 
 										'è', 'å', 'ä', 'ö'};//, '\''}; // ' doesn't seem to work
+	
+	private static String[] rules;
+	
+	private static void initRules(){
+		try {
+			InputStream rulesF = HaikuActivity.getInstance().getAssets().open("rules.txt");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(rulesF));
+			ArrayList<String> rowsString = new ArrayList<String>();
+			String tempText;
+			while ((tempText = reader.readLine()) != null) {
+				rowsString.add(tempText);
+			}
+			rules = new String[rowsString.size()];
+			for(int i = 0; i < rowsString.size(); i++){
+				rules[i] = rowsString.get(i);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String[] getRules(){
+		return rules;
+	}
 	
 	public static void resetHaikusRemoved(){
 		haikusRemovedLast.clear();
@@ -143,7 +167,7 @@ public class HaikuGenerator {
 		int size = haikus.size();
 		for(int i = haikus.size() - 1; i >= 0; i--){
 			for(int a = 0; a < wordsRemoved.size(); a++){
-				if(haikus.get(i).getWordsUsed().contains(wordsRemoved.get(a)) && !wordsDefinedInRulesTextFile.contains(wordsRemoved.get(a))){
+				if(haikus.get(i).getWordsUsed().contains(wordsRemoved.get(a))){// && !wordsDefinedInRulesTextFile.contains(wordsRemoved.get(a))){
 					haikusRemovedLast.add(haikus.get(i));
 					haikus.remove(i);
 					break;
@@ -178,7 +202,8 @@ public class HaikuGenerator {
 		inited = true;
 		initPartOfSpeech();
 		initThemes();
-		initRulesWords();
+//		initRulesWords();
+		initRules();
 	}
 	
 	public static PartOfSpeech getPartOfSpeechWithID(long id){
@@ -190,49 +215,49 @@ public class HaikuGenerator {
 		return null;
 	}
 	
-	private static void initRulesWords(){
-		try {
-			InputStream rules = HaikuActivity.getInstance().getAssets().open("rules.txt");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(rules));
-			String tempText;
-			String wordPart;
-			int syllables;
-			boolean exists;
-			while ((tempText = reader.readLine()) != null) {// or until the part is found
-				while(tempText.contains("[")){
-					wordPart = tempText.substring(tempText.indexOf('[')+1, tempText.indexOf(']'));
-					syllables = Integer.parseInt(wordPart.substring(wordPart.indexOf('(')+1, wordPart.indexOf(')')));
-					wordPart = wordPart.substring(0, wordPart.indexOf('('));
-					exists = false;
-					for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
-						if(wordsDefinedInRulesTextFile.get(i).getText().equals(wordPart)){
-							exists = true;
-							break;
-						}
-					}
-					if(!exists){
-						wordsDefinedInRulesTextFile.add(new Word(wordPart, syllables));
-					}
-					if(tempText.indexOf(']') == tempText.length() - 1){
-						// if it is the last object
-						break; // there are no more
-					}
-					tempText = tempText.substring(tempText.indexOf(']')+1);
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		wordsDefinedInRulesTextFile.add(new Word("a", 1));
-		wordsDefinedInRulesTextFile.add(new Word("an", 1));
-//		for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
-//			Log.i("TAG", wordsDefinedInRulesTextFile.get(i).getText());
+//	private static void initRulesWords(){ //TODO
+//		try {
+//			InputStream rules = HaikuActivity.getInstance().getAssets().open("rules.txt");
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(rules));
+//			String tempText;
+//			String wordPart;
+//			int syllables;
+//			boolean exists;
+//			while ((tempText = reader.readLine()) != null) {// or until the part is found
+//				while(tempText.contains("[")){
+//					wordPart = tempText.substring(tempText.indexOf('[')+1, tempText.indexOf(']'));
+//					syllables = Integer.parseInt(wordPart.substring(wordPart.indexOf('(')+1, wordPart.indexOf(')')));
+//					wordPart = wordPart.substring(0, wordPart.indexOf('('));
+//					exists = false;
+//					for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
+//						if(wordsDefinedInRulesTextFile.get(i).getText().equals(wordPart)){
+//							exists = true;
+//							break;
+//						}
+//					}
+//					if(!exists){
+//						wordsDefinedInRulesTextFile.add(new Word(wordPart, syllables));
+//					}
+//					if(tempText.indexOf(']') == tempText.length() - 1){
+//						// if it is the last object
+//						break; // there are no more
+//					}
+//					tempText = tempText.substring(tempText.indexOf(']')+1);
+//				}
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
 //		}
-	}
+//		wordsDefinedInRulesTextFile.add(new Word("a", 1));
+//		wordsDefinedInRulesTextFile.add(new Word("an", 1));
+////		for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
+////			Log.i("TAG", wordsDefinedInRulesTextFile.get(i).getText());
+////		}
+//	}
 	
-	public static ArrayList<Word> getRulesWords(){
-		return wordsDefinedInRulesTextFile;
-	}
+//	public static ArrayList<Word> getRulesWords(){
+//		return wordsDefinedInRulesTextFile;
+//	}
 	
 	private static void initPartOfSpeech(){
 		allWordTypes = HaikuActivity.databaseHandler.getAllPartOfSpeeches();
@@ -666,18 +691,29 @@ public class HaikuGenerator {
 		theAllTheme = HaikuActivity.databaseHandler.getTheAllTheme();
 		theAllThemeWordIDs.addAll(theAllTheme.getWordids()); // Will always be there
 	}
-		
-	public static void createHaikus(){
+	
+	public static double testStartTime;
+	
+	public static synchronized void createHaikus(){ //TODO
+		testStartTime = System.currentTimeMillis();
 		haikus.clear();
-		generationsCounter = 1;
+		generationsCounter = 4;
+//		printAllUsableWords();
 		haikus.add(new Haiku(!themes.isEmpty()));
+		haikus.add(new Haiku(!themes.isEmpty()));
+		haikus.add(new Haiku(!themes.isEmpty()));
+		haikus.add(new Haiku(!themes.isEmpty()));
+		
 	}
 	
-	public static void nextHaiku(){
+	public static synchronized void nextHaiku(){ //TODO
 		if(generationsCounter < NUMBER_OF_GENERATIONS && !BinView.getInstance().isShowingHaiku()){
 			updateWordsUsed();
 			generationsCounter++;
 			haikus.add(new Haiku(!themes.isEmpty()));
+		}
+		else{
+			Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
 		}
 	}
 	
@@ -731,15 +767,15 @@ public class HaikuGenerator {
 	
 	public static void printAllUsableWords(){
 		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){
-			smsLogWordsWithThemes.get(i).print("TAG");
+			smsLogWordsWithThemes.get(i).print("TAG2");
 		}
-		Log.i("TAG", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
+		Log.i("TAG2", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
 		
 		for(int i = 0; i < smsLogWordsWithTheAllTheme.size(); i++){
-			smsLogWordsWithTheAllTheme.get(i).print("TAG");
+			smsLogWordsWithTheAllTheme.get(i).print("TAG2");
 		}
-		Log.i("TAG", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
-		Log.i("TAG", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
+		Log.i("TAG2", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
+		Log.i("TAG2", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
 	}
 	
 	/**
@@ -800,10 +836,10 @@ public class HaikuGenerator {
 				break;
 			}
 		}
-		Log.i("TAG2", "sentence: " + sentence);
-		for(int i = 0; i < notRealWords.size(); i++){
-			Log.i("TAG2", notRealWords.get(i));
-		}
+//		Log.i("TAG2", "sentence: " + sentence);
+//		for(int i = 0; i < notRealWords.size(); i++){
+//			Log.i("TAG2", notRealWords.get(i));
+//		}
 		return notRealWords;
 	}
 }

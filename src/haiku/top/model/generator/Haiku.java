@@ -1,6 +1,7 @@
 package haiku.top.model.generator;
 
 
+import haiku.top.model.Word;
 import haiku.top.model.WordAndNumber;
 import haiku.top.view.binview.BinView;
 
@@ -16,10 +17,60 @@ public class Haiku {
 	private double startTime = System.currentTimeMillis();
 	private boolean themes;
 	private ArrayList<String> wordsUsed = new ArrayList<String>();
+	private ArrayList<Long> cueWords = new ArrayList<Long>();
+	private ArrayList<Word> usedWords = new ArrayList<Word>();
 	
 	public Haiku(boolean themes){
 		this.themes = themes;
-		generate();
+		generate(1);
+	}
+	
+	public void addCueWords(ArrayList<Long> cueWords){
+		this.cueWords.addAll(cueWords);
+	}
+	
+	public void addCueWord(long cueWord){
+		this.cueWords.add(cueWord);
+	}
+	
+	public ArrayList<Word> getUsedWords(){
+		return usedWords;
+	}
+	
+	public ArrayList<Long> getCueWords(){
+		return cueWords;
+	}
+	
+	public void printUsedWords(){
+		Log.i("TAG", "");
+		String text = "";
+		for(int i = 0; i < usedWords.size(); i++){
+			text += usedWords.get(i).getText() + ", ";
+		}
+		Log.i("TAG", text);
+		Log.i("TAG", "");
+	}
+	
+	public void removeCueWords(ArrayList<Long> ids){
+//		Log.i("TAG", "Remove " + ids.size() + " cue words for word " + usedWords.get(usedWords.size()-1).getText() + ": " + cueWords.size());
+		for(int i = 0; i < ids.size(); i++){
+			for(int a = 0; a < cueWords.size(); a++){
+				if(ids.get(i) == cueWords.get(a)){
+					cueWords.remove(a);
+					break;
+				}
+			}
+		}
+//		Log.i("TAG", "After: " + cueWords.size());
+	}
+	
+	public void removeUsedWord(Word word){
+		for(int i = usedWords.size()-1; i >= 0; i--){
+			if(usedWords.get(i).equals(word)){
+				usedWords.remove(i); // only want to remove one and remove it from the end of the list
+				return;
+			}
+		}
 	}
 	
 	public boolean containsThemes(){
@@ -43,12 +94,21 @@ public class Haiku {
 		return null;
 	}
 	
-	public void generate(){
-//		HaikuGenerator.printAllUsableWords();
-		new FindSentenceThread(5, this, 1).start();
-		new FindSentenceThread(7, this, 2).start();
-		new FindSentenceThread(5, this, 3).start();
+	public void generate(int row){
+		if(row == 2){
+			new FindSentenceThread(7, this, 2).start();
+		}
+		else{
+			new FindSentenceThread(5, this, row).start();
+		}
 	}
+	
+//	public void generate(){
+////		HaikuGenerator.printAllUsableWords();
+//		new FindSentenceThread(5, this, 1).start();
+//		new FindSentenceThread(7, this, 2).start();
+//		new FindSentenceThread(5, this, 3).start();
+//	}
 	
 	public void updateHaikuFinished(){
 		haikuFinished = (row1 != null && row2 != null && row3 != null);
@@ -71,7 +131,7 @@ public class Haiku {
 		wordsUsed.addAll(HaikuGenerator.getWords(row3));
 		ArrayList<String> wordsRemoved = BinView.getInstance().getAllWordsRemoved();
 		for(int i = 0; i < wordsRemoved.size(); i++){
-			if(wordsUsed.contains(wordsRemoved.get(i)) && !HaikuGenerator.getRulesWords().contains(wordsRemoved.get(i))){
+			if(wordsUsed.contains(wordsRemoved.get(i))){// && !HaikuGenerator.getRulesWords().contains(wordsRemoved.get(i))){
 				HaikuGenerator.removeHaiku(this);
 				return;
 			}
@@ -99,6 +159,8 @@ public class Haiku {
 		Log.i("TAG", "" + row1);
 		Log.i("TAG", "" + row2);
 		Log.i("TAG", "" + row3);
+		printUsedWords();
+		Log.i("TAG", "Cue words: " + cueWords.size());
 		Log.i("TAG", " ");
 	}
 }

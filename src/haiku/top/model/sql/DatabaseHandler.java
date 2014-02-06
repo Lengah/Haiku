@@ -1,16 +1,23 @@
 package haiku.top.model.sql;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import haiku.top.HaikuActivity;
 import haiku.top.model.PartOfSpeech;
 import haiku.top.model.Theme;
 import haiku.top.model.Word;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
+import haiku.top.view.main.MainView;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -21,7 +28,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 public class DatabaseHandler extends SQLiteOpenHelper{
-	
+	private static DatabaseHandler dh;
 	private static String DB_PATH = "/data/data/haiku.top/databases/";
 	private static final String DB_NAME = "deletebyhaiku_db"; //file name
 	private SQLiteDatabase myDataBase;  
@@ -48,14 +55,67 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     private static final String KEY_WORD_TEXT = "text"; //TEXT
     private static final String KEY_WORD_SYLLABLES = "syllables"; //TEXT
     private static final String KEY_WORD_PARTOFSPEECHID = "partofspeechid";
+    private static final String KEY_WORD_CUEWORDSIDS = "cuewords";
 
     private static final String KEY_THEME_ID = "_id"; //INTEGER PRIMARY KEY
     private static final String KEY_THEME_NAME = "name"; //TEXT
 
-    private static final String KEY_THEMEWORD_ID = "_id"; //INTEGER PRIMARY KEY
     private static final String KEY_THEMEWORD_THEMEID = "themeid"; //INTEGER, Foreign key theme(_id)
     private static final String KEY_THEMEWORD_WORDID = "wordid"; //INTEGER, Foreign key word(_id)
 
+//    public void test(){
+//    	Cursor cursor = myDataBase.query(TABLE_WORD, null, null, null, null, null, null);
+//    	Log.i("TAG", "" + cursor.getCount());
+//    	cursor.close();
+//    }
+    
+    //test 30/1/2014
+//    public void rebuildWordTable(){
+//    	double startTime = System.currentTimeMillis();
+//    	Log.i("TAG", "Updating the database");
+//    	myDataBase.execSQL("DROP TABLE IF EXISTS " + TABLE_WORD);
+//    	Log.i("TAG", "creating new");
+//    	myDataBase.execSQL("CREATE TABLE " + TABLE_WORD + " (" 
+//    			+ KEY_WORD_ID + " INTEGER not NULL, "
+//    			+ KEY_WORD_TEXT + " VARCHAR(255), "
+//    			+ KEY_WORD_SYLLABLES + " VARCHAR(255), "
+//    			+ KEY_WORD_PARTOFSPEECHID + " INTEGER not NULL, "
+//    			+ KEY_WORD_CUEWORDSIDS + " VARCHAR(255))");
+//    	
+//    	Log.i("TAG", "created");
+//		try {
+//			InputStream rules = HaikuActivity.getInstance().getAssets().open("deletebyhaiku_db_sql_word_dictionary_full_updated2_added_words_and_cue_words.txt");
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(rules));
+////			File sqlWords = new File("assets/deletebyhaiku_db_sql_word_dictionary_full_updated2_added_words_and_cue_words.txt");
+////			BufferedReader reader = new BufferedReader(new FileReader(sqlWords));
+//			int rows = 170329;
+//			int c = 0;
+//			int currentP = -1;
+//			int temp;
+//			String text;
+//			while ((text = reader.readLine()) != null) {
+//				c++;
+//				temp = c*100/rows;
+//				if(temp != currentP){
+//					Log.i("TAG", temp + "% done.");
+//					currentP = temp;
+//				}
+//				myDataBase.execSQL(text);
+//			}
+//			
+//		} catch (Exception e) {
+//			Log.i("TAG", "exception: " + e);
+//			e.printStackTrace();
+//		}
+//		double execTime = System.currentTimeMillis()-startTime;
+//		int seconds = (int)execTime/1000;
+//		int minutes = seconds/60;
+//		seconds = seconds%60;
+//		int hours = minutes/60;
+//		minutes = minutes%60;
+//		Log.i("TAG", "Time (HH:MM:SS): " + hours + ":" + minutes + ":" + seconds);
+//    }
+    
     /**
      * Creates a empty database on the system and rewrites it with your own database.
      * */
@@ -99,6 +159,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
      * This is done by transfering bytestream.
      * */
    private void copyDataBase() throws IOException {
+	   Log.i("TAG", "copyDataBase");
 	   //Open your local db as the input stream
 	   InputStream myInput = myContext.getAssets().open(DB_NAME);
 	   
@@ -120,6 +181,21 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	   myOutput.close();
 	   myInput.close();
    }
+   
+   public static DatabaseHandler getInstance(){
+	   if(dh == null){
+		   dh = new DatabaseHandler(MainView.getInstance().getContext());
+		   dh.openReadOnlyDataBase();
+	   }
+	   return dh;
+   }
+   
+//   public SQLiteDatabase getDatabase(){
+//	   if(myDataBase == null){
+//		   openReadOnlyDataBase();
+//	   }
+//	   return myDataBase;
+//   }
     
    public void openDataBase() throws SQLException {
 	   //Open the database
@@ -127,7 +203,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	   myDataBase = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READWRITE);
    }
    
-   public void openReadOnlyDataBase() throws SQLException {
+   private void openReadOnlyDataBase() throws SQLException {
 	   //Open the database
 	   String myPath = DB_PATH + DB_NAME;
 	   myDataBase = SQLiteDatabase.openDatabase(myPath, null, SQLiteDatabase.OPEN_READONLY);
@@ -136,6 +212,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
    @Override
    public synchronized void close() {   
 	   if(myDataBase != null)
+		   Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
 		   myDataBase.close(); 
 	   super.close(); 
    }
@@ -149,33 +226,60 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	}
 	
 	public String getWordTextFromID(String id) {
-		Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_TEXT }, KEY_WORD_ID + "=?", new String[] { id }, null, null, null, null);
-	    if (cursor != null && cursor.getCount() > 0) { //if word found
-		    cursor.moveToFirst();
-		    String text = cursor.getString(0);
-		    cursor.close();
-		    return text;
-	    }
-		else {
+		Cursor cursor = null;
+		try{
+			cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_TEXT }, KEY_WORD_ID + "=?", new String[] { id }, null, null, null, null);
+		    if (cursor != null && cursor.getCount() > 0) { //if word found
+			    cursor.moveToFirst();
+			    String text = cursor.getString(0);
+			    return text;
+		    }
+			else {
+		    	return "";
+		    }
+		}
+		finally{
 			cursor.close();
-	    	return "";
-	    }
+		}
 	}
 	
 	public ArrayList<PartOfSpeech> getAllPartOfSpeeches(){
-		ArrayList<PartOfSpeech> partOfSpeeches = new ArrayList<PartOfSpeech>();
-		Cursor cursor = myDataBase.query(TABLE_PARTOFSPEECH, new String[] {KEY_PARTOFSPEECH_ID, KEY_PARTOFSPEECH_TYPE }, null, null, null, null, null, null);
-		if(cursor.moveToFirst()){
-	    	long id;
-	    	String type;
-	    	do {
-	    		id = cursor.getLong(0);
-	    		type = cursor.getString(1);
-	    		partOfSpeeches.add(new PartOfSpeech(id, type));
-	    	}while(cursor.moveToNext());
-	    }
-		cursor.close();
-		return partOfSpeeches;
+		Cursor cursor = null;
+		try{
+			ArrayList<PartOfSpeech> partOfSpeeches = new ArrayList<PartOfSpeech>();
+			cursor = myDataBase.query(TABLE_PARTOFSPEECH, new String[] {KEY_PARTOFSPEECH_ID, KEY_PARTOFSPEECH_TYPE }, null, null, null, null, null, null);
+			if(cursor.moveToFirst()){
+		    	long id;
+		    	String type;
+		    	do {
+		    		id = cursor.getLong(0);
+		    		type = cursor.getString(1);
+		    		partOfSpeeches.add(new PartOfSpeech(id, type));
+		    	}while(cursor.moveToNext());
+		    }
+			return partOfSpeeches;
+		}
+		finally{
+			cursor.close();
+		}
+	}
+	
+	public ArrayList<Long> getIDs(String idsString){
+		ArrayList<Long> ra = new ArrayList<Long>();
+		int index;
+		while(idsString.contains(".")){
+			idsString = idsString.substring(1); // remove the first dot
+			index = idsString.indexOf(".");
+			if(index == -1){
+				ra.add(Long.parseLong(idsString));
+				break;
+			}
+			else{
+				ra.add(Long.parseLong(idsString.substring(0, index)));
+				idsString = idsString.substring(index);
+			}
+		}
+		return ra;
 	}
 	
 	//TODO causes massive lag when many (1000+) words are added simultaneously
@@ -198,95 +302,116 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 				selectionArg[i] = texts.get(textCounter + i);
 			}
 			textCounter += selectionArg.length;
-			
-		    Cursor cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  KEY_WORD_PARTOFSPEECHID, }, selection, selectionArg, null, null, null, null);
-		    
-		    if(cursor.moveToFirst()){
-		    	long id;
-		    	String syllables;
-		    	String text;
-		    	long partOfSpeechID;
-		    	do {
-		    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
-		    		text = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // TODO text and syllables are swapped for some reason (there is a test a few rows down)
-		    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_TEXT));
-		    		partOfSpeechID = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_PARTOFSPEECHID));
-		    		words.add(new Word(id, syllables, text, HaikuGenerator.getPartOfSpeechWithID(partOfSpeechID).getType()));
-		    	}while(cursor.moveToNext());
-		    }
-		    cursor.close();
+			Cursor cursor = null;
+			try{
+			    cursor = myDataBase.query(TABLE_WORD, new String[] { KEY_WORD_ID, KEY_WORD_TEXT, KEY_WORD_SYLLABLES,  KEY_WORD_PARTOFSPEECHID, KEY_WORD_CUEWORDSIDS}, selection, selectionArg, null, null, null, null);
+			    
+			    if(cursor.moveToFirst()){
+			    	long id;
+			    	String syllables;
+			    	String text;
+			    	long partOfSpeechID;
+			    	do {
+			    		id = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_ID));
+			    		text = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_SYLLABLES)); // TODO text and syllables are swapped for some reason (there is a test a few rows down)
+			    		syllables = cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_TEXT));
+			    		partOfSpeechID = cursor.getLong(cursor.getColumnIndexOrThrow(KEY_WORD_PARTOFSPEECHID));
+			    		words.add(new Word(id, syllables, text, HaikuGenerator.getPartOfSpeechWithID(partOfSpeechID).getType(), getIDs(cursor.getString(cursor.getColumnIndexOrThrow(KEY_WORD_CUEWORDSIDS)))));
+			    	}while(cursor.moveToNext());
+			    }
+			}
+			finally{
+				cursor.close();
+			}
 		}
 //	    Log.i("TAG", "getWords(): Getting all the words: " + (System.currentTimeMillis() - startTime));
 //		Log.i("TAG3", "Number of words not found: " + (texts.size()-words.size()));
-		Log.i("TAG3", "Words to look for");
-		for(int i = 0; i < texts.size(); i++){
-			Log.i("TAG3", texts.get(i));
-		}
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "Words found");
-		for(int i = 0; i < words.size(); i++){
-			Log.i("TAG3", words.get(i).getText() + ", " + words.get(i).getwordType());
-		}
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "Words not found");
-		boolean found;
-		for(int t = 0; t < texts.size(); t++){
-			found = false;
-			for(int i = 0; i < words.size(); i++){
-				if(texts.get(t).equalsIgnoreCase(words.get(i).getText())){
-					found = true;
-					break;
-				}
-			}
-			if(!found){
-				Log.i("TAG3", texts.get(t));
-			}
-		}
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
-		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "Words to look for");
+//		for(int i = 0; i < texts.size(); i++){
+//			Log.i("TAG3", texts.get(i));
+//		}
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "Words found");
+//		for(int i = 0; i < words.size(); i++){
+//			Log.i("TAG3", words.get(i).getText() + ", " + words.get(i).getwordType());
+//		}
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "Words not found");
+//		boolean found;
+//		for(int t = 0; t < texts.size(); t++){
+//			found = false;
+//			for(int i = 0; i < words.size(); i++){
+//				if(texts.get(t).equalsIgnoreCase(words.get(i).getText())){
+//					found = true;
+//					break;
+//				}
+//			}
+//			if(!found){
+//				Log.i("TAG3", texts.get(t));
+//			}
+//		}
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
+//		Log.i("TAG3", "--------------------------");
 	    return words;
 	}
 	
 	public ArrayList<Long> initTheme(Theme t) {
-		ArrayList<Long> wordids = new ArrayList<Long>();
-		
-	    Cursor cursor = myDataBase.rawQuery("SELECT " + KEY_THEMEWORD_WORDID + " FROM " + TABLE_THEMEWORD + " WHERE " + KEY_THEMEWORD_THEMEID + " = " + t.getID() + ";", null);
-	    if (cursor.moveToFirst()) {
-	        do {
-	    		wordids.add(cursor.getLong(0));
-	        } while (cursor.moveToNext());
-	    }
-	    cursor.close();
-		return wordids;
+		Cursor cursor = null;
+		try{
+			ArrayList<Long> wordids = new ArrayList<Long>();
+			
+		    cursor = myDataBase.rawQuery("SELECT " + KEY_THEMEWORD_WORDID + " FROM " + TABLE_THEMEWORD + " WHERE " + KEY_THEMEWORD_THEMEID + " = " + t.getID() + ";", null);
+		    if (cursor.moveToFirst()) {
+		        do {
+		    		wordids.add(cursor.getLong(0));
+		        } while (cursor.moveToNext());
+		    }
+			return wordids;
+		}
+		finally{
+			cursor.close();
+		}
 	}
 	
 	public Theme getTheAllTheme() {
-	    Cursor cursor = myDataBase.query(TABLE_THEME, new String[] { KEY_THEME_ID }, KEY_THEME_NAME + "=?", new String[] { "all" }, null, null, null, null);
-    	cursor.moveToFirst();
-    	return new Theme(cursor.getLong(0), "all");   
+		Cursor cursor = null;
+		try{
+		    cursor = myDataBase.query(TABLE_THEME, new String[] { KEY_THEME_ID }, KEY_THEME_NAME + "=?", new String[] { "all" }, null, null, null, null);
+	    	cursor.moveToFirst();
+	    	long id = cursor.getLong(0);
+	    	return new Theme(id, "all");
+		}
+		finally{
+			cursor.close();
+		}
 	}
 	
 	public ArrayList<Theme> getAllThemes() {
-		ArrayList<Theme> themes = new ArrayList<Theme>();
-		Cursor cursor = myDataBase.rawQuery("SELECT * FROM " + TABLE_THEME + ";", null);
-	    if (cursor.moveToFirst()) {
-	        do {
-	        	String id = cursor.getString(0);
-	        	String themeName = cursor.getString(1);
-    		    if (!themeName.equals("all"))
-    		    	themes.add(new Theme(Long.parseLong(id), themeName));
-	        } while (cursor.moveToNext());
-	    }
-	    cursor.close();
-		return themes;
+		Cursor cursor = null;
+		try{
+			ArrayList<Theme> themes = new ArrayList<Theme>();
+			cursor = myDataBase.rawQuery("SELECT * FROM " + TABLE_THEME + ";", null);
+		    if (cursor.moveToFirst()) {
+		        do {
+		        	String id = cursor.getString(0);
+		        	String themeName = cursor.getString(1);
+	    		    if (!themeName.equals("all"))
+	    		    	themes.add(new Theme(Long.parseLong(id), themeName));
+		        } while (cursor.moveToNext());
+		    }
+			return themes;
+		}
+		finally{
+			cursor.close();
+		}
 	}
 	
 	public void initSMSES(ArrayList<SMS> smses){

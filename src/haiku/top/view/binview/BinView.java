@@ -97,7 +97,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int screenWidth;
 	private int screenHeight;
 	
-	public static final int DELETE_DISTANCE = 10;
+	public static final int DELETE_DISTANCE = 10; //10
 	private int deleteDistance;
 	
 	// These positions are compared to the image width and height
@@ -605,7 +605,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < smsView.size(); i++){
 			binCombinedSMSView.addSMS(smsView.get(i).getSMS());
 		}
-		stopAt = 25; //TODO
+		stopAt = 30; //TODO
 		updateNumberOfWordsLeft();
 		binCombinedSMSView.init();
 	}

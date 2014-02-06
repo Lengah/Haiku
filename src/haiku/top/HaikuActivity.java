@@ -84,7 +84,7 @@ public class HaikuActivity extends Activity {
 		mPrefs = getPreferences(Context.MODE_PRIVATE);
 		((CreateSamplesView)createSamplesView).samplesExist = mPrefs.getBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
 //		smsWordTableExist =  mPrefs.getBoolean(SMSWORD_EXIST_KEY, false);
-		safeMode =  mPrefs.getBoolean(SAFE_MODE_KEY, false);
+		safeMode =  mPrefs.getBoolean(SAFE_MODE_KEY, true);
 		
         //if so, load contacts
         if (((CreateSamplesView)createSamplesView).samplesExist) {
@@ -116,6 +116,15 @@ public class HaikuActivity extends Activity {
 		HaikuGenerator.init();
 		mainView = new MainView(this);
 		setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (databaseHandler != null) {
+        	Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
+        	databaseHandler.close();
+        }
     }
     
     public boolean isSafeMode(){

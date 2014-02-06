@@ -21,13 +21,13 @@ public class AddSmsesThread extends Thread{
 	public void run(){
 		double startTime = System.currentTimeMillis();
 		// Since this thread will probably use the database under a long period of time it need its own version of the database
-		DatabaseHandler databaseHandler = new DatabaseHandler(MainView.getInstance().getContext());
-        try {
-        	databaseHandler.openReadOnlyDataBase();
-        } catch(SQLException sqle){
-        	throw sqle; 
-        }
-		databaseHandler.initSMSES(smses);
+//		DatabaseHandler databaseHandler = new DatabaseHandler(MainView.getInstance().getContext());
+//        try {
+//        	databaseHandler.openReadOnlyDataBase();
+//        } catch(SQLException sqle){
+//        	throw sqle; 
+//        }
+		DatabaseHandler.getInstance().initSMSES(smses);
 		for(int i = 0; i < smses.size(); i++){
 			HaikuGenerator.addSMS(smses.get(i));
 		}

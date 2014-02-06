@@ -79,16 +79,27 @@ public class BinCombinedSMS extends RelativeLayout{
 		}
 		scrollThread = new Thread(){
 			public void run(){
+				boolean empty;
 				while(true){
-					ArrayList<FallingWordAnimation> anims = new ArrayList<FallingWordAnimation>(animations);
-					for(int i = anims.size()-1; i >= 0; i--){
-						if(anims.get(i).isFinished()){
-							anims.remove(i);
+					empty = true;
+					for(int i = 0; i < animations.size(); i++){
+						if(!animations.get(i).isFinished()){
+							empty = false;
+							break;
 						}
 					}
-					if(anims.isEmpty()){
+					if(empty){
 						break;
 					}
+//					ArrayList<FallingWordAnimation> anims = new ArrayList<FallingWordAnimation>(animations);
+//					for(int i = anims.size()-1; i >= 0; i--){
+//						if(anims.get(i).isFinished()){
+//							anims.remove(i);
+//						}
+//					}
+//					if(anims.isEmpty()){
+//						break;
+//					}
 					try {
 						Thread.sleep(FallingWordAnimation.TIME_TO_FALL_ONE_ROW/2);
 					} catch (InterruptedException e) {
@@ -173,21 +184,46 @@ public class BinCombinedSMS extends RelativeLayout{
 		params.setMargins((int) word.getStartPos(), word.getRow().getRowIndex()*height, 0, 0);
 		addView(movingView, params);
 		
-		for(int i = 0; i < animations.size(); i++){
-			if(word.equals(animations.get(i).getWord()) && animations.get(i).getWord().getRow().getRowIndex() == word.getRow().getRowIndex()-rows){
-				removeView(animations.get(i).getMovingView());
-				animations.get(i).addRows(rows, word, movingView);
+		for(int i = 0; i < animations.size(); i++){ //TODO
+			if(word.equals(animations.get(i).getWord())//){
+					&& (animations.get(i).getWord().getRow().getRowIndex() == word.getRow().getRowIndex()-rows)){
+//					|| animations.get(i).getWord().getRow().getRowIndex() == word.getRow().getRowIndex()-rows-animations.get(i).getRows())){
+//				if(!animations.get(i).hasStarted()){
+					removeView(animations.get(i).getMovingView());
+//				}
+//				if(animations.get(i).hasStarted()){
+//					animations.get(i).updateWhileRunning(rows, word, movingView);
+//				}
+//				else{
+					animations.get(i).addRows(rows, word, movingView);
+//				}
 				return;
 			}
+//			if(word.equals(animations.get(i).getWord()) && animations.get(i).getWord().getRow().getRowIndex() == word.getRow().getRowIndex()-rows-animations.get(i).getRows()){
+//				if(animations.get(i).hasStarted()){
+//					animations.get(i).updateWhileRunning(rows, word, movingView);
+//					return;
+//				}
+//			}
 		}
 		
 		animations.add(new FallingWordAnimation(movingView, word, rows));
 	}
 	
+	/**
+	 * Adds an animation to the list and starts it
+	 * 
+	 */
+	public void addAnimation(FallingWordAnimation a){
+		animations.add(a);
+		a.start();
+	}
+	
 	public void colorOfAWordUpdated(BinSMSRowWord word){
 		for(int i = 0; i < animations.size(); i++){
 			if(animations.get(i).getWord().equals(word)){
-				animations.get(i).getMovingView().setTextColor(word.getCurrentTextColor());
+//				animations.get(i).getMovingView().setTextColor(word.getCurrentTextColor());
+				animations.get(i).updateTextColor(word.getCurrentTextColor());
 				return;
 			}
 		}
@@ -245,6 +281,14 @@ public class BinCombinedSMS extends RelativeLayout{
 	
 	public void delete(ArrayList<BinSMSRowWord> wordsToBeDeleted){
 		for(int i = wordsToBeDeleted.size()-1; i >= 0; i--){ // Start at the bottom
+//			for(int a = 0; a < animations.size(); a++){ //TODO
+//				if(wordsToBeDeleted.get(i).equals(animations.get(a).getWord()) && wordsToBeDeleted.get(i).getRow() == animations.get(a).getWord().getRow()){
+//					animations.get(a).removed();
+//					removeView(animations.get(a).getMovingView());
+//					animations.remove(a);
+//					break;
+//				}
+//			}
 			wordsToBeDeleted.get(i).delete();
 		}
 		animateWords();
@@ -252,11 +296,6 @@ public class BinCombinedSMS extends RelativeLayout{
 	
 	public ArrayList<BinSMSRow> getRows(){
 		return rows;
-	}
-	
-	public void removeRow(BinSMSRow row){
-		rows.remove(row);
-		removeView(row);
 	}
 	
 	public void addSMSesAtPosition(ArrayList<SMS> smses, int rowIndex, int xPos){

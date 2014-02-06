@@ -10,6 +10,7 @@ public class Word {
 	private String syllables;
 	private String wordType; //parthofspeech
 	private int numberOfSyllables;
+	private ArrayList<Long> cueWordIDs;
 
 	/**
 	 * FORMAT: slips|slips|verb (usu participle).intransitive verb.transitive verb.noun.plural noun.singular verb
@@ -30,11 +31,12 @@ public class Word {
 		initNumberOfSyllables();
 	}*/
 	
-	public Word(long id, String text, String syllables, String wordType) {
+	public Word(long id, String text, String syllables, String wordType, ArrayList<Long> cueWordIDs) {
 		this.id = id;
 		this.text = text;
 		this.syllables = syllables;
 		this.wordType = wordType;
+		this.cueWordIDs = cueWordIDs;
 		initNumberOfSyllables();
 	}
 	
@@ -67,6 +69,10 @@ public class Word {
 //		}
 //		wordTypes.add(wordType.getType());
 //	}
+	
+	public ArrayList<Long> getCueWordIDs(){
+		return cueWordIDs;
+	}
 	
 	public long getID(){
 		return id;
