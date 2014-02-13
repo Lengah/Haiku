@@ -73,6 +73,12 @@ public class HaikuGenerator {
 										's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'é', 
 										'è', 'å', 'ä', 'ö'};//, '\''}; // ' doesn't seem to work
 	
+	/**
+	 * Words in rules.txt which are not words (words in [] brackets)
+	 * Such as ',', '?' and '!'
+	 */
+	private static ArrayList<String> nonWordsInRules = new ArrayList<String>();
+	
 	private static String[] rules;
 	
 	private static void initRules(){
@@ -90,6 +96,27 @@ public class HaikuGenerator {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static ArrayList<String> getNonWordsInRules(){
+		return nonWordsInRules;
+	}
+	
+	private static void initNonWordsCharacters(){
+		int startIndex;
+		int endIndex;
+		String temp;
+		String[] rulesTemp = rules.clone();
+		for(int i = 0; i < rulesTemp.length; i++){
+			while((startIndex = rulesTemp[i].indexOf('[')) != -1){
+				endIndex = rulesTemp[i].indexOf(']');
+				temp = rulesTemp[i].substring(startIndex+1, endIndex);
+				if(!nonWordsInRules.contains(temp)){
+					nonWordsInRules.add(temp);
+				}
+				rulesTemp[i] = rulesTemp[i].substring(endIndex+1);
+			}
 		}
 	}
 	
@@ -204,6 +231,7 @@ public class HaikuGenerator {
 		initThemes();
 //		initRulesWords();
 		initRules();
+		initNonWordsCharacters();
 	}
 	
 	public static PartOfSpeech getPartOfSpeechWithID(long id){

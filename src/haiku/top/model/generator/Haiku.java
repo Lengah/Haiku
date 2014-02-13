@@ -45,7 +45,7 @@ public class Haiku {
 		Log.i("TAG", "");
 		String text = "";
 		for(int i = 0; i < usedWords.size(); i++){
-			text += usedWords.get(i).getText() + ", ";
+			text += "[" + usedWords.get(i).getText() + ", " + usedWords.get(i).getwordType() + "], ";
 		}
 		Log.i("TAG", text);
 		Log.i("TAG", "");

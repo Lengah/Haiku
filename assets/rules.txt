@@ -1,28 +1,52 @@
-<sentence>=2
+<sentence>=2|2.1.
 <single sentence>
 <single sentence>(conjunction)<single sentence>
 
-<single sentence>=3
+<single sentence>=6|4.3.3.4.1.1.
 <simple sentence>
 (gerund)<simple sentence>
 (adverb)(gerund)<simple sentence>
+<alone noun phrase>
+<simple sentence start><alone noun phrase>
+<simple sentence start>
 
-<simple sentence>=13
-<noun phrase>(intransitive verb)
-<noun phrase>(intransitive verb)(adverb)
-<noun phrase>(intransitive verb)(preposition)<noun phrase>
-<noun phrase>(intransitive verb)(adverb)(preposition)<noun phrase>
-(adverb)[,]<noun phrase>(intransitive verb)
-(adverb)[,]<noun phrase>(intransitive verb)(preposition)<noun phrase>
-<noun phrase>(adverb)(intransitive verb)
-<noun phrase>(adverb)(intransitive verb)(preposition)<noun phrase>
-(adverb)[,]<noun phrase>(adverb)(intransitive verb)
-(adverb)[,]<noun phrase>(adverb)(intransitive verb)(preposition)<noun phrase>
-<noun phrase>(transitive verb)<noun phrase>
-<noun phrase>(transitive verb)<noun phrase>(adverb)
-<noun phrase>(adverb)(transitive verb)<noun phrase>
+<simple sentence>=4|1.1.2.5.
+(adverb)[,]<start noun phrase>(intransitive verb)(preposition)<noun phrase>
+(adverb)[,]<start noun phrase>(adverb)(intransitive verb)(preposition)<noun phrase>
+<simple sentence start><simple sentence2>
+<simple sentence2>
 
-<noun phrase>=10
+<simple sentence2>=5|4.1.1.3.1.
+<start noun phrase>(transitive verb)<noun phrase>
+<start noun phrase>(adverb)(transitive verb)<noun phrase>
+<start noun phrase>(adverb)(intransitive verb)(preposition)<noun phrase>
+<start noun phrase>(intransitive verb)(preposition)<noun phrase>
+<start noun phrase>(intransitive verb)(adverb)(preposition)<noun phrase>
+
+<simple sentence start>=2|1.1.
+(interjection)[!]
+(transitive verb)[!]
+
+<alone noun phrase>=16|2.2.2.2.2.2.2.2.1.1.1.1.1.1.1.1.
+(definite article)(positive adjective)(noun)
+(definite article)(positive adjective)(plural noun)
+(definite article)(superlative adjective)(noun)
+(definite article)(superlative adjective)(plural noun)
+(indefinite article)(positive adjective)(noun)
+(definite article)(comparative adjective)(noun)
+(indefinite article)(comparative adjective)(noun)
+(definite article)(comparative adjective)(plural noun)
+(definite article)(positive adjective)(positive adjective)(noun)
+(definite article)(positive adjective)(positive adjective)(plural noun)
+(definite article)(superlative adjective)(positive adjective)(noun)
+(definite article)(superlative adjective)(positive adjective)(plural noun)
+(indefinite article)(positive adjective)(positive adjective)(noun)
+(definite article)(comparative adjective)(definite article)(noun)
+(indefinite article)(comparative adjective)(positive adjective)(noun)
+(definite article)(comparative adjective)(definite article)(plural noun)
+
+
+<start noun phrase>=11|3.3.1.2.2.1.2.1.1.1.2.
 (pronoun)
 (noun)
 (plural noun)
@@ -33,3 +57,16 @@
 (definite article)(superlative adjective)(plural noun)
 (indefinite article)(noun)
 (indefinite article)(positive adjective)(noun)
+(definite article)(comparative adjective)(noun)
+
+<noun phrase>=10|3.1.2.1.1.1.1.2.3.1.
+(noun)
+(plural noun)
+(definite article)(noun)
+(definite article)(plural noun)
+(definite article)(positive adjective)(noun)
+(definite article)(superlative adjective)(noun)
+(definite article)(superlative adjective)(plural noun)
+(indefinite article)(noun)
+(indefinite article)(positive adjective)(noun)
+(definite article)(comparative adjective)(noun)

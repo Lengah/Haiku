@@ -44,9 +44,11 @@ public class FindSentenceThread extends Thread{
 //				sentence = sentence.substring(0, index-5) + "a " + sentence.substring(index);
 //			}
 //		}
-		while(sentence.contains(" , ")){
-			int index = sentence.indexOf(" , ");
-			sentence = sentence.substring(0, index) + ", " + sentence.substring(index+3);
+		for(int i = 0; i < HaikuGenerator.getNonWordsInRules().size(); i++){
+			while(sentence.contains(" " + HaikuGenerator.getNonWordsInRules().get(i) + " ")){
+				int index = sentence.indexOf(" " + HaikuGenerator.getNonWordsInRules().get(i) + " ");
+				sentence = sentence.substring(0, index) + HaikuGenerator.getNonWordsInRules().get(i) + " " + sentence.substring(index+3);
+			}
 		}
 //		sentence = sentence.substring(0, 1).toUpperCase() + sentence.substring(1);
 		sentence = sentence.toUpperCase();
@@ -57,6 +59,10 @@ public class FindSentenceThread extends Thread{
 	}
 	
 	private void updateWordList(ArrayList<Word> words){
+		// double all words (so that the avoid duplications has an effect
+		for(int i = words.size()-1; i >= 0; i--){
+			words.add(words.get(i));
+		}
 		//cue words
 		for(int i = words.size()-1; i >= 0; i--){
 			for(int a = 0; a < haiku.getCueWords().size(); a++){
@@ -68,12 +74,13 @@ public class FindSentenceThread extends Thread{
 			}
 		}
 		// avoid duplications
-		// if the word is used, only 1 instance of the word is allowed in the final list
+		// if the word is used, the chance of it being used again is decreased
 		boolean found;
 		for(int a = 0; a < haiku.getUsedWords().size(); a++){
 			found = false;
 			for(int i = words.size()-1; i >= 0; i--){
-				if(words.get(i).equals(haiku.getUsedWords().get(a))){
+//				if(words.get(i).equals(haiku.getUsedWords().get(a))){
+				if(words.get(i).getText().equalsIgnoreCase(haiku.getUsedWords().get(a).getText())){
 					if(found){
 						words.remove(i);
 					}
@@ -96,22 +103,60 @@ public class FindSentenceThread extends Thread{
 			if(endIndex+1 != structure.length()){
 				theRest = structure.substring(endIndex+1);
 			}
-			ArrayList<Integer> rowsLeft = new ArrayList<Integer>();
+//			ArrayList<Integer> rowsLeft = new ArrayList<Integer>();
+//			int ruleRowIndex;
+//			String tempText;
+//			for(ruleRowIndex = 0; ruleRowIndex < HaikuGenerator.getRules().length; ruleRowIndex++){
+//				tempText = HaikuGenerator.getRules()[ruleRowIndex];
+//				if(tempText.contains(firstPart + "=")){
+//					int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1));
+//					for(int i = 1; i <= rows; i++){
+//						rowsLeft.add(i);
+//					}
+//					break;
+//				}
+//			}
+			ArrayList<WeightedRow> rowsLeft = new ArrayList<WeightedRow>();
 			int ruleRowIndex;
 			String tempText;
 			for(ruleRowIndex = 0; ruleRowIndex < HaikuGenerator.getRules().length; ruleRowIndex++){
 				tempText = HaikuGenerator.getRules()[ruleRowIndex];
 				if(tempText.contains(firstPart + "=")){
-					int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1));
+					int rows = Integer.parseInt(tempText.substring(tempText.indexOf('=')+1, tempText.indexOf('|')));
+					String weights = tempText.substring(tempText.indexOf('|')+1);
+					int weight;
 					for(int i = 1; i <= rows; i++){
-						rowsLeft.add(i);
+//						Log.i("TAG", "firstpart: " + firstPart + ", weights: " + weights);
+						weight = Integer.parseInt(weights.substring(0, weights.indexOf('.')));
+						weights = weights.substring(weights.indexOf('.')+1); //TODO out of bounds?
+						rowsLeft.add(new WeightedRow(i, weight));
 					}
 					break;
 				}
 			}
+			int weightSum;
+			int counter;
+			int row;
+			WeightedRow chosenRow = null;
 			while(!rowsLeft.isEmpty()){
-				randomIndex = randomGenerator.nextInt(rowsLeft.size());
-				int row = rowsLeft.get(randomIndex);
+//				randomIndex = randomGenerator.nextInt(rowsLeft.size());
+//				int row = rowsLeft.get(randomIndex);
+				weightSum = 0;
+				for(int i = 0; i < rowsLeft.size(); i++){
+					weightSum += rowsLeft.get(i).getWeight();
+				}
+				randomIndex = randomGenerator.nextInt(weightSum)+1; // [1, weightSum]
+				counter = 0;
+				row = -1; // so it will crash if it can't find it (so I will notice)
+				for(int i = 0; i < rowsLeft.size(); i++){
+					counter += rowsLeft.get(i).getWeight();
+					if(counter >= randomIndex){
+						row = rowsLeft.get(i).getRow();
+						chosenRow = rowsLeft.get(i);
+						break;
+					}
+				}
+				
 				tempText = HaikuGenerator.getRules()[ruleRowIndex+row];
 				String returnStringOfTheRest = null;
 				if(theRest == null){
@@ -145,7 +190,8 @@ public class FindSentenceThread extends Thread{
 //					syllables += countSyllables(returnString);
 				}
 				// try another row
-				rowsLeft.remove(randomIndex);
+//				rowsLeft.remove(randomIndex);
+				rowsLeft.remove(chosenRow);
 			}
 			return null;
 		}

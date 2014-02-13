@@ -40,16 +40,6 @@ public class Word {
 		initNumberOfSyllables();
 	}
 	
-	/**
-	 * @IMPORTANT Used only by the words that are in the rules.txt file such as the or a. The words in the rules.txt file doesn't have to be in the dictionary, but we need to know their number of syllables
-	 * @param text
-	 * @param numberOfSyllables
-	 */
-	public Word(String text, int numberOfSyllables){
-		this.text = text;
-		this.numberOfSyllables = numberOfSyllables;
-	}
-	
 //	/**
 //	 * If a word is created by this constructor, then wordTypes should be added in the near future
 //	 * @param id
@@ -105,7 +95,9 @@ public class Word {
 	}
 	
 	public void print(String Tag){
-		Log.i(Tag, text + "|" + syllables + "|" + wordType);
+//		if(wordType.equalsIgnoreCase("plural noun")){
+			Log.i(Tag, text + "|" + syllables + "|" + wordType);
+//		}
 	}
 	
 	@Override

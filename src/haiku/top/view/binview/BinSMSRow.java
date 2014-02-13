@@ -53,7 +53,7 @@ public class BinSMSRow extends RelativeLayout{
 	}
 	
 	private static Random randomGenerator = new Random();
-	public static final int CHANCE_TO_DELETE = 10; // in %
+	public static final int CHANCE_TO_DELETE = 15; // in %
 	
 	public ArrayList<BinSMSRowWord> setToBeDeleted(){
 		ArrayList<BinSMSRowWord> wordsToDelete = new ArrayList<BinSMSRowWord>();
