@@ -14,7 +14,6 @@ import haiku.top.view.binview.BinView;
 import haiku.top.view.date.DateView;
 import haiku.top.view.main.ConversationObjectView;
 import haiku.top.view.main.MainView;
-import haiku.top.view.main.SMSObjectView;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -243,50 +242,6 @@ public class HaikuGenerator {
 		return null;
 	}
 	
-//	private static void initRulesWords(){ //TODO
-//		try {
-//			InputStream rules = HaikuActivity.getInstance().getAssets().open("rules.txt");
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(rules));
-//			String tempText;
-//			String wordPart;
-//			int syllables;
-//			boolean exists;
-//			while ((tempText = reader.readLine()) != null) {// or until the part is found
-//				while(tempText.contains("[")){
-//					wordPart = tempText.substring(tempText.indexOf('[')+1, tempText.indexOf(']'));
-//					syllables = Integer.parseInt(wordPart.substring(wordPart.indexOf('(')+1, wordPart.indexOf(')')));
-//					wordPart = wordPart.substring(0, wordPart.indexOf('('));
-//					exists = false;
-//					for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
-//						if(wordsDefinedInRulesTextFile.get(i).getText().equals(wordPart)){
-//							exists = true;
-//							break;
-//						}
-//					}
-//					if(!exists){
-//						wordsDefinedInRulesTextFile.add(new Word(wordPart, syllables));
-//					}
-//					if(tempText.indexOf(']') == tempText.length() - 1){
-//						// if it is the last object
-//						break; // there are no more
-//					}
-//					tempText = tempText.substring(tempText.indexOf(']')+1);
-//				}
-//			}
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		wordsDefinedInRulesTextFile.add(new Word("a", 1));
-//		wordsDefinedInRulesTextFile.add(new Word("an", 1));
-////		for(int i = 0; i < wordsDefinedInRulesTextFile.size(); i++){
-////			Log.i("TAG", wordsDefinedInRulesTextFile.get(i).getText());
-////		}
-//	}
-	
-//	public static ArrayList<Word> getRulesWords(){
-//		return wordsDefinedInRulesTextFile;
-//	}
-	
 	private static void initPartOfSpeech(){
 		allWordTypes = HaikuActivity.databaseHandler.getAllPartOfSpeeches();
 	}
@@ -336,7 +291,7 @@ public class HaikuGenerator {
 		ArrayList<SMS> threadSMS = new ArrayList<SMS>();
 		if (cursor.moveToFirst()) {
 			do{
-				threadSMS.add(new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID));
+				threadSMS.add(new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID, cursor.getString(cursor.getColumnIndexOrThrow("type"))));
 			}
 			while(cursor.moveToNext());
 		}
@@ -511,7 +466,8 @@ public class HaikuGenerator {
 				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")));
+						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")),
+						cursor.getString(cursor.getColumnIndexOrThrow("type")));
 				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
 					newSMSes.add(tempSMS);
 				}
@@ -542,7 +498,8 @@ public class HaikuGenerator {
 				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						threadID);
+						threadID,
+						cursor.getString(cursor.getColumnIndexOrThrow("type")));
 				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
 					newSMSes.add(tempSMS);
 				}
@@ -567,7 +524,8 @@ public class HaikuGenerator {
 				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")));
+						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")),
+						cursor.getString(cursor.getColumnIndexOrThrow("type")));
 				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
 					newSMSes.add(tempSMS);
 				}
@@ -592,7 +550,8 @@ public class HaikuGenerator {
 				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
 						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						threadID);
+						threadID,
+						cursor.getString(cursor.getColumnIndexOrThrow("type")));
 				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
 					newSMSes.add(tempSMS);
 				}
@@ -721,11 +680,13 @@ public class HaikuGenerator {
 	}
 	
 	public static double testStartTime;
+	private static int createdHaikusCounter;
 	
 	public static synchronized void createHaikus(){ //TODO
 		testStartTime = System.currentTimeMillis();
 		haikus.clear();
 		generationsCounter = 4;
+		createdHaikusCounter = 0;
 //		printAllUsableWords();
 		haikus.add(new Haiku(!themes.isEmpty()));
 		haikus.add(new Haiku(!themes.isEmpty()));
@@ -735,13 +696,15 @@ public class HaikuGenerator {
 	}
 	
 	public static synchronized void nextHaiku(){ //TODO
+		createdHaikusCounter++;
 		if(generationsCounter < NUMBER_OF_GENERATIONS && !BinView.getInstance().isShowingHaiku()){
 			updateWordsUsed();
 			generationsCounter++;
 			haikus.add(new Haiku(!themes.isEmpty()));
 		}
-		else{
+		else if(createdHaikusCounter == NUMBER_OF_GENERATIONS){
 			Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
+			BinView.getInstance().allHaikusAreGenerated();
 		}
 	}
 	

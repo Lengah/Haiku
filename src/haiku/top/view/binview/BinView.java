@@ -19,7 +19,7 @@ import haiku.top.view.date.QuarterCircle;
 import haiku.top.view.date.YearMonthView;
 import haiku.top.view.main.ConversationObjectView;
 import haiku.top.view.main.MainView;
-import haiku.top.view.main.SMSObjectView;
+import haiku.top.view.main.sms.SMSObject;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.database.Cursor;
@@ -58,6 +58,7 @@ import android.widget.ScrollView;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.Toast;
 
 public class BinView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener, OnDragListener{
 	private Context context;
@@ -1189,6 +1190,18 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 	}
 	
+	public void allHaikusAreGenerated(){
+		if(!haikuFinished){
+			Log.i("TAG", "No haiku found!");
+			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+		        @Override
+		        public void run(){
+		        	Toast.makeText(getContext(), "A Haiku cannot be created with the current sms input (add more!)",Toast.LENGTH_LONG).show();
+		        }
+		    });
+		}
+	}
+	
 	public void resetHaikuFinished(){
 		haikuFinished = false;
 	}
@@ -1699,9 +1712,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    				if(addingObjectDuringDeletion instanceof ConversationObjectView){
 	    					smses = HaikuGenerator.addThread(((ConversationObjectView)addingObjectDuringDeletion).getThreadID());
 	    				}
-	    				if(addingObjectDuringDeletion instanceof SMSObjectView){
-	    					smses.add(((SMSObjectView)addingObjectDuringDeletion).getSMS());
-	    					HaikuGenerator.calculateSMS(((SMSObjectView)addingObjectDuringDeletion).getSMS());
+	    				if(addingObjectDuringDeletion instanceof SMSObject){
+	    					smses.add(((SMSObject)addingObjectDuringDeletion).getSMS());
+	    					HaikuGenerator.calculateSMS(((SMSObject)addingObjectDuringDeletion).getSMS());
 	    				}
 	    				if(addingObjectDuringDeletion instanceof QuarterCircle){
 	    					if(((QuarterCircle) addingObjectDuringDeletion).isYearView()){

@@ -116,7 +116,9 @@ public class Haiku {
 			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
 			print();
 			initWordsUsed();
-			BinView.getInstance().haikuIsFinished();
+			if(!row1.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL")){
+				BinView.getInstance().haikuIsFinished();
+			}
 			HaikuGenerator.nextHaiku();
 		}
 	}

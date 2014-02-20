@@ -9,6 +9,7 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -47,6 +48,7 @@ import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.ThemeObjectView;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.date.DateView;
+import haiku.top.view.main.sms.SMSObject;
 
 public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
 	private static MainView mv;
@@ -81,7 +83,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private TextView contactName;
 	private ConversationObjectView chosenContact;
 	private ScrollView smsScroll;
-	private LinearLayout smsList;
+	private RelativeLayout smsList;
 	
 	private ImageView haikuBinViewSmall;
 	private HaikuBinDragListener haikuBinDragListener;
@@ -90,7 +92,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private View viewBeingDragged = null;
 	
 	private ArrayList<ConversationObjectView> conversations = new ArrayList<ConversationObjectView>();
-	private ArrayList<SMSObjectView> smsObjects = new ArrayList<SMSObjectView>();
+//	private ArrayList<SMSObjectView> smsObjects = new ArrayList<SMSObjectView>(); //TODO OLD sms view
+	private ArrayList<SMSObject> smsObjects = new ArrayList<SMSObject>();
 	private ArrayList<ThemeObjectView> themeObjects = new ArrayList<ThemeObjectView>();
 //	private int threadIDInUse; // The conversation the user is currently looking at
 	
@@ -105,6 +108,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private DateView dateView;
 	
 	private boolean lookingAtHaikus = false;
+	private int listWidth;
 	
 	public MainView(Context context) {
 		super(context);
@@ -117,6 +121,13 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2*100, getResources().getDisplayMetrics());
         int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics());
+        
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+	    listWidth = HaikuActivity.getInstance().getWindowWidth() - Math.round(110 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));   
+        
+        SMSObject.setMarginSides((int) (listWidth*(SMSObject.MARGIN_SIDES/100.0)));
+        SMSObject.setPaddingSides((int) (listWidth*(SMSObject.PADDING_SIDES/100.0)));
+        SMSObject.calc();
         
         double radiansAngle = ((double)Math.abs(THEME_ROTATION))/180.0*Math.PI; // The rotation in radians
         
@@ -147,7 +158,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
 		contactName = (TextView)findViewById(R.id.pickedcontactname);
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
-		smsList = (LinearLayout)findViewById(R.id.listofsms);
+		smsList = (RelativeLayout)findViewById(R.id.listofsms);
 		
 		themeScroll = (ScrollView)findViewById(R.id.themeview);
 		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
@@ -275,8 +286,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return mv;
 	}
 	
+	public int getListWidth(){
+		return listWidth;
+	}
+	
 	/**
-	 * if this method returns en empty list, then the program should exit when the user
+	 * if this method returns an empty list, then the program should exit when the user
 	 * presses the back button. Otherwise it should close the last view in the arraylist (when the user presses
 	 * the back button). The view Integers are public constants in the MainView class. VIEW_SHOWN_...
 	 * @return
@@ -399,6 +414,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 	
 	public void setSMSView(int threadID){
+		smsListTopOffset = 0;
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 		contactScroll.setVisibility(GONE);
 		smslayout.setVisibility(VISIBLE);
@@ -419,25 +435,82 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		workerThread.start();
 	}
 	
-	public synchronized void addSMSToView(final SMSObjectView smsObject){
-		smsObjects.add(smsObject);
-//		if(lookingAtHaikus){ // somehow cancels the touch?
-			smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+	
+	private int smsListTopOffset;
+	
+	public SMSObject getLastObjectInSMSList(){
+		if(smsObjects.isEmpty()){
+			return null;
+		}
+		return smsObjects.get(smsObjects.size()-1);
+	}
+	
+	public synchronized void addSMSToView(SMS sms){ //TODO
+//		SMSObjectTopBottom lastObjectInList = null;
+//		if(!smsObjects.isEmpty()){
+//			lastObjectInList = (SMSObjectTopBottom)smsObjects.get(smsObjects.size()-1);
 //		}
+//		else{
+//			// else -> first object -> no constraints on where to draw
+//			lastObjectInList = new SMSObjectTopBottom(context); // is generated when the SMSObject is created
+//			smsObjects.add(lastObjectInList);
+//			smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+//			smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
+//		}
+		final SMSObject smsObject = new SMSObject(context, sms);
+		
+		smsObjects.add(smsObject);
+		smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
 		smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
+		
+//		smsObjects.add(smsObject.getBottomBox());
+//		smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+//		smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
+		
 		HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
 	        @Override
 	        public void run(){
-	        	smsList.addView(smsObject);
-	    		if(HaikuGenerator.getAllAddedSMS().contains(smsObject.getSMS())){
-	    			smsObject.setAlpha(OPACITY_USED);
-	    		}
-	    		else{
-	    			smsObject.setAlpha(OPACITY_DEFAULT);
-	    		}        
+//	        	if(smsList.getChildCount() == 0){
+//	        		//first
+//	        		RelativeLayout.LayoutParams params1 = new RelativeLayout.LayoutParams(listWidth, (int) (SMSObject.getHeightOfTextRow()*HEIGHT_OF_TOPBOTTOM_SMSOBJECTS_IN_ROWS));
+//	        		smsList.addView(smsObject.getTopBox(), params1);
+//	        	}
+	        	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(smsObject.getTotalWidth(), smsObject.getTotalHeight());
+	        	if(smsObject.getSMS().isSent()){
+	        		params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+	        		params.setMargins(0, smsListTopOffset, smsObject.getPadding(), 0);
+	        	}
+	        	else{
+	        		params.setMargins(smsObject.getPadding(), smsListTopOffset, 0, 0);
+	        	}
+	        	smsList.addView(smsObject, params);
+	        	smsListTopOffset += smsObject.getOffsetCreatedByThisView();
+//	        	LinearLayout.LayoutParams params3 = new LinearLayout.LayoutParams(listWidth, (int) (SMSObject.getHeightOfTextRow()*HEIGHT_OF_TOPBOTTOM_SMSOBJECTS_IN_ROWS));
+//	        	smsList.addView(smsObject.getBottomBox(), params3);
 	        }
 	    });
 	}
+	
+	// Old - With the old SMS view which was just an oval (works fine)
+//	public synchronized void addSMSToView(final SMSObjectView smsObject){
+//		smsObjects.add(smsObject);
+////		if(lookingAtHaikus){ // somehow cancels the touch?
+//			smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+////		}
+//		smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
+//		HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+//	        @Override
+//	        public void run(){
+//	        	smsList.addView(smsObject);
+//	    		if(HaikuGenerator.getAllAddedSMS().contains(smsObject.getSMS())){
+//	    			smsObject.setAlpha(OPACITY_USED);
+//	    		}
+//	    		else{
+//	    			smsObject.setAlpha(OPACITY_DEFAULT);
+//	    		}        
+//	        }
+//	    });
+//	}
 	
 	/**
 	 * Just changes the visibility of the smsObjects
@@ -445,18 +518,23 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public void updateSMSView(){
 		boolean empty = true;
 		for(int i = 0; i < smsObjects.size(); i++){
-			if(HaikuGenerator.getAllAddedSMS().contains(smsObjects.get(i).getSMS())){
+			if(!(smsObjects.get(i) instanceof SMSObject)){
+				continue;
+			}
+			if(HaikuGenerator.getAllAddedSMS().contains(((SMSObject)smsObjects.get(i)).getSMS())){
 //				smsObjects.get(i).setVisibility(GONE);
 				smsObjects.get(i).setAlpha(OPACITY_USED);
+//				smsObjects.get(i).setSelectedColor();
 			}
 			else{
 //				smsObjects.get(i).setVisibility(VISIBLE);
 				smsObjects.get(i).setAlpha(OPACITY_DEFAULT);
+//				smsObjects.get(i).resetColor();
 				empty = false;
 			}
 		}
 		if(empty && !smsObjects.isEmpty()){
-			HaikuGenerator.addThread((int)smsObjects.get(0).getSMS().getContactID());
+			HaikuGenerator.addThread((int)((SMSObject)smsObjects.get(0)).getSMS().getContactID());
 		}
 	}
 	
@@ -534,9 +612,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //		return false;
 		
 		// Code for sharing
-		if(lookingAtHaikus && v instanceof SMSObjectView){
+		if(lookingAtHaikus && v instanceof SMSObject){
 			// The user wants to share one of his haikus
-		    HaikuActivity.getInstance().shareMessage(((SMSObjectView)v).getSMS().getMessage());
+		    HaikuActivity.getInstance().shareMessage(((SMSObject)v).getSMS().getMessage());
 		}
 		return false;
 	}

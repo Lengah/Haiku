@@ -14,7 +14,6 @@ import haiku.top.model.smshandler.SMS;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.main.MainView;
-import haiku.top.view.main.SMSObjectView;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentProviderOperation;

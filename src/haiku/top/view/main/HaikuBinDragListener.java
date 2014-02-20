@@ -9,6 +9,7 @@ import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.view.ThemeObjectView;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.date.QuarterCircle;
+import haiku.top.view.main.sms.SMSObject;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
@@ -44,7 +45,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		inBinRange = true;
 	    		view = MainView.getInstance().getDraggedView();
-	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObjectView || view instanceof QuarterCircle)){
+	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObject || view instanceof QuarterCircle)){
 	    			// Since deletion has started the user should be able to place the dragged object in the bin
 	    			isAddingDuringDeletion = true;
 	    			MainView.getInstance().getBinView().setAddingObjectDuringDeletion(view);
@@ -63,8 +64,8 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		if(view instanceof ConversationObjectView){
 	    			HaikuGenerator.addThread(((ConversationObjectView)view).getThreadID());
 	    		}
-	    		if(view instanceof SMSObjectView){
-	    			HaikuGenerator.calculateSMS(((SMSObjectView)view).getSMS());
+	    		if(view instanceof SMSObject){
+	    			HaikuGenerator.calculateSMS(((SMSObject)view).getSMS());
 	    		}
 	    		if(view instanceof QuarterCircle){
 	    			if(((QuarterCircle) view).isYearView()){
@@ -101,7 +102,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		if(view instanceof ConversationObjectView){
 	    			MainView.getInstance().updateConversationsVisibility();
 	    		}
-	    		if(view instanceof SMSObjectView){
+	    		if(view instanceof SMSObject){
 	    			MainView.getInstance().updateSMSView();
 	    		}
 	    		if(view instanceof QuarterCircle){

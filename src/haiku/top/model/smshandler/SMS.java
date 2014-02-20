@@ -17,16 +17,32 @@ public class SMS {
 	private String message;
 	private String date;
 	private long contactID;
+	private boolean sent = false; // if false -> received
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 	private ArrayList<Word> wordsInSms;
 	
 	private ArrayList<String> notRealWords;
 	
-	public SMS(long id, String message, String date, long contactID){
+	public SMS(long id, String message, String date, long contactID, String sentString){
 		this.id = id;
 		this.message = message;
 		this.date = date;
 		this.contactID = contactID;
+		if (sentString.equals("1")) {
+	        sent = true;
+	    }
+	}
+	
+	public SMS(long id, String message, String date, long contactID, boolean sent){
+		this.id = id;
+		this.message = message;
+		this.date = date;
+		this.contactID = contactID;
+		this.sent = sent;
+	}
+	
+	public boolean isSent(){
+		return sent;
 	}
 	
 	public ArrayList<Word> getWords(){
