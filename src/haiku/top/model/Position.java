@@ -26,4 +26,9 @@ public class Position {
 	public void setYPos(float yPos){
 		this.yPos = yPos;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		return o instanceof Position && ((Position)o).getXPos() == xPos && ((Position)o).getYPos() == yPos;
+	}
 }

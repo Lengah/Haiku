@@ -413,6 +413,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return chosenContact.getThreadID();
 	}
 	
+	public boolean isLookingAtHaikus(){
+		return lookingAtHaikus;
+	}
+	
 	public void setSMSView(int threadID){
 		smsListTopOffset = 0;
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);

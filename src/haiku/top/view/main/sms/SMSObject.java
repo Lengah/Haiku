@@ -1,6 +1,9 @@
 package haiku.top.view.main.sms;
 
+import java.util.ArrayList;
+
 import haiku.top.HaikuActivity;
+import haiku.top.model.Word;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.view.main.MainView;
@@ -70,10 +73,12 @@ public class SMSObject extends RelativeLayout{
 	 */
 	private SMS sms;
 	
+	private long seed;
 
 	public SMSObject(Context context, SMS sms) {
 		super(context);
 		this.sms = sms;
+		calcSeed();
 //		if(sms.isSent()){
 //			margin = marginSides;
 //		}
@@ -81,7 +86,7 @@ public class SMSObject extends RelativeLayout{
 //			margin = paddingSides;
 //		}
 		// generate middle box
-		centerBox = new SMSObjectCenter(context, sms, this); // generates in constructor
+		centerBox = new SMSObjectCenter(context, sms); // generates in constructor
 		
 		background = new SMSObjectBackground(context, this);
 		
@@ -104,13 +109,37 @@ public class SMSObject extends RelativeLayout{
 		}
 	}
 	
+	private void calcSeed(){
+		String temp = "" +  (sms.getID()/sms.getYear()) + sms.getMessage().length();
+		seed = Long.parseLong(temp);
+		ArrayList<String> words = sms.getNotRealWords();
+		long comb = 0;
+		for(int i = 0; i < words.size(); i++){
+			comb += Long.parseLong("" + i + words.get(i).length());
+		}
+		if(!words.isEmpty()){
+			comb = comb * words.get(words.size()/2).length();
+		}
+		String date = "";
+		if(sms.getDate().length() > 2){
+			date = sms.getDate().substring(sms.getDate().length()-2, sms.getDate().length());
+		}
+		seed = Long.parseLong("" + seed + comb + date);
+		Log.i("TAG2", "seed: " + seed);
+	}
+	
+	public long getSeed(){
+		return seed;
+	}
 	
 	public void setColor(){
 		if(sms.isSent()){
 			background.setColor(SMSObject.COLOR_OF_SENT_SMS);
+			centerBox.setColor(SMSObject.COLOR_OF_SENT_SMS);
 		}
 		else{
 			background.setColor(SMSObject.COLOR_OF_RECEIVED_SMS);
+			centerBox.setColor(SMSObject.COLOR_OF_RECEIVED_SMS);
 		}
 	}
 

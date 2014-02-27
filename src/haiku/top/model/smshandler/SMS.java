@@ -28,7 +28,7 @@ public class SMS {
 		this.message = message;
 		this.date = date;
 		this.contactID = contactID;
-		if (sentString.equals("1")) {
+		if (!sentString.equals("1")) {
 	        sent = true;
 	    }
 	}

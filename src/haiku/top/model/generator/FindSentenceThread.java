@@ -50,8 +50,8 @@ public class FindSentenceThread extends Thread{
 				sentence = sentence.substring(0, index) + HaikuGenerator.getNonWordsInRules().get(i) + " " + sentence.substring(index+3);
 			}
 		}
-//		sentence = sentence.substring(0, 1).toUpperCase() + sentence.substring(1);
-		sentence = sentence.toUpperCase();
+		sentence = sentence.substring(0, 1).toUpperCase() + sentence.substring(1);
+//		sentence = sentence.toUpperCase();
 		haiku.addRow(row, sentence);
 		if(row != 3){
 			haiku.generate(row+1); // start generating the next row
