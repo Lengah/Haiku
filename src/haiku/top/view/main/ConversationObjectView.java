@@ -5,17 +5,20 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.DuplicateFormatFlagsException;
+import java.util.Random;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
 import haiku.top.model.Theme;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.util.TypedValue;
@@ -32,13 +35,13 @@ import android.widget.LinearLayout.LayoutParams;
 
 public class ConversationObjectView extends LinearLayout{
 	private ImageView image;
+	private ImageView imageForeground;
 	private TextView nameView;
 	private int threadID;
 	private Cursor cursor;
 	private Context context;
 	private String name;
 	private Bitmap picture;
-	
 	
 	public ConversationObjectView(Context context, int threadID, String address) {
 		super(context);
@@ -53,6 +56,7 @@ public class ConversationObjectView extends LinearLayout{
 		
 		
 		image = (ImageView)findViewById(R.id.contactPic);
+		imageForeground = (ImageView)findViewById(R.id.contact_foreground);
 		nameView = (TextView)findViewById(R.id.contactname);
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
@@ -72,9 +76,10 @@ public class ConversationObjectView extends LinearLayout{
 //	    if (input != null) {
 //	    	picture = BitmapFactory.decodeStream(input);
 		
-		if(picture != null){
+		if(picture != null){ //TODO
 	    	image.setImageBitmap(picture);
 		}
+		calculateForegroundAlpha();
 //		else{
 //			long id = HaikuActivity.getIDFromName(context, name);
 //			if(id != -1){
@@ -109,6 +114,14 @@ public class ConversationObjectView extends LinearLayout{
 //	public Cursor getCursor(){
 //		return cursor;
 //	}
+	
+	private static final double FULLY_VISIBLE = 50.0;
+	
+	public void calculateForegroundAlpha(){
+		int smsCount = HaikuActivity.getSMSCount(threadID);
+		float alpha = (float) Math.max(0, (1.0 - smsCount/FULLY_VISIBLE));
+		imageForeground.setAlpha(alpha);
+	}
 	
 	public int getThreadID(){
 		return threadID;

@@ -323,6 +323,16 @@ public class HaikuActivity extends Activity {
 		return null;
 	}
 	
+	public static int getSMSCount(int thread_id){
+		Uri uri = Uri.parse(ALLBOXES);
+		Cursor cursor = getInstance().getApplicationContext().getContentResolver().query(uri, null, "thread_id = '" + thread_id + "'", null, SORT_ORDER_INV);
+//		Cursor cursor = getInstance().getApplicationContext().getContentResolver().query(uri, null, "thread_id = '" + thread_id + "'", null, SORT_ORDER_INV);
+		if(cursor!=null){
+			return cursor.getCount();
+		}
+		return 0;
+	}
+	
 	public static Cursor getHaikuThread(Context context, int thread_id){
 		Uri uri = Uri.parse(ALLBOXES);
 		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id = '" + thread_id + "'", null, SORT_ORDER);
