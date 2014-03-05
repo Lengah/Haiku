@@ -1,3 +1,5 @@
+// Old code. It has been replaced by the class SMSObject in the packet haiku.top.view.main.sms
+
 //package haiku.top.view.main;
 //
 //import java.util.Date;

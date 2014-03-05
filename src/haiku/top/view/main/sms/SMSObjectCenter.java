@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -21,6 +22,9 @@ public class SMSObjectCenter extends RelativeLayout{
 	private int viewWidth;
 	private int viewHeight;
 	private SMS sms;
+	
+	private static float SMS_TEXT_SIZE_SP = 15;
+	private static float DATE_TEXT_SIZE_SP = 12;
 	
 	/**
 	 * In % of the text height
@@ -48,11 +52,8 @@ public class SMSObjectCenter extends RelativeLayout{
 //		smsDateView.setTypeface(parentObject.getTypeFace());
 		smsTextView.setText(sms.getMessage());
 		smsDateView.setText(sms.getFullDate());
-		smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-//		if(MainView.getInstance().isLookingAtHaikus()){
-//			smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-//		}
-		smsDateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+		smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
+		smsDateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DATE_TEXT_SIZE_SP);
 		
 		double textLength = smsTextView.getPaint().measureText(smsTextView.getText().toString());
 		double dateLength = smsDateView.getPaint().measureText(smsDateView.getText().toString());
@@ -71,7 +72,7 @@ public class SMSObjectCenter extends RelativeLayout{
 		Log.i("TAG3", "" + smsTextView.getText().toString());
 		Log.i("TAG3", "rows: " + viewRows);
 	
-		int heightOfSMSText = (int) ((viewRows+0.5) * smsTextView.getLineHeight());
+		int heightOfSMSText = getHeight(context, smsTextView.getText().toString(), smsTextView.getTypeface());
 		int padding = (int) (SMSObject.getHeightOfTextRow() * PADDING_BETWEEN_TEXT_AND_DATE/100.0); // padding
 		int heightOfDateText = SMSObject.getHeightOfTextRow();
 		viewHeight = heightOfSMSText + padding + heightOfDateText + 2*sideMargin;
@@ -86,6 +87,17 @@ public class SMSObjectCenter extends RelativeLayout{
 		dateParams.setMargins(sideMargin, sideMargin + heightOfSMSText + padding, 0, 0);
 		addView(smsDateView, dateParams);
 	}
+	
+	private int getHeight(Context context, CharSequence text, Typeface typeface) {
+        TextView textView = new TextView(context);
+        textView.setTypeface(typeface);
+        textView.setText(text, TextView.BufferType.SPANNABLE);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth, View.MeasureSpec.AT_MOST);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        textView.measure(widthMeasureSpec, heightMeasureSpec);
+        return textView.getMeasuredHeight();
+    }
 	
 	private int getRows(Paint paint, String text, int width){
 		int maxWidth = 99*width/100;
