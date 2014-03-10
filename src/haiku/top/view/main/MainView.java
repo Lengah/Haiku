@@ -79,6 +79,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LinearLayout contactList;
 	
 	private LinearLayout smslayout;
+	private LinearLayout pickedContactLayout;
 	private ImageView contactPic;
 	private TextView contactName;
 	private ConversationObjectView chosenContact;
@@ -155,6 +156,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		contactList.setOverScrollMode(OVER_SCROLL_ALWAYS);
 		
 		smslayout = (LinearLayout)findViewById(R.id.smslayout);
+		pickedContactLayout = (LinearLayout)findViewById(R.id.pickedcontact_layout);
 		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
 		contactName = (TextView)findViewById(R.id.pickedcontactname);
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
@@ -173,6 +175,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		addView(haikuBinViewExtended);
 		haikuBinViewExtended.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		
+		pickedContactLayout.setOnClickListener(this);
 		haikuBinViewSmall.setOnClickListener(this);
 //		haikuBinViewExtended.setOnClickListener(this);
 		haikuBinViewExtended.setVisibility(View.GONE);
@@ -600,6 +603,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 		else if(v.equals(haikuBinViewSmall)){
 			openBinView();
+		}
+		else if(v.equals(pickedContactLayout)){
+			closeSMSView();
 		}
 	}
 

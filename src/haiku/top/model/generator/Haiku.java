@@ -119,6 +119,9 @@ public class Haiku {
 			if(!row1.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL")){
 				BinView.getInstance().haikuIsFinished();
 			}
+			else{
+				HaikuGenerator.nullHaikuGenerated();
+			}
 			HaikuGenerator.nextHaiku();
 		}
 	}

@@ -98,7 +98,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int screenWidth;
 	private int screenHeight;
 	
-	public static final int DELETE_DISTANCE = 10; //10
+	public static final int DELETE_DISTANCE = 8; //10 
 	private int deleteDistance;
 	
 	// These positions are compared to the image width and height
@@ -256,6 +256,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private int contactNameHeight;
 	private static final double SCROLL_HEIGHT = 0.1; // 10% of the text area's height
+	
+	private static final float ALPHA_PROGRESS_DEFAULT = (float)1.0;
+	private static final float ALPHA_PROGRESS_NOTREADY = (float)0.3;
 	
 	public BinView(Context context) {
 		super(context);
@@ -606,7 +609,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < smsView.size(); i++){
 			binCombinedSMSView.addSMS(smsView.get(i).getSMS());
 		}
-		stopAt = 30; //TODO
+		stopAt = 25; //TODO
 		updateNumberOfWordsLeft();
 		binCombinedSMSView.init();
 	}
@@ -782,6 +785,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void onOpen(){
+		progressBar.setAlpha(ALPHA_PROGRESS_NOTREADY);
 		try {
 			endProgress.acquire();
 			if(HaikuGenerator.threadsAreRunning()){
@@ -799,6 +803,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private void createHaikus(){
 		if(!stateChanged){
 			// the bin was closed and then opened, but the contents did not change -> nothing needs to be done
+			progressBar.setAlpha(ALPHA_PROGRESS_DEFAULT);
 			return;
 		}
 		if(haikuFinished){ // stateChanged is true here
@@ -1187,6 +1192,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public void haikuIsFinished(){
 		if(!haikuFinished){
 			haikuFinished = true;
+			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+		        @Override
+		        public void run(){
+		        	progressBar.setAlpha(ALPHA_PROGRESS_DEFAULT);
+		        }
+		    });
 		}
 	}
 	
@@ -1232,6 +1243,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int eventsNeededForDelete = 10;
 	private int eventsNeededForUndo = 5;
 	private int eventCounter = 0;
+	
+	private int noWordsRemovedCounter = 0;
+	private static final int TRIES_UNTIL_AUTO_COMPLETION = 3;
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -1412,6 +1426,16 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 							HaikuGenerator.checkIfHaikusAreValid(allWordsRemoved);
 							canUndo = true;
 							eventCounter = 0;
+							if(lastChanged.isEmpty()){
+								noWordsRemovedCounter++;
+								if(noWordsRemovedCounter > TRIES_UNTIL_AUTO_COMPLETION){
+									progressBar.setProgress((int) progressBar.getMaxProgress()+1);
+									return true;
+								}
+							}
+							else{
+								noWordsRemovedCounter = 0;
+							}
 						}
 					}
 					else if(canUndo){

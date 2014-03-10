@@ -87,7 +87,7 @@ containing a value of this type.
     }
     public static final class id {
         public static final int ContactLayout=0x7f080014;
-        public static final int action_settings=0x7f080025;
+        public static final int action_settings=0x7f080026;
         public static final int bincontactname=0x7f080000;
         public static final int binview=0x7f08001d;
         public static final int contactPic=0x7f080016;
@@ -98,7 +98,7 @@ containing a value of this type.
         public static final int imageLayers=0x7f080015;
         public static final int listofcontacts=0x7f08001f;
         public static final int listofdates=0x7f080007;
-        public static final int listofsms=0x7f080024;
+        public static final int listofsms=0x7f080025;
         public static final int listoftext=0x7f080002;
         public static final int listofthemes=0x7f080005;
         public static final int loadButton=0x7f080010;
@@ -106,14 +106,15 @@ containing a value of this type.
         public static final int msgtext=0x7f080019;
         public static final int numberOfContacts2=0x7f08000b;
         public static final int numberOfSMS=0x7f08000e;
-        public static final int pickedcontactname=0x7f080022;
-        public static final int pickedcontactpic=0x7f080021;
+        public static final int pickedcontact_layout=0x7f080021;
+        public static final int pickedcontactname=0x7f080023;
+        public static final int pickedcontactpic=0x7f080022;
         public static final int removeButton=0x7f080013;
-        public static final int safemode=0x7f080027;
-        public static final int samplecontent=0x7f080026;
+        public static final int safemode=0x7f080028;
+        public static final int samplecontent=0x7f080027;
         public static final int saveButton=0x7f080003;
         public static final int scrollofcontacts=0x7f08001e;
-        public static final int scrollofsms=0x7f080023;
+        public static final int scrollofsms=0x7f080024;
         public static final int smsSlide=0x7f08000f;
         public static final int smslayout=0x7f080020;
         public static final int text1=0x7f080008;

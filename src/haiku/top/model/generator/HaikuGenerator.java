@@ -683,6 +683,8 @@ public class HaikuGenerator {
 	private static int createdHaikusCounter;
 	
 	public static synchronized void createHaikus(){ //TODO
+		nullHaikuGenerated = false;
+		allGenerated = false;
 		testStartTime = System.currentTimeMillis();
 		haikus.clear();
 		generationsCounter = 4;
@@ -695,8 +697,22 @@ public class HaikuGenerator {
 		
 	}
 	
+	private static boolean nullHaikuGenerated = false;
+	private static boolean allGenerated = false;
+	
+	public static synchronized void nullHaikuGenerated(){
+		nullHaikuGenerated = true;
+	}
+	
 	public static synchronized void nextHaiku(){ //TODO
 		createdHaikusCounter++;
+		if(nullHaikuGenerated){ // Since the algorithm checks ALL possible solutions, if none is found it means that none exists.
+			if(!allGenerated){
+				BinView.getInstance().allHaikusAreGenerated();
+				allGenerated = true;
+			}
+			return;
+		}
 		if(generationsCounter < NUMBER_OF_GENERATIONS && !BinView.getInstance().isShowingHaiku()){
 			updateWordsUsed();
 			generationsCounter++;

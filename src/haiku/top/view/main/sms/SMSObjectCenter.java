@@ -64,14 +64,6 @@ public class SMSObjectCenter extends RelativeLayout{
 		double maxWidth = temp - temp*2.0*SMSObject.WIDTH_OF_SIDES/100.0;
 		viewWidth = (int) Math.min(maxWidth, Math.max(textLength, dateLength));
 		
-//		int viewRows = ((int)textLength/(viewWidth+1));
-//		
-//		int heightOfSMSText = (int) ((viewRows + 1.8) * SMSObject.getHeightOfTextRow());
-		
-		int viewRows = getRows(smsTextView.getPaint(), smsTextView.getText().toString(), viewWidth);
-		Log.i("TAG3", "" + smsTextView.getText().toString());
-		Log.i("TAG3", "rows: " + viewRows);
-	
 		int heightOfSMSText = getHeight(context, smsTextView.getText().toString(), smsTextView.getTypeface());
 		int padding = (int) (SMSObject.getHeightOfTextRow() * PADDING_BETWEEN_TEXT_AND_DATE/100.0); // padding
 		int heightOfDateText = SMSObject.getHeightOfTextRow();
@@ -99,43 +91,44 @@ public class SMSObjectCenter extends RelativeLayout{
         return textView.getMeasuredHeight();
     }
 	
-	private int getRows(Paint paint, String text, int width){
-		int maxWidth = 99*width/100;
-		if(text.contains("NULL")){ //TODO
-			return 4;
-		}
-		double textLength = paint.measureText(text);
-		if(textLength >= maxWidth){
-			String tempString = "";
-			String temptempString = "";
-			String[] words = text.split(" ");
-			Log.i("TAG4", "words.length: " + words.length);
-			if(words.length == 0){
-				words = new String[]{text};
-			}
-			Log.i("TAG4", "words:");
-			for(String w : words){
-				Log.i("TAG4", "    '" + w + "'");
-			}
-			for(int i = 0; i < words.length && paint.measureText(tempString) <= maxWidth; i++){
-				if(words[i].equals(" ") || words[i].equals("")){
-					continue;
-				}
-				if(paint.measureText(words[i]) >= maxWidth && temptempString.length() == 0){
-					temptempString = words[i];
-					break;
-				}
-				temptempString = tempString;
-				if(!tempString.equals("")){
-					tempString += " ";
-				}
-				tempString += words[i];
-			}
-			Log.i("TAG4", "temptempString: " + temptempString);
-			return 1 + getRows(paint, text.substring(temptempString.length()), width);
-		}
-		return 1;
-	}
+	// Old, unused and is not always working properly. Use getHeight instead.
+//	private int getRows(Paint paint, String text, int width){
+//		int maxWidth = 99*width/100;
+//		if(text.contains("NULL")){ //TODO
+//			return 4;
+//		}
+//		double textLength = paint.measureText(text);
+//		if(textLength >= maxWidth){
+//			String tempString = "";
+//			String temptempString = "";
+//			String[] words = text.split(" ");
+//			Log.i("TAG4", "words.length: " + words.length);
+//			if(words.length == 0){
+//				words = new String[]{text};
+//			}
+//			Log.i("TAG4", "words:");
+//			for(String w : words){
+//				Log.i("TAG4", "    '" + w + "'");
+//			}
+//			for(int i = 0; i < words.length && paint.measureText(tempString) <= maxWidth; i++){
+//				if(words[i].equals(" ") || words[i].equals("")){
+//					continue;
+//				}
+//				if(paint.measureText(words[i]) >= maxWidth && temptempString.length() == 0){
+//					temptempString = words[i];
+//					break;
+//				}
+//				temptempString = tempString;
+//				if(!tempString.equals("")){
+//					tempString += " ";
+//				}
+//				tempString += words[i];
+//			}
+//			Log.i("TAG4", "temptempString: " + temptempString);
+//			return 1 + getRows(paint, text.substring(temptempString.length()), width);
+//		}
+//		return 1;
+//	}
 	
 	public void setColor(int color){
 		setBackgroundColor(color);
