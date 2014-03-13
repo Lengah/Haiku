@@ -23,8 +23,8 @@ public class SMSObjectCenter extends RelativeLayout{
 	private int viewHeight;
 	private SMS sms;
 	
-	private static float SMS_TEXT_SIZE_SP = 15;
-	private static float DATE_TEXT_SIZE_SP = 12;
+	private static final float SMS_TEXT_SIZE_SP = 17; //15
+	private static final float DATE_TEXT_SIZE_SP = 14; //12
 	
 	/**
 	 * In % of the text height
@@ -48,8 +48,8 @@ public class SMSObjectCenter extends RelativeLayout{
 		
 		int sideMargin = (int) (MainView.getInstance().getListWidth()*SIDE_MARGIN/100.0);
 		
-//		smsTextView.setTypeface(parentObject.getTypeFace());
-//		smsDateView.setTypeface(parentObject.getTypeFace());
+		smsTextView.setTypeface(MainView.getInstance().getSmsListTypeface());
+		smsDateView.setTypeface(MainView.getInstance().getSmsListTypeface());
 		smsTextView.setText(sms.getMessage());
 		smsDateView.setText(sms.getFullDate());
 		smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
@@ -64,7 +64,7 @@ public class SMSObjectCenter extends RelativeLayout{
 		double maxWidth = temp - temp*2.0*SMSObject.WIDTH_OF_SIDES/100.0;
 		viewWidth = (int) Math.min(maxWidth, Math.max(textLength, dateLength));
 		
-		int heightOfSMSText = getHeight(context, smsTextView.getText().toString(), smsTextView.getTypeface());
+		int heightOfSMSText = getHeight(context, smsTextView.getText().toString());
 		int padding = (int) (SMSObject.getHeightOfTextRow() * PADDING_BETWEEN_TEXT_AND_DATE/100.0); // padding
 		int heightOfDateText = SMSObject.getHeightOfTextRow();
 		viewHeight = heightOfSMSText + padding + heightOfDateText + 2*sideMargin;
@@ -80,9 +80,9 @@ public class SMSObjectCenter extends RelativeLayout{
 		addView(smsDateView, dateParams);
 	}
 	
-	private int getHeight(Context context, CharSequence text, Typeface typeface) {
+	private int getHeight(Context context, CharSequence text) {
         TextView textView = new TextView(context);
-        textView.setTypeface(typeface);
+        textView.setTypeface(MainView.getInstance().getSmsListTypeface());
         textView.setText(text, TextView.BufferType.SPANNABLE);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
         int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth, View.MeasureSpec.AT_MOST);

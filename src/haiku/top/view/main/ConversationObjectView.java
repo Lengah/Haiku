@@ -61,6 +61,7 @@ public class ConversationObjectView extends LinearLayout{
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
 		nameView.setText(name);
+		nameView.setTypeface(MainView.getInstance().getContactsTypeface());
 		// Adobe Garamond Pro looks weird for contact names.
 //        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
 //        nameView.setTypeface(adobeGaramondProRegular);

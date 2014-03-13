@@ -3,6 +3,7 @@ package haiku.top.view.date;
 import haiku.top.R;
 import haiku.top.model.Position;
 import haiku.top.model.date.Month;
+import haiku.top.view.main.MainView;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -67,8 +68,8 @@ public class QuarterCircle extends View{
         textPaint = new Paint();
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setColor(Color.WHITE);
-        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
-        textPaint.setTypeface(adobeGaramondProRegular);
+//        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        textPaint.setTypeface(MainView.getInstance().getDateTypeface());
         
         if(text.length() > 0){
         	updateTextSize();

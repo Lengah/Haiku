@@ -1,6 +1,7 @@
 package haiku.top.view.date;
 
 import haiku.top.model.date.YearMonth;
+import haiku.top.view.main.MainView;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -51,13 +52,13 @@ public class YearMonthView extends View{
 		monthPaint = new Paint();
 		monthPaint.setStyle(Paint.Style.FILL);
 		monthPaint.setColor(Color.WHITE);
-        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
-        monthPaint.setTypeface(adobeGaramondProRegular);
+//        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+        monthPaint.setTypeface(MainView.getInstance().getDateTypeface());
 		
 		yearPaint = new Paint();
 		yearPaint.setStyle(Paint.Style.FILL);
 		yearPaint.setColor(Color.WHITE);
-		yearPaint.setTypeface(adobeGaramondProRegular);
+		yearPaint.setTypeface(MainView.getInstance().getDateTypeface());
 		
 		updateMonthTextSize();
 		updateYearTextSize();

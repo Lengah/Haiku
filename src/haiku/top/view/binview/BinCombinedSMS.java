@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
@@ -42,7 +43,11 @@ public class BinCombinedSMS extends RelativeLayout{
 		super(context);
 		this.context = context;
 //		setOrientation(VERTICAL);
-		paint = (new TextView(context)).getPaint();// All rows have the same paint properties
+		TextView testView = new TextView(context);
+		testView.setTypeface(MainView.getInstance().getSmsBinCombinedTypeface());
+		testView.setTextSize(TypedValue.COMPLEX_UNIT_SP, BinView.BIN_SMS_TEXT_SIZE_SP);
+		paint = testView.getPaint();// All rows have the same paint properties
+		
 		lengthOfSpace = paint.measureText(" ");
 		
 		Rect textRect = new Rect();
@@ -201,6 +206,8 @@ public class BinCombinedSMS extends RelativeLayout{
 //			}
 		}
 		TextView movingView = new TextView(context);
+		movingView.setTypeface(MainView.getInstance().getSmsBinCombinedTypeface());
+		movingView.setTextSize(TypedValue.COMPLEX_UNIT_SP, BinView.BIN_SMS_TEXT_SIZE_SP);
 //		movingView.setText(word.getWord());
 		movingView.setTextColor(word.getCurrentTextColor());
 		LayoutParams params = new RelativeLayout.LayoutParams((int) word.getLength(), height);

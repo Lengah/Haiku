@@ -260,6 +260,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final float ALPHA_PROGRESS_DEFAULT = (float)1.0;
 	private static final float ALPHA_PROGRESS_NOTREADY = (float)0.3;
 	
+	public static final float BIN_SMS_TEXT_SIZE_SP = 17;
+	
 	public BinView(Context context) {
 		super(context);
 		this.context = context;
@@ -361,9 +363,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		row1.setTextColor(Color.BLACK);
 		row2.setTextColor(Color.BLACK);
 		row3.setTextColor(Color.BLACK);
-		row1.setTextSize(13);
-		row2.setTextSize(13);
-		row3.setTextSize(13);
+//		row1.setTextSize(13);
+//		row2.setTextSize(13);
+//		row3.setTextSize(13);
+		row1.setTypeface(MainView.getInstance().getHaikuTypeface());
+		row2.setTypeface(MainView.getInstance().getHaikuTypeface());
+		row3.setTypeface(MainView.getInstance().getHaikuTypeface());
 		
 		LayoutParams haikuParams = new RelativeLayout.LayoutParams(haikuWidth, haikuHeight);
 		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
@@ -1056,7 +1061,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public void haikuReady(){
 		endHaiku = HaikuGenerator.getRandomReadyHaiku();
-		setHaikuFonts();
+//		setHaikuFonts();
 		row1.setText(endHaiku.getRow(1));
 		row2.setText(endHaiku.getRow(2));
 		row3.setText(endHaiku.getRow(3));
@@ -1810,42 +1815,42 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    return true;
 	}
 
-	private void setHaikuFonts() {
-        Typeface charle = Typeface.createFromAsset(context.getAssets(), "fonts/CharlemagneStd-Bold.otf");
-        Typeface basker = Typeface.createFromAsset(context.getAssets(), "fonts/LibreBaskerville-Regular.ttf");
-        Typeface djgross = Typeface.createFromAsset(context.getAssets(), "fonts/DJGROSS.ttf");
-        
-        double random = Math.random();     
-        if (random < 0.16) { //random set fonts
-            row1.setTypeface(djgross);
-            row2.setTypeface(basker);
-            row3.setTypeface(charle);
-        }   	
-        else if (random > 0.16 && random < 0.32) {
-            row1.setTypeface(charle);
-            row2.setTypeface(basker);
-            row3.setTypeface(djgross);
-        }
-        else if (random > 0.32 && random < 0.48) {
-            row1.setTypeface(basker);
-            row2.setTypeface(djgross);
-            row3.setTypeface(charle);
-        }
-        else if (random > 0.48 && random < 0.64) {
-            row1.setTypeface(charle);
-            row2.setTypeface(djgross);
-            row3.setTypeface(basker);
-        }
-        else if (random > 0.64 && random < 0.82) {
-            row1.setTypeface(djgross);
-            row2.setTypeface(charle);
-            row3.setTypeface(basker);
-        }
-        else {
-            row1.setTypeface(basker);
-            row2.setTypeface(charle);
-            row3.setTypeface(djgross);
-        }
-	}
+//	private void setHaikuFonts() {
+//        Typeface charle = Typeface.createFromAsset(context.getAssets(), "fonts/CharlemagneStd-Bold.otf");
+//        Typeface basker = Typeface.createFromAsset(context.getAssets(), "fonts/LibreBaskerville-Regular.ttf");
+//        Typeface djgross = Typeface.createFromAsset(context.getAssets(), "fonts/DJGROSS.ttf");
+//        
+//        double random = Math.random();     
+//        if (random < 0.16) { //random set fonts
+//            row1.setTypeface(djgross);
+//            row2.setTypeface(basker);
+//            row3.setTypeface(charle);
+//        }   	
+//        else if (random > 0.16 && random < 0.32) {
+//            row1.setTypeface(charle);
+//            row2.setTypeface(basker);
+//            row3.setTypeface(djgross);
+//        }
+//        else if (random > 0.32 && random < 0.48) {
+//            row1.setTypeface(basker);
+//            row2.setTypeface(djgross);
+//            row3.setTypeface(charle);
+//        }
+//        else if (random > 0.48 && random < 0.64) {
+//            row1.setTypeface(charle);
+//            row2.setTypeface(djgross);
+//            row3.setTypeface(basker);
+//        }
+//        else if (random > 0.64 && random < 0.82) {
+//            row1.setTypeface(djgross);
+//            row2.setTypeface(charle);
+//            row3.setTypeface(basker);
+//        }
+//        else {
+//            row1.setTypeface(basker);
+//            row2.setTypeface(charle);
+//            row3.setTypeface(djgross);
+//        }
+//	}
 	
 }

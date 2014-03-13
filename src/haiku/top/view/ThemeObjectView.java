@@ -5,6 +5,7 @@ import java.util.DuplicateFormatFlagsException;
 import haiku.top.model.Theme;
 import haiku.top.model.Word;
 import haiku.top.view.binview.BinView;
+import haiku.top.view.main.MainView;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -47,8 +48,8 @@ public class ThemeObjectView extends LinearLayout{
 		themeText.setText(theme.getName());
 		themeText.setTextColor(Color.WHITE);
 		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
-		themeText.setTypeface(adobeGaramondProRegular);
+//        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		themeText.setTypeface(MainView.getInstance().getThemeTypeface());
 		
 //		themeText.setAlpha(MainView.OPACITY_FULL);
 		int maxSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics());

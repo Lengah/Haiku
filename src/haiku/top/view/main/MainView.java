@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Typeface;
 
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -111,10 +112,27 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private boolean lookingAtHaikus = false;
 	private int listWidth;
 	
+	private Typeface haikuTypeface;
+	private Typeface smsBinTypeface;
+	private Typeface smsBinCombinedTypeface;
+	private Typeface smsListTypeface;
+	private Typeface contactsTypeface;
+	private Typeface themeTypeface;
+	private Typeface dateTypeface;
+	
 	public MainView(Context context) {
 		super(context);
 		this.context = context;
 		mv = this;
+		
+		haikuTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		smsBinTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		smsBinCombinedTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		smsListTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		contactsTypeface = null;
+		themeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		dateTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		
 		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
 		
 		ImageView yellowBackground = new ImageView(context);
@@ -287,6 +305,34 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public static synchronized MainView getInstance(){
 		return mv;
+	}
+	
+	public Typeface getHaikuTypeface(){
+		return haikuTypeface;
+	}
+	
+	public Typeface getSmsBinTypeface(){
+		return smsBinTypeface;
+	}
+	
+	public Typeface getSmsBinCombinedTypeface(){
+		return smsBinCombinedTypeface;
+	}
+	
+	public Typeface getSmsListTypeface(){
+		return smsListTypeface;
+	}
+	
+	public Typeface getContactsTypeface(){
+		return contactsTypeface;
+	}
+	
+	public Typeface getThemeTypeface(){
+		return themeTypeface;
+	}
+	
+	public Typeface getDateTypeface(){
+		return dateTypeface;
 	}
 	
 	public int getListWidth(){

@@ -3,6 +3,7 @@ package haiku.top.view.binview;
 import haiku.top.model.SMSBinWord;
 import haiku.top.model.Word;
 import haiku.top.model.smshandler.SMS;
+import haiku.top.view.main.MainView;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.text.Html;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -83,6 +85,8 @@ public class BinSMSView extends LinearLayout{
 		textView = new TextView(context);
 		addView(textView);
 		textView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		textView.setTypeface(MainView.getInstance().getSmsBinTypeface());
+		textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, BinView.BIN_SMS_TEXT_SIZE_SP);
 //		String tempString;
 //		for(int i = 0; i < words.size(); i++){
 //			tempString = "<font color='black'>" + words.get(i) + "</font>";

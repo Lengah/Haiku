@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.TextView;
 
 public class BinSMSRowWord extends TextView{
@@ -33,7 +34,7 @@ public class BinSMSRowWord extends TextView{
 //		for(int i = 0; i < realWords.size(); i++){
 //			Log.i("TAG", "realWords " + (i+1) + ": " + realWords.get(i).getText());
 //		}
-		Log.i("TAG", "");
+//		Log.i("TAG", "");
 		this.word = word;
 		this.startPos = startPos;
 		this.length = length;
@@ -41,6 +42,8 @@ public class BinSMSRowWord extends TextView{
 		this.row = row;
 		setText(word);
 		setTextColor(DEFAULT_COLOR);
+		setTypeface(MainView.getInstance().getSmsListTypeface());
+		setTextSize(TypedValue.COMPLEX_UNIT_SP, BinView.BIN_SMS_TEXT_SIZE_SP);
 	}
 	
 	public void setRow(BinSMSRow row){
