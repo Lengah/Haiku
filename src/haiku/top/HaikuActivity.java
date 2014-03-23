@@ -33,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.Vibrator;
@@ -44,6 +45,7 @@ import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -73,8 +75,12 @@ public class HaikuActivity extends Activity {
 	
 	public static DatabaseHandler databaseHandler;
 	
+	private int screenWidth;
+	private int screenHeight;
+	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        calculateHeightAndWidth();
         ha = this;
         createSamplesView = new CreateSamplesView(this);
 //        initContactsAndSMS(this);
@@ -131,15 +137,6 @@ public class HaikuActivity extends Activity {
     	return safeMode;
     }
     
-    public int getStatusBarHeight() {
-    	int result = 0;
-    	int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-    	if (resourceId > 0) {
-    		result = getResources().getDimensionPixelSize(resourceId);
-    	}
-    	return result;
-      }
-    
     protected void onPause() { //save data between sessions
         super.onPause();
         SharedPreferences.Editor ed = mPrefs.edit();
@@ -163,10 +160,15 @@ public class HaikuActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         return true;
     }
+    
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case android.R.id.home:
+        	backPressed();
+        	return true;
         case R.id.samplecontent:
        	 setContentView(createSamplesView);
        	 inCreateSamplesView = true;
@@ -259,12 +261,20 @@ public class HaikuActivity extends Activity {
     
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event ) {
-    if(keycode == KeyEvent.KEYCODE_BACK){
-			if(inCreateSamplesView){
-				setContentView(mainView);
-				inCreateSamplesView = false;
-				return true;
-			}
+	    if(keycode == KeyEvent.KEYCODE_BACK){
+			backPressed();
+	     	return true;
+	     }
+	     else
+	    	 return false;
+    }
+    
+    private void backPressed(){
+    	if(inCreateSamplesView){
+			setContentView(mainView);
+			inCreateSamplesView = false;
+			return;
+		}
     	 
 		ArrayList<Integer> states = MainView.getInstance().getViewsShown();
 		if (states.isEmpty()) {
@@ -282,10 +292,6 @@ public class HaikuActivity extends Activity {
 			}
 			
 		}
-     	return true;
-     }
-     else
-    	 return false;
     }
     
     public static HaikuActivity getInstance(){
@@ -293,17 +299,41 @@ public class HaikuActivity extends Activity {
     }
     
     public int getWindowHeight(){
-		Display display = getWindowManager().getDefaultDisplay();
-		android.graphics.Point size = new android.graphics.Point();
-		display.getSize(size);
-		return size.y;
+		return screenHeight;
 	}
     
     public int getWindowWidth(){
+		return screenWidth;
+    }
+    
+    private void calculateHeightAndWidth(){
     	Display display = getWindowManager().getDefaultDisplay();
 		android.graphics.Point size = new android.graphics.Point();
 		display.getSize(size);
-		return size.x;
+		screenWidth = size.x;
+		screenHeight = size.y - getStatusBarHeight() - getActionBarHeight();
+    }
+    
+    public int getStatusBarHeight() {
+    	int result = 0;
+    	int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+    	if (resourceId > 0) {
+    		result = getResources().getDimensionPixelSize(resourceId);
+    	}
+    	return result;
+     }
+    
+    public int getActionBarHeight(){
+    	int actionBarHeight = 0;
+    	TypedValue tv = new TypedValue();
+        if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)){
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+        }
+        if(actionBarHeight == 0 && getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)){
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+        }
+
+    	return actionBarHeight;
     }
     
     public static Cursor getThreads(Context context){
@@ -629,9 +659,7 @@ public class HaikuActivity extends Activity {
 		this.getContentResolver().delete(Uri.parse("content://sms/"), selection, selectionArg); //find and delete SMS using ID
     	Log.i("TAG", "Time to delete: " + (System.currentTimeMillis() - startTime));
 	}
-    
-
-    
+       
     public void addHaikuSMS(Haiku haiku) {
     	String name = "Haiku";
     	String phone = "1";

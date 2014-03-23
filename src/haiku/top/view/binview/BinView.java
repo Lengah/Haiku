@@ -75,8 +75,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private ScrollView textScroll;
 	private LinearLayout textList;
 	
-	private ImageButton saveButton;
-	private ImageButton shareButton;
+	private static final String SAVE_TEXT = "Save";
+	private static final String SHARE_TEXT = "Share";
+	
+	private BinButton saveButton;
+	private BinButton shareButton;
 	
 	private LinearLayout haikuView;
 	private TextView row1;
@@ -182,12 +185,14 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int haikuWidth; // used to calculate the text size of the rows
 	
 	// the save button
-	private static final Position SAVE_UPPER_LEFT = new Position(468, 960);
+	private static final Position SAVE_UPPER_LEFT = new Position(448, 960);
 	private static final int SAVE_WIDTH = 250;
-	private static final int SAVE_HEIGHT = 250;
+	private static final int SAVE_HEIGHT = (int) (250.0 * (446.0/655.0)); // the actual image file is 655x446 px
 	
 	// the share button is just as big as the save button
 	private static final Position SHARE_UPPER_LEFT = new Position(168, 960);
+	private static final int SHARE_WIDTH = 250;
+	private static final int SHARE_HEIGHT = (int) (250.0 * (454.0/641.0)); // the actual image file is 641x454 px
 	
 	// the date list
 	private static final Position DATE_UPPER_LEFT = new Position(70, 870);
@@ -277,13 +282,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		pointerView = new LinearLayout(context);
 		pointerView.setBackgroundColor(Color.BLACK);
 		
-		WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		Display display = wm.getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		screenWidth = size.x;
-		screenHeight = size.y;
-		screenHeight = screenHeight - HaikuActivity.getInstance().getStatusBarHeight();
+		screenWidth = HaikuActivity.getInstance().getWindowWidth();
+		screenHeight = HaikuActivity.getInstance().getWindowHeight();
 		
 		// See the DELETE_DISTANCE value as a dp value and convert it to a px value
         deleteDistance = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, DELETE_DISTANCE, getResources().getDisplayMetrics());
@@ -388,7 +388,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		int saveMarginLeft = (int)(((double)SAVE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int saveMarginTop = (int)(((double)SAVE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		saveButton = new ImageButton(context);
+		saveButton = new BinButton(context, SAVE_TEXT, saveHeight, saveWidth);
+		saveButton.setTypeface(MainView.getInstance().getSaveTypeface());
+		int saveButtonMaxSize = saveButton.calculateMaxSize();
 		LayoutParams saveParams = new RelativeLayout.LayoutParams(saveWidth, saveHeight);
 		saveParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		saveParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -396,24 +398,30 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		saveButton.setLayoutParams(saveParams);
 		addView(saveButton);
 		saveButton.setBackgroundResource(R.drawable.save_button);
-		saveButton.setOnClickListener(this);
 		saveButton.setVisibility(GONE);
 		
 		
 		// SHARE BUTTON
+		int shareWidth = (int)(((double)SHARE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		int shareHeight = (int)(((double)SHARE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		
 		int shareMarginLeft = (int)(((double)SHARE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		
-		shareButton = new ImageButton(context);
-		LayoutParams shareParams = new RelativeLayout.LayoutParams(saveWidth, saveHeight);
+		shareButton = new BinButton(context, SHARE_TEXT, shareHeight, shareWidth);
+		shareButton.setTypeface(MainView.getInstance().getShareTypeface());
+		int shareButtonMaxSize = shareButton.calculateMaxSize();
+		LayoutParams shareParams = new RelativeLayout.LayoutParams(shareWidth, shareHeight);
 		shareParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		shareParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 		shareParams.setMargins(shareMarginLeft, saveMarginTop, 0, 0); // same margin top as save
 		shareButton.setLayoutParams(shareParams);
 		addView(shareButton);
-		shareButton.setBackgroundResource(R.drawable.save_button); //TODO need an image
-		shareButton.setOnClickListener(this);
+		shareButton.setBackgroundResource(R.drawable.share_button);
 		shareButton.setVisibility(GONE);
 		
+		int sharedMaxSize = Math.min(saveButtonMaxSize, shareButtonMaxSize);
+		saveButton.setTextSize(sharedMaxSize);
+		shareButton.setTextSize(sharedMaxSize);
 		
 		// DATE
 		dateWidth = (int)(((double)DATE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
@@ -1075,6 +1083,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		shareButton.setVisibility(VISIBLE);
 		contactName.setVisibility(GONE);
 		showHaiku = true;
+		deletionInProgress = false;//TODO
 	}
 	
 	private int getMaxTextSizeForHaiku(){
@@ -1516,16 +1525,25 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 
 	@Override
 	public void onClick(View v) {
+//		if(v.equals(saveButton)){
+//			save();
+//		}
+//		else if(v.equals(shareButton)){
+//			share();
+//		}
+//		else{
+			// close bin view
+			stateChanged = false;
+			MainView.getInstance().closeBinView();
+//		}
+	}
+	
+	public void clickedButton(View v){
 		if(v.equals(saveButton)){
 			save();
 		}
 		else if(v.equals(shareButton)){
 			share();
-		}
-		else{
-			// close bin view
-			stateChanged = false;
-			MainView.getInstance().closeBinView();
 		}
 	}
 	

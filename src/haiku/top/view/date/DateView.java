@@ -2,7 +2,6 @@ package haiku.top.view.date;
 
 // OnLongClick and onTouch doesn't seem to work at the same time
 
-import haiku.top.HaikuActivity;
 import haiku.top.model.date.Month;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.date.YearMonthConvo;
@@ -10,27 +9,20 @@ import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.view.main.MainView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.os.Handler;
-import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.DragShadowBuilder;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.view.animation.Animation.AnimationListener;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 
 public class DateView extends RelativeLayout implements OnTouchListener, OnClickListener{//, OnLongClickListener{
-	private Context context;
 	private QuarterCircle yearView;
 	
 	private ArrayList<QuarterCircle> months = new ArrayList<QuarterCircle>();
@@ -39,16 +31,19 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	
 	public static final int SIZE_OF_MONTH = 25;
 	public static final int ANIMATION_NEW_YEAR_DURATION = 500;
-	public static final int YEAR_VIEW_FULL_SIZE = 100;
+	public static final double YEAR_VIEW_FULL_SIZE = 130.0; // 100 Originally
+	public static final double TIME_SMALL_SIZE = 100.0; // 50 Originally
 	public static final int SIZE_FACTOR = 2;
+	public static final int TOTAL_SIZE = 210; // 180 Originally
+	//The size of the months will be TOTAL_SIZE - YEAR_VIEW_FULL_SIZE
 	public static final int DEGREES_TO_NEW_YEAR = 30;
 	private boolean dateViewClosed = true;
-	private int yearSelected = 2013;
+	private int yearSelected = getCurrentYear();
 	
 	public DateView(Context context) {
 		super(context);
-		this.context = context;
-		yearView = new QuarterCircle(context, YEAR_VIEW_FULL_SIZE/SIZE_FACTOR);
+//		yearView = new QuarterCircle(context, YEAR_VIEW_FULL_SIZE/SIZE_FACTOR);
+		yearView = new QuarterCircle(context, (int)TIME_SMALL_SIZE);
 		yearView.setText("Time");
 		LayoutParams params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -57,7 +52,8 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 		addView(yearView);
 		for(int i = 0; i < MONTHS_NAME.length; i++){
 //			Log.i("TAG", "Start: " + (-90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH) + ", End: " + (-90 + SIZE_OF_MONTH*i));
-			months.add(new QuarterCircle(context, MONTHS_NAME[i], 180, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, yearView.getRadius()*SIZE_FACTOR));
+//			months.add(new QuarterCircle(context, MONTHS_NAME[i], 180, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, yearView.getRadius()*SIZE_FACTOR));
+			months.add(new QuarterCircle(context, MONTHS_NAME[i], TOTAL_SIZE, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
 			months.get(i).setVisibility(GONE);
 			months.get(i).setLayoutParams(params1);
 			addView(months.get(i));
@@ -79,6 +75,11 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //		months.get(0).setOnLongClickListener(this);
 		update();
 //		closeDateView();
+	}
+	
+	private int getCurrentYear(){
+		Calendar now = Calendar.getInstance();
+		return now.get(Calendar.YEAR);
 	}
 	
 	public int getRadius(){
@@ -157,7 +158,8 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 		dateViewClosed = !dateViewClosed;
 		MainView.getInstance().addViewElement(MainView.VIEW_SHOWN_DATE);
 		yearView.setText("" + yearSelected);
-		a = yearView.changeSizeTo(SIZE_FACTOR, MainView.ANIMATION_TIME_DATE);
+//		a = yearView.changeSizeTo(SIZE_FACTOR, MainView.ANIMATION_TIME_DATE); //TODO
+		a = yearView.changeSizeTo(YEAR_VIEW_FULL_SIZE/TIME_SMALL_SIZE, MainView.ANIMATION_TIME_DATE);
 	    yearView.startAnimation(a);
 	    a.setAnimationListener(new AnimationListener() {
 			@Override
@@ -189,7 +191,8 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 		}
 		dateViewClosed = !dateViewClosed;
 		MainView.getInstance().removeViewElement(MainView.VIEW_SHOWN_DATE);
-		a = yearView.changeSizeTo(1.0/SIZE_FACTOR, MainView.ANIMATION_TIME_DATE);
+//		a = yearView.changeSizeTo(1.0/SIZE_FACTOR, MainView.ANIMATION_TIME_DATE); // TODO
+		a = yearView.changeSizeTo(TIME_SMALL_SIZE/YEAR_VIEW_FULL_SIZE, MainView.ANIMATION_TIME_DATE);
 	    yearView.startAnimation(a);
 	    a.setAnimationListener(new AnimationListener() {
 			@Override

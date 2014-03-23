@@ -53,6 +53,9 @@ public class QuarterCircle extends View{
     private Month month;
     private boolean isYearView = false;
     
+    private static final int TIME_YEAR_ROTATION = MainView.THEME_ROTATION;
+//    private float radiansRotation;
+    
 	public QuarterCircle(Context context, AttributeSet attrs) {
 		super(context, attrs);
         init(attrs); // Read all attributes
@@ -78,7 +81,7 @@ public class QuarterCircle extends View{
 	
 	public QuarterCircle(Context context, String text) {
 		super(context);
-        init(); // Read all attributes
+        init();
 
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setStyle(Paint.Style.FILL);
@@ -102,7 +105,7 @@ public class QuarterCircle extends View{
 	
 	public QuarterCircle(Context context) {
 		super(context);
-        init(); // Read all attributes
+        init();
 
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setStyle(Paint.Style.FILL);
@@ -124,7 +127,7 @@ public class QuarterCircle extends View{
 	public QuarterCircle(Context context, int radius) {
 		super(context);
 		circleRadius = radius;
-        init(); // Read all attributes
+        init();
 
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setStyle(Paint.Style.FILL);
@@ -145,7 +148,7 @@ public class QuarterCircle extends View{
 		super(context);
 		circleRadius = radius;
 		this.drawOffset = offset;
-        init(startAngle, endAngle); // Read all attributes
+        init(startAngle, endAngle);
 
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setStyle(Paint.Style.STROKE);
@@ -198,6 +201,8 @@ public class QuarterCircle extends View{
         // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
+        
+//        radiansRotation = (float) (((double)Math.abs(TIME_YEAR_ROTATION))/180.0*Math.PI); // The rotation in radians
 	}
 	
 	public void init(int startAngle, int endAngle){
@@ -225,7 +230,12 @@ public class QuarterCircle extends View{
     		canvas.translate(-1, 1);
             canvas.drawArc(circleArc, circleStartAngle, circleEndAngle - circleStartAngle, true, circlePaint);
             canvas.drawArc(circleArc, circleStartAngle, circleEndAngle - circleStartAngle, true, circleStrokePaint);
+            
+            //Rotate the text
+            canvas.save();
+            canvas.rotate(TIME_YEAR_ROTATION, circleRadius/10, 3*circleRadius/4);
             canvas.drawText(text, circleRadius/10, 3*circleRadius/4, textPaint);
+            canvas.restore();
     	}
     	else{ // Month view
     		canvas.translate(-1, 1);

@@ -57,6 +57,9 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		break;
 	    	case DragEvent.ACTION_DROP:
 	    		inBinRange = false;
+	    		if(BinView.getInstance().isShowingHaiku()){
+	    			return true;
+	    		}
 	    		view = MainView.getInstance().getDraggedView();
 	    		if(view instanceof ThemeObjectView){
 	    			HaikuGenerator.addTheme(((ThemeObjectView)view).getTheme());

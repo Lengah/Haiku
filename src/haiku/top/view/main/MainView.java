@@ -119,6 +119,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private Typeface contactsTypeface;
 	private Typeface themeTypeface;
 	private Typeface dateTypeface;
+	private Typeface saveTypeface;
+	private Typeface shareTypeface;
 	
 	public MainView(Context context) {
 		super(context);
@@ -132,6 +134,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		contactsTypeface = null;
 		themeTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
 		dateTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		saveTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		shareTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
 		
 		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
 		
@@ -333,6 +337,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public Typeface getDateTypeface(){
 		return dateTypeface;
+	}
+	
+	public Typeface getSaveTypeface(){
+		return saveTypeface;
+	}
+	
+	public Typeface getShareTypeface(){
+		return shareTypeface;
 	}
 	
 	public int getListWidth(){
