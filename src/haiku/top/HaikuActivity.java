@@ -13,6 +13,7 @@ import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
+import haiku.top.view.binview.BinView;
 import haiku.top.view.main.MainView;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -180,32 +181,56 @@ public class HaikuActivity extends Activity {
 			
 		if (safeMode) {
 		alertDialogBuilder
-			.setMessage("Safe mode is ON. Turn OFF? SMS deleted in this app WILL be deleted in phone too!")
+			.setMessage("No SMS will be deleted if Safe mode is ON, but will be deleted if it is OFF.\n\nSafe mode is currently ON. Turn it OFF?")
 			.setCancelable(false)
 			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog,int id) {
+				public void onClick(DialogInterface dialog, int id) {
 					safeMode = false;
+					
+					AlertDialog.Builder builder = new AlertDialog.Builder(HaikuActivity.getInstance());
+					builder.setMessage("Safe mode is now OFF, SMS will be deleted.")
+					       .setCancelable(false)
+					       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					           public void onClick(DialogInterface dialog, int id) {
+					        	   dialog.cancel();
+					           }
+					       });
+					AlertDialog alert = builder.create();
+					alert.show();
+					
 					dialog.cancel();
 				}
 			  })
 			.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog,int id) {
+					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
 				});
 			}
 		else {
 			alertDialogBuilder
-			.setMessage("Safe mode is OFF. Turn ON? SMS deleted in this app WILL NOT be deleted in phone.")
+			.setMessage("No SMS will be deleted if Safe mode is ON, but will be deleted if it is OFF.\n\nSafe mode is currently OFF. Turn it ON?")
 			.setCancelable(false)
 			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog,int id) {
+				public void onClick(DialogInterface dialog, int id) {
 					safeMode = true;
+					
+					AlertDialog.Builder builder = new AlertDialog.Builder(HaikuActivity.getInstance());
+					builder.setMessage("Safe mode is now ON, SMS will NOT be deleted.")
+					       .setCancelable(false)
+					       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					           public void onClick(DialogInterface dialog, int id) {
+					        	   dialog.cancel();
+					           }
+					       });
+					AlertDialog alert = builder.create();
+					alert.show();
+					
 					dialog.cancel();
 				}
 			  })
 			.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog,int id) {
+					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
 				});	

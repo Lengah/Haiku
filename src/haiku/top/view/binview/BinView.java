@@ -232,6 +232,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private boolean stateChanged = false; // If the user closes the bin and then opens it without adding new SMS, there is no need to generate new SMS
 	
 	private ProgressDialog threadProgressBar;
+	private ProgressDialog saveProgressBar;
 	private static Semaphore endProgress = new Semaphore(1);
 	
 	/**
@@ -278,6 +279,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		threadProgressBar.setMessage("Loading...");
 		threadProgressBar.setCancelable(false);
 		threadProgressBar.setIndeterminate(true);
+		
+		saveProgressBar = new ProgressDialog(context);
+		saveProgressBar.setMessage("Saving...");
+		saveProgressBar.setCancelable(false);
+		saveProgressBar.setIndeterminate(true);
 		
 		pointerView = new LinearLayout(context);
 		pointerView.setBackgroundColor(Color.BLACK);
@@ -1505,21 +1511,40 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void save(){
-		if(!HaikuActivity.getInstance().isSafeMode()){
-			// safe mode is off!
-			// DELETE
-			ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
-			for(int i = 0; i < smsView.size(); i++){
-				smsToDelete.add(smsView.get(i).getSMS());
-			}
-			HaikuActivity.getInstance().deleteSMS(smsToDelete);
+		if(!saveProgressBar.isShowing()){
+			saveProgressBar.show();
 		}
-		HaikuActivity.getInstance().addHaikuSMS(endHaiku);
-		MainView.getInstance().updateConversations();
-		reset();
+		new Thread(){
+			public void run(){
+				if(!HaikuActivity.getInstance().isSafeMode()){
+					// safe mode is off!
+					// DELETE
+					ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
+					for(int i = 0; i < smsView.size(); i++){
+						smsToDelete.add(smsView.get(i).getSMS());
+					}
+					HaikuActivity.getInstance().deleteSMS(smsToDelete);
+					
+				}
+				HaikuActivity.getInstance().addHaikuSMS(endHaiku);
+				doneSaving();
+			}
+		}.start();
 	}
 	
-	public void share(){//TODO
+	public synchronized void doneSaving(){
+		HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+	        public void run() {
+	        	MainView.getInstance().updateConversations();
+	    		reset();
+	    		if(saveProgressBar.isShowing()){
+	    			saveProgressBar.dismiss();
+	    		}
+	        }
+	    });
+	}
+	
+	public void share(){
 		HaikuActivity.getInstance().shareMessage(endHaiku.getHaikuPoem());
 	}
 
