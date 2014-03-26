@@ -6,6 +6,7 @@ import android.R.xml;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -122,10 +123,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private Typeface saveTypeface;
 	private Typeface shareTypeface;
 	
+	private LayoutParams fillerParams;
+	private float fillerHeight;
+	
 	public MainView(Context context) {
 		super(context);
 		this.context = context;
 		mv = this;
+		
+		fillerHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) DateView.TIME_SMALL_SIZE, getResources().getDisplayMetrics());
+		fillerParams = new LayoutParams(LayoutParams.MATCH_PARENT, (int) fillerHeight);
 		
 		haikuTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
 		smsBinTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
@@ -394,6 +401,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			contactList.addView(conversations.get(i));
 //			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
 		}
+		contactList.addView(new View(getContext()), fillerParams); //TODO
 //		contactScroll.post(new Runnable() { 
 //	        public void run() { 
 //	        	contactScroll.scrollBy(0, fillerHeight);
@@ -457,6 +465,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public synchronized void removeWorkerThread(){
 		workerThread = null;
+		HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+	        @Override
+	        public void run(){
+	        	RelativeLayout.LayoutParams fillerParams2 = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) fillerHeight);
+	        	fillerParams2.setMargins(0, smsListTopOffset, 0, 0);
+	        	smsList.addView(new View(getContext()), fillerParams2);
+	        }
+		});
 	}
 	
 	public synchronized void stopWorkerThreadIfActive(){
@@ -500,7 +516,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		workerThread.start();
 	}
 	
-	
 	private int smsListTopOffset;
 	
 	public SMSObject getLastObjectInSMSList(){
@@ -510,7 +525,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return smsObjects.get(smsObjects.size()-1);
 	}
 	
-	public synchronized void addSMSToView(SMS sms){ //TODO
+	public synchronized void addSMSToView(SMS sms){
 //		SMSObjectTopBottom lastObjectInList = null;
 //		if(!smsObjects.isEmpty()){
 //			lastObjectInList = (SMSObjectTopBottom)smsObjects.get(smsObjects.size()-1);

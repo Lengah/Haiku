@@ -1080,9 +1080,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		row2.setText(endHaiku.getRow(2));
 		row3.setText(endHaiku.getRow(3));
 		int size = getMaxTextSizeForHaiku();
-		row1.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-		row2.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-		row3.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+//		row1.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+//		row2.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+//		row3.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+		row1.setTextSize(size);
+		row2.setTextSize(size);
+		row3.setTextSize(size);
 		haikuView.setVisibility(VISIBLE);
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
@@ -1101,7 +1104,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		Rect textRect;
 	    do {
 	    	size1++;
-	    	textPaint.setTextSize(size1);
+//	    	textPaint.setTextSize(size1);
+	    	row1.setTextSize(size1);
+	    	textPaint = row1.getPaint(); 
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
 	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
@@ -1113,7 +1118,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textPaint = row2.getPaint(); 
 	    do {
 	    	size2++;
-	    	textPaint.setTextSize(size2);
+//	    	textPaint.setTextSize(size2);
+	    	row2.setTextSize(size2);
+	    	textPaint = row2.getPaint(); 
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
 	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
@@ -1122,7 +1129,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textPaint = row3.getPaint(); 
 	    do {
 	    	size3++;
-	    	textPaint.setTextSize(size3);
+//	    	textPaint.setTextSize(size3);
+	    	row3.setTextSize(size3);
+	    	textPaint = row3.getPaint(); 
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
 	    } while(textPaint.measureText(text) < 9*haikuWidth/10);

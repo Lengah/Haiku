@@ -50,10 +50,11 @@ public class SMSObjectCenter extends RelativeLayout{
 		
 		smsTextView.setTypeface(MainView.getInstance().getSmsListTypeface());
 		smsDateView.setTypeface(MainView.getInstance().getSmsListTypeface());
-		smsTextView.setText(sms.getMessage());
+		smsTextView.setText(sms.getMessage(), TextView.BufferType.SPANNABLE);
 		smsDateView.setText(sms.getFullDate());
 		smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
 		smsDateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DATE_TEXT_SIZE_SP);
+		smsTextView.setPaintFlags(smsTextView.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
 		
 		double textLength = smsTextView.getPaint().measureText(smsTextView.getText().toString());
 		double dateLength = smsDateView.getPaint().measureText(smsDateView.getText().toString());
@@ -69,13 +70,13 @@ public class SMSObjectCenter extends RelativeLayout{
 		int heightOfDateText = SMSObject.getHeightOfTextRow();
 		viewHeight = heightOfSMSText + padding + heightOfDateText + 2*sideMargin;
 		
-		LayoutParams textParams = new RelativeLayout.LayoutParams((int) viewWidth, heightOfSMSText);
+		LayoutParams textParams = new RelativeLayout.LayoutParams(viewWidth, heightOfSMSText);
 		textParams.setMargins(sideMargin, sideMargin, 0, 0);
 		addView(smsTextView, textParams);
 
 		smsDateView.setGravity(Gravity.RIGHT);
 		
-		LayoutParams dateParams = new RelativeLayout.LayoutParams((int) viewWidth, heightOfDateText);
+		LayoutParams dateParams = new RelativeLayout.LayoutParams(viewWidth, heightOfDateText);
 		dateParams.setMargins(sideMargin, sideMargin + heightOfSMSText + padding, 0, 0);
 		addView(smsDateView, dateParams);
 	}
@@ -85,7 +86,8 @@ public class SMSObjectCenter extends RelativeLayout{
         textView.setTypeface(MainView.getInstance().getSmsListTypeface());
         textView.setText(text, TextView.BufferType.SPANNABLE);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
-        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth, View.MeasureSpec.AT_MOST);
+        textView.setPaintFlags(textView.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(viewWidth-3, View.MeasureSpec.AT_MOST); // viewWidth-3. It should work without the -3!! Something is wrong with the Typeface file!
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         textView.measure(widthMeasureSpec, heightMeasureSpec);
         return textView.getMeasuredHeight();
