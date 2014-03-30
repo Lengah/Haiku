@@ -234,7 +234,7 @@ public class QuarterCircle extends View{
             //Rotate the text
             canvas.save();
             canvas.rotate(TIME_YEAR_ROTATION, circleRadius/10, 3*circleRadius/4);
-            canvas.drawText(text, circleRadius/10, 3*circleRadius/4, textPaint);
+            canvas.drawText(text, circleRadius/10, 6*circleRadius/7, textPaint); // 3*circleRadius/4 som y va det förut
             canvas.restore();
     	}
     	else{ // Month view

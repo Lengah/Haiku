@@ -899,19 +899,27 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				return;
 			}
 		}
+		ArrayList<String> addresses = HaikuActivity.getConversationNumbers(context, firstContactID);
+		if(addresses.size() != 1){
+			// shouldn't be shown since it is of a conversation with many participants.
+			return;
+		}
 		// is not shown, but should be
 		showingContactName = true;
 		contactID = firstContactID;
-		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id='" + firstContactID + "'", null, null);
-		if(cursor.moveToFirst()){
-			String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
-			contactName.setText(HaikuActivity.getContactName(context, address));
-		}
-		else{
-			contactName.setText("Name not found");
-		}
+		contactName.setText(HaikuActivity.getContactName(context, addresses.get(0)));
 		contactName.setVisibility(VISIBLE);
+		
+		// OLD
+//		showingContactName = true;
+//		contactID = firstContactID;
+//		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+//		Cursor cursor = context.getContentResolver().query(uri, null, "thread_id='" + firstContactID + "'", null, null);
+//		if(cursor.moveToFirst()){
+//			String address = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+//			contactName.setText(HaikuActivity.getContactName(context, address).get(0)); //TODO should the others also be shown? doesn't matter?
+//		}
+//		contactName.setVisibility(VISIBLE);
 	}
 	
 	public void addTheme(Theme theme){

@@ -32,9 +32,9 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	public static final int SIZE_OF_MONTH = 25;
 	public static final int ANIMATION_NEW_YEAR_DURATION = 500;
 	public static final double YEAR_VIEW_FULL_SIZE = 130.0; // 100 Originally
-	public static final double TIME_SMALL_SIZE = 100.0; // 50 Originally
+	public static final double TIME_SMALL_SIZE = 90.0; // 50 Originally
 	public static final int SIZE_FACTOR = 2;
-	public static final int TOTAL_SIZE = 210; // 180 Originally
+	public static final int TOTAL_SIZE = 210; // 180 Originally. The Months' size will be TOTAL_SIZE - YEAR_VIEW_FULL_SIZE
 	//The size of the months will be TOTAL_SIZE - YEAR_VIEW_FULL_SIZE
 	public static final int DEGREES_TO_NEW_YEAR = 30;
 	private boolean dateViewClosed = true;

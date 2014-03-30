@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Bitmap;
@@ -45,6 +46,7 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -278,7 +280,12 @@ public class HaikuActivity extends Activity {
     public void shareMessage(String message){
 		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND); 
 	    sharingIntent.setType("text/plain");
-	    String shareBody = message;
+	    String shareBody = message + "\n";
+	    int spaces = message.length()/3;
+	    for(int i = 0; i < spaces; i++){
+	    	shareBody += " ";
+	    }
+	    shareBody += "-Haiku";
 	    sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
 	    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
 	    startActivity(Intent.createChooser(sharingIntent, "Share via"));
@@ -396,9 +403,66 @@ public class HaikuActivity extends Activity {
 			return cursor;
 		}
 		return null;
-	} 
+	}
+	
 
-    /**
+	public static float convertDpToPixel(float dp){
+		return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getInstance().getResources().getDisplayMetrics());
+	}
+	
+	public static ArrayList<String> getConversationNumbers(Context context, long threadID){
+		Uri uri = Uri.parse(ALLBOXES);
+	    String where = "thread_id="+threadID; 
+	    Cursor mycursor= getInstance().getContentResolver().query(uri, null, where ,null,null); 
+//	    getInstance().startManagingCursor(mycursor);
+
+	    ArrayList<String> numbers = new ArrayList<String>();
+
+	    if(mycursor.moveToFirst()){
+            for(int i=0;i<mycursor.getCount();i++){
+            	String address = mycursor.getString(mycursor.getColumnIndexOrThrow("address")).toString();
+            	if(!numbers.contains(address)){
+            		numbers.add(address);
+            	}
+                mycursor.moveToNext();
+            }
+	    }
+	    mycursor.close();
+	    return numbers;
+	}
+
+	// bara en kontakt per telefonnummer 
+//    public static ArrayList<String> getContactName (Context ctx, String phoneNumber) {
+//    	ArrayList<String> returnArray = new ArrayList<String>();
+//        String res;
+//        if (phoneNumber != null) {
+//        	Cursor c = null;
+//            try {
+//                res = phoneNumber;
+//                ContentResolver resolver = ctx.getContentResolver();
+//                Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+//                c = resolver.query(uri, new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
+//                Log.i("TAG4", "c.getCount(): " + c.getCount()); //TODO
+//                if (c != null && c.moveToFirst()) {
+//                	do{
+//                		res = c.getString(c.getColumnIndex(CommonDataKinds.Phone.DISPLAY_NAME));
+//                		returnArray.add(res);
+//                	}
+//                	while(c.moveToNext());
+//                }
+//            } catch (Exception ex) {
+//              Log.e("ssssss", "getContactName error: Phone number = " + phoneNumber, ex);  
+//              res = null;
+//            }finally{
+//    			c.close();
+//    		}
+//        } else {
+//            res = null;
+//        }
+//        return returnArray;
+//    }
+    
+	/**
      * Tries to get the contact's display name of the specified phone number.
      * If not found, returns the argument. If there is an error or phoneNumber
      * is null, R.string.chat_call_hidden will be returned.
@@ -412,7 +476,6 @@ public class HaikuActivity extends Activity {
                 ContentResolver resolver = ctx.getContentResolver();
                 Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
                 Cursor c = resolver.query(uri, new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
-   
                 if (c != null && c.moveToFirst()) {
                     res = c.getString(c.getColumnIndex(CommonDataKinds.Phone.DISPLAY_NAME));
                     c.close();

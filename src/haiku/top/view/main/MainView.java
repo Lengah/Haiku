@@ -2,6 +2,8 @@ package haiku.top.view.main;
 
 import java.util.ArrayList;
 
+import org.w3c.dom.NameList;
+
 import android.R.xml;
 import android.content.Context;
 import android.content.Intent;
@@ -82,9 +84,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	private LinearLayout smslayout;
 	private LinearLayout pickedContactLayout;
+	private LinearLayout pickedContactNamesLayout;
 	private ImageView contactPic;
-	private TextView contactName;
 	private ConversationObjectView chosenContact;
+	private ScrollView namesScroll;
+	private LinearLayout namesScrollLayout;
+	
 	private ScrollView smsScroll;
 	private RelativeLayout smsList;
 	
@@ -95,7 +100,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private View viewBeingDragged = null;
 	
 	private ArrayList<ConversationObjectView> conversations = new ArrayList<ConversationObjectView>();
-//	private ArrayList<SMSObjectView> smsObjects = new ArrayList<SMSObjectView>(); //TODO OLD sms view
+//	private ArrayList<SMSObjectView> smsObjects = new ArrayList<SMSObjectView>(); //OLD sms view
 	private ArrayList<SMSObject> smsObjects = new ArrayList<SMSObject>();
 	private ArrayList<ThemeObjectView> themeObjects = new ArrayList<ThemeObjectView>();
 //	private int threadIDInUse; // The conversation the user is currently looking at
@@ -186,8 +191,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		smslayout = (LinearLayout)findViewById(R.id.smslayout);
 		pickedContactLayout = (LinearLayout)findViewById(R.id.pickedcontact_layout);
+		pickedContactNamesLayout = (LinearLayout)findViewById(R.id.pickedcontactnames_layout);
 		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
-		contactName = (TextView)findViewById(R.id.pickedcontactname);
+		namesScroll = (ScrollView)findViewById(R.id.scrollofnames);
+		
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
 		smsList = (RelativeLayout)findViewById(R.id.listofsms);
 		
@@ -205,6 +212,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		haikuBinViewExtended.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		
 		pickedContactLayout.setOnClickListener(this);
+		namesScroll.setOnClickListener(this);
 		haikuBinViewSmall.setOnClickListener(this);
 //		haikuBinViewExtended.setOnClickListener(this);
 		haikuBinViewExtended.setVisibility(View.GONE);
@@ -238,7 +246,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			themeObject.setOnTouchListener(this); // overrides the scroll function!
 //			height += themeObject.getHeightOfView();
 		}
-//		smsScroll.setVisibility(GONE); //TODO
+//		smsScroll.setVisibility(GONE);
 		smslayout.setVisibility(GONE);
 //		themeButton.bringToFront();
 		themeScroll.bringToFront();
@@ -272,7 +280,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //					}
 //				   if(event.getAction() == MotionEvent.ACTION_UP){
 //						if(shouldSnapBack){
-//							//TODO snapback!
 //							Log.i("TAG", "snapback!");
 //							contactScroll.post(new Runnable() { 
 //						        public void run() { 
@@ -389,19 +396,25 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		Cursor cursor = HaikuActivity.getThreads(context);
 		if (cursor.moveToFirst()) {
 			do{
-				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
-//				conversations.get(conversations.size()-1).setOnLongClickListener(this); // used for sharing instead - 18/1/2014
-				conversations.get(conversations.size()-1).setOnClickListener(this);
-				conversations.get(conversations.size()-1).setOnTouchListener(this);
+//				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
+				ConversationObjectView temp = new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")));
+				if(temp.isHaikuConversation()){
+					conversations.add(0, temp);
+				}
+				else{
+					conversations.add(temp);
+				}
+				temp.setOnClickListener(this);
+				temp.setOnTouchListener(this);
 			}
 			while(cursor.moveToNext());
 		}
-//		contactList.addView(filler); //TODO
+//		contactList.addView(filler);
 		for(int i = 0; i < conversations.size(); i++){
 			contactList.addView(conversations.get(i));
 //			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
 		}
-		contactList.addView(new View(getContext()), fillerParams); //TODO
+		contactList.addView(new View(getContext()), fillerParams);
 //		contactScroll.post(new Runnable() { 
 //	        public void run() { 
 //	        	contactScroll.scrollBy(0, fillerHeight);
@@ -435,7 +448,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //	public void setSMSView(int threadID){ 
 //		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 //		contactScroll.setVisibility(GONE);
-////		smsScroll.setVisibility(VISIBLE); // TODO
+////		smsScroll.setVisibility(VISIBLE);
 //		smslayout.setVisibility(VISIBLE);
 //		Cursor cursor = HaikuActivity.getThread(context, threadID);
 //		if(chosenContact.getPicture() != null){
@@ -494,6 +507,66 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return lookingAtHaikus;
 	}
 	
+	private boolean canEnlargeNamesList = true;
+	
+	public void updateContactNames(int threadID){
+		namesListIsEnlarged = false;
+		pickedContactNamesLayout.removeAllViews();
+		namesScroll.removeAllViews();
+		pickedContactNamesLayout.setVisibility(View.VISIBLE);
+		namesScroll.setVisibility(View.GONE);
+		if(chosenContact.getNames().size() == 1){
+			canEnlargeNamesList = false; // can not enlarge it because there is only one
+			TextView temp = new TextView(context);
+			temp.setTextColor(Color.BLACK);
+			int layoutHeight = 50;
+			int textSize = 15;
+			temp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight)));
+			temp.setTextSize(textSize);
+			temp.setGravity(Gravity.CENTER_VERTICAL);
+			temp.setText(chosenContact.getNames().get(0));
+			pickedContactNamesLayout.addView(temp);
+		}
+		else{
+			canEnlargeNamesList = true;
+			TextView temp;
+			TextView temp2;
+			int layoutHeight = 25;
+			int textSize = 15;
+			
+			int maxScrollListHeight = (int) HaikuActivity.convertDpToPixel(150);
+			namesScrollLayout = new LinearLayout(context);
+			int listHeight = Math.min(maxScrollListHeight, (int) HaikuActivity.convertDpToPixel(layoutHeight) * chosenContact.getNames().size());
+			namesScrollLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+			namesScrollLayout.setOrientation(LinearLayout.VERTICAL);
+			namesScrollLayout.setOnClickListener(this);
+			namesScroll.addView(namesScrollLayout);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,listHeight);
+			params.setMargins((int) HaikuActivity.convertDpToPixel(3), 0, 0, 0);
+			namesScroll.setLayoutParams(params);
+			
+			
+			for(String s : chosenContact.getNames()){
+				temp = new TextView(context);
+				temp.setTextColor(Color.BLACK);
+				temp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight)));
+				temp.setTextSize(textSize); // sp as default
+				temp.setGravity(Gravity.CENTER_VERTICAL);
+				temp.setText(s);
+				pickedContactNamesLayout.addView(temp);
+				
+				
+				temp2 = new TextView(context);
+				temp2.setTextColor(Color.BLACK);
+				temp2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight)));
+				temp2.setTextSize(textSize); // sp as default
+				temp2.setGravity(Gravity.CENTER_VERTICAL);
+				temp2.setText(s);
+				namesScrollLayout.addView(temp2);
+			}
+		}
+	}
+	
 	public void setSMSView(int threadID){
 		smsListTopOffset = 0;
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
@@ -505,8 +578,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		else{
 //			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
 		}
-		contactName.setText(chosenContact.getName());
-		if(chosenContact.getName().equals("Haiku")){
+//		contactName.setText(chosenContact.getName());
+		updateContactNames(threadID);
+		if(chosenContact.getNames().get(0).equals("Haiku")){
 			lookingAtHaikus = true;
 		}
 		else{
@@ -668,6 +742,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return isBinColor;
 	}
 	
+	private boolean namesListIsEnlarged = false;
+	
 	@Override
 	public void onClick(View v) {
 		if(v instanceof ConversationObjectView){
@@ -677,8 +753,18 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		else if(v.equals(haikuBinViewSmall)){
 			openBinView();
 		}
-		else if(v.equals(pickedContactLayout)){
-			closeSMSView();
+		else if((v.equals(pickedContactLayout) || v.equals(namesScroll) || v.equals(namesScrollLayout)) && canEnlargeNamesList){
+//			closeSMSView();
+			if(namesListIsEnlarged){
+				namesScroll.setVisibility(View.GONE);
+				pickedContactNamesLayout.setVisibility(View.VISIBLE);
+				namesListIsEnlarged = false;
+			}
+			else{
+				pickedContactNamesLayout.setVisibility(View.GONE);
+				namesScroll.setVisibility(View.VISIBLE);
+				namesListIsEnlarged = true;
+			}
 		}
 	}
 

@@ -1,53 +1,37 @@
 package haiku.top.view.main;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.DuplicateFormatFlagsException;
-import java.util.Random;
+import java.util.ArrayList;
 
 import haiku.top.HaikuActivity;
 import haiku.top.R;
-import haiku.top.model.Theme;
-import android.content.ContentUris;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.provider.ContactsContract;
+import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.LinearLayout.LayoutParams;
 
 public class ConversationObjectView extends LinearLayout{
 	private ImageView image;
 	private ImageView imageForeground;
-	private TextView nameView;
 	private int threadID;
-	private Cursor cursor;
-	private Context context;
-	private String name;
 	private Bitmap picture;
+	private ArrayList<String> names;
+	private ArrayList<String> addresses;
 	
-	public ConversationObjectView(Context context, int threadID, String address) {
+	public ConversationObjectView(Context context, int threadID){//, String address) {
 		super(context);
-		this.context = context;
 		this.threadID = threadID;
-		this.name = HaikuActivity.getContactName(context, address);
+		addresses = HaikuActivity.getConversationNumbers(context, threadID);
+		names = new ArrayList<String>();
+		for(int i = 0; i < addresses.size(); i++){
+			names.add(HaikuActivity.getContactName(context, addresses.get(i)));
+		}
+//		this.names = HaikuActivity.getContactName(context, address);
 		
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		layoutInflater.inflate(R.layout.item_contact,this);
@@ -57,11 +41,51 @@ public class ConversationObjectView extends LinearLayout{
 		
 		image = (ImageView)findViewById(R.id.contactPic);
 		imageForeground = (ImageView)findViewById(R.id.contact_foreground);
-		nameView = (TextView)findViewById(R.id.contactname);
+		TextView nameView1 = (TextView)findViewById(R.id.contactname1);
+		TextView nameView2 = (TextView)findViewById(R.id.contactname2);
+		TextView nameView3 = (TextView)findViewById(R.id.contactname3);
+		TextView plus = (TextView)findViewById(R.id.contactnameplus);
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
-		nameView.setText(name);
-		nameView.setTypeface(MainView.getInstance().getContactsTypeface());
+		if(names.size() == 1){
+			nameView1.setText(names.get(0));
+			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView2.setVisibility(View.GONE);
+			nameView3.setVisibility(View.GONE);
+		}
+		if(names.size() == 2){
+			nameView1.setText(names.get(0));
+			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView2.setText(names.get(1));
+			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView3.setVisibility(View.GONE);
+		}
+		if(names.size() == 3){
+			nameView1.setText(names.get(0));
+			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView2.setText(names.get(1));
+			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
+
+			nameView3.setText(names.get(2));
+			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
+		}
+		if(names.size() > 3){
+			nameView1.setText(names.get(0));
+			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView2.setText(names.get(1));
+			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
+
+			nameView3.setText(names.get(2));
+			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
+		}
+		else{
+			plus.setVisibility(View.GONE);
+		}
 		// Adobe Garamond Pro looks weird for contact names.
 //        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
 //        nameView.setTypeface(adobeGaramondProRegular);
@@ -70,8 +94,12 @@ public class ConversationObjectView extends LinearLayout{
 		int paddingLeftAndRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, getResources().getDisplayMetrics());
 		
 		setPadding(paddingLeftAndRight, paddingTopAndBottom, paddingLeftAndRight, paddingTopAndBottom);
-		
-		picture = HaikuActivity.getContactPhoto(context, name); // this method works
+		if(names.size() == 1){
+			picture = HaikuActivity.getContactPhoto(context, names.get(0)); // this method works
+		}
+		else{
+			picture = null;
+		}
 //		picture = HaikuActivity.getImage(context, name);
 //	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, threadID));
 //	    if (input != null) {
@@ -128,11 +156,15 @@ public class ConversationObjectView extends LinearLayout{
 		return threadID;
 	}
 	
-	public String getName(){
-		return name;
+	public ArrayList<String> getNames(){
+		return names;
 	}
 	
 	public Bitmap getPicture(){
 		return picture;
+	}
+	
+	public boolean isHaikuConversation(){
+		return names.size() == 1 && names.get(0).equals("Haiku");
 	}
 }

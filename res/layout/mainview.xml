@@ -47,7 +47,8 @@
    	        android:id="@+id/pickedcontact_layout"
 		    android:layout_width="match_parent"
 		    android:layout_height="wrap_content" 
-		    android:orientation="horizontal">
+		    android:orientation="horizontal"
+		    android:layout_marginRight="110dp">
 		
 		    <ImageView
 		        android:id="@+id/pickedcontactpic"
@@ -57,16 +58,22 @@
 		        android:src="@drawable/delete_by_haiku_logo"/>
 		    
 		    
-		
-		    <TextView
-		        android:id="@+id/pickedcontactname"
-		        android:text="Default Name"
-		        android:textColor="#404040"
-		        android:layout_width="match_parent"
-		        android:layout_height="match_parent"
-		        android:textSize="15sp" 
-		        android:gravity="center_vertical"
-		        android:layout_marginLeft="3dp"/>
+			<LinearLayout
+			    android:id="@+id/pickedcontactnames_layout"
+			    android:layout_width="match_parent"
+		        android:layout_height="50dp"
+		        android:orientation="vertical"
+		        android:layout_marginLeft="3dp">
+				    
+			</LinearLayout>
+			
+			<ScrollView
+		       	android:id="@+id/scrollofnames"
+		       	android:layout_width="match_parent"
+		       	android:layout_height="wrap_content"
+		       	android:layout_marginLeft="3dp">
+
+			</ScrollView>
 		
 		</LinearLayout>
    	    

@@ -25,14 +25,63 @@
 	        android:src="@drawable/contact_fg"/>
 	    
 	</RelativeLayout>
-    <TextView
-        android:id="@+id/contactname"
-        android:text="Default Name"
-        android:textColor="#404040"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textSize="15sp" 
-        android:gravity="center_vertical"
-        android:layout_marginLeft="3dp"/>
+	<RelativeLayout 
+	    android:id="@+id/contactnamesspace"
+	    android:layout_width="match_parent"
+        android:layout_height="match_parent">
+	    
+	    	<LinearLayout 
+	    	    android:layout_width="match_parent"
+	        	android:layout_height="match_parent"
+	        	android:orientation="vertical">
+	        	
+	    	    	
+	    	    	<TextView
+				        android:id="@+id/contactname1"
+				        android:text="Default Name"
+				        android:textColor="#404040"
+				        android:layout_width="match_parent"
+				        android:layout_height="wrap_content"
+				        android:layout_weight="1"
+				        android:textSize="13sp" 
+				        android:gravity="center_vertical"
+				        android:layout_marginLeft="3dp"/>
+	    	    	
+	    	    	<TextView
+				        android:id="@+id/contactname2"
+				        android:text="Default Name"
+				        android:textColor="#404040"
+				        android:layout_width="match_parent"
+				        android:layout_height="wrap_content"
+				        android:layout_weight="1"
+				        android:textSize="13sp" 
+				        android:gravity="center_vertical"
+				        android:layout_marginLeft="3dp"/>
+	    	    	
+	    	    	<TextView
+				        android:id="@+id/contactname3"
+				        android:text="Default Name"
+				        android:textColor="#404040"
+				        android:layout_width="match_parent"
+				        android:layout_height="wrap_content"
+				        android:layout_weight="1"
+				        android:textSize="13sp" 
+				        android:gravity="center_vertical"
+				        android:layout_marginLeft="3dp"/>
+	    	</LinearLayout>
+	    	<TextView
+				        android:id="@+id/contactnameplus"
+				        android:text="+"
+				        android:textColor="#404040"
+				        android:layout_width="20dp"
+				        android:layout_height="20dp"
+				        android:textSize="13sp" 
+				        android:gravity="center"
+				        android:layout_marginRight="1dp"
+				        android:layout_marginBottom="1dp"
+				        android:layout_alignParentRight="true"
+				        android:layout_alignParentBottom="true"/>
+	</RelativeLayout>
+    
 
 </LinearLayout>
