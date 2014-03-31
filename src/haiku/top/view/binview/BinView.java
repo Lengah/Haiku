@@ -655,12 +655,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		datesView.add(ymv);
 		dateList.addView(ymv);
 		ymv.setOnTouchListener(this);
+		MainView.getInstance().getSmallBinView().addDate(ym);
 	}
 	
 	public void removeDate(YearMonthView ymv){
 		dateList.removeView(ymv);
 		datesView.remove(ymv);
-		return;
+		MainView.getInstance().getSmallBinView().removeDate(ymv.getYearMonth());
 	}
 	
 	private boolean showingContactName = false;
@@ -787,6 +788,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
 		MainView.getInstance().updateSMSView();
+		MainView.getInstance().getSmallBinView().clear();
 		updateThemeView();
 	}
 	
@@ -928,6 +930,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		tob.setOnTouchListener(this);
 		stateChanged = true;
 		updateThemeView();
+		MainView.getInstance().getSmallBinView().addTheme(theme);
 	}
 	
 	public void removeTheme(ThemeObjectView tob){
@@ -936,6 +939,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		resetHaikuFinished();
 		HaikuGenerator.updateWordsUsed();
 		HaikuGenerator.createHaikus();
+		MainView.getInstance().getSmallBinView().removeTheme(tob);
 	}
 	
 	public void updateThemeView(){
@@ -945,6 +949,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		for(int i = 0; i < themesView.size(); i++){
 			themeViews.get(i).addView(themesView.get(i));
 		}
+		MainView.getInstance().getSmallBinView().updateThemeView();
 	}
 	
 	/**

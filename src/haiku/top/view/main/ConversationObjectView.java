@@ -149,6 +149,7 @@ public class ConversationObjectView extends LinearLayout{
 	public void calculateForegroundAlpha(){
 		int smsCount = HaikuActivity.getSMSCount(threadID);
 		float alpha = (float) Math.max(0, (1.0 - smsCount/FULLY_VISIBLE));
+		alpha = 0; //TODO 
 		imageForeground.setAlpha(alpha);
 	}
 	

@@ -12,6 +12,9 @@ public class Theme {
 	public Theme(long id, String name){
 		this.id = id;
 		this.name = name;
+		if(name.equalsIgnoreCase("art")){
+			this.name = "art    "; //TODO ugly solution
+		}
 	}
 	
 	public ArrayList<Long> getWordids() {

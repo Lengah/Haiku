@@ -51,12 +51,25 @@ import haiku.top.model.smshandler.ShowSMSESThread;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.ThemeObjectView;
 import haiku.top.view.binview.BinView;
+import haiku.top.view.binview.HaikuProgressBar;
 import haiku.top.view.date.DateView;
 import haiku.top.view.main.sms.SMSObject;
 
 public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
 	private static MainView mv;
 	private Context context;
+	
+	public static final int COLOR_THEME_BACKGROUND = Color.rgb(251, 206, 13); // "#FBCE0D"
+	/**
+	 * in %. The small bin view fills out the rest
+	 */
+	public static final double THEME_HEIGHT = 35.0;
+	/**
+	 * in dp
+	 */
+	public static final double RIGHT_VIEWS_WIDTH = 100;
+	private double rightViewsWidth;
+	
 	public static final int ANIMATION_TIME_BIN = 300;
 	public static final int ANIMATION_TIME_DATE = 300;
 	public static final float OPACITY_USED = (float) 0.3;
@@ -93,7 +106,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private ScrollView smsScroll;
 	private RelativeLayout smsList;
 	
-	private ImageView haikuBinViewSmall;
+	private SmallBinView haikuBinViewSmall;
 	private HaikuBinDragListener haikuBinDragListener;
 	private BinView haikuBinViewExtended;
 	
@@ -151,11 +164,29 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
 		
+		rightViewsWidth = HaikuActivity.convertDpToPixel((float) RIGHT_VIEWS_WIDTH);
+		int themeViewHeight = (int) (HaikuActivity.getInstance().getWindowHeight()*THEME_HEIGHT/100.0);
+		int smallBinViewHeight = HaikuActivity.getInstance().getWindowHeight()-themeViewHeight;
+		
+		themeScroll = new ScrollView(context);
+		themeScroll.setBackgroundColor(COLOR_THEME_BACKGROUND);
+		themeScroll.setRotation(THEME_ROTATION);
+		LayoutParams themeParams = new RelativeLayout.LayoutParams((int) rightViewsWidth, themeViewHeight);
+		themeParams.addRule(ALIGN_PARENT_RIGHT);
+		themeParams.addRule(ALIGN_PARENT_TOP);
+		
+		haikuBinViewSmall = new SmallBinView(context, (int) rightViewsWidth, smallBinViewHeight);
+		LayoutParams haikuBinViewSmallParams = new RelativeLayout.LayoutParams((int) rightViewsWidth, smallBinViewHeight);
+		haikuBinViewSmallParams.addRule(ALIGN_PARENT_RIGHT);
+		haikuBinViewSmallParams.addRule(ALIGN_PARENT_BOTTOM);
+		
+		addView(themeScroll, themeParams);
+		addView(haikuBinViewSmall, haikuBinViewSmallParams);
+		
 		ImageView yellowBackground = new ImageView(context);
 		yellowBackground.setBackgroundColor(Color.rgb(251, 206, 13));
 		
-		int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2*100, getResources().getDisplayMetrics());
-        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics());
+		int width = (int) (2*rightViewsWidth);
         
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
 	    listWidth = HaikuActivity.getInstance().getWindowWidth() - Math.round(110 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));   
@@ -172,7 +203,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
         // the distance from the themeview's xpos to the xpos at the top of the screen if you follow the angle
         int xOffset = (int) Math.sqrt(yOffset*yOffset*(1.0/(Math.cos(radiansAngle)*Math.cos(radiansAngle)) - 1));
         
-		LayoutParams fillParams = new RelativeLayout.LayoutParams(width, height);
+		LayoutParams fillParams = new RelativeLayout.LayoutParams(width, themeViewHeight);
 		fillParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 		fillParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		fillParams.setMargins(0, -yOffset, -width/2 + xOffset, 0);
@@ -197,10 +228,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
 		smsList = (RelativeLayout)findViewById(R.id.listofsms);
-		
-		themeScroll = (ScrollView)findViewById(R.id.themeview);
-		haikuBinViewSmall = (ImageView)findViewById(R.id.binview);
-		themeScroll.setRotation(THEME_ROTATION);
 		
 		haikuBinDragListener = new HaikuBinDragListener();
 		haikuBinViewSmall.setOnDragListener(haikuBinDragListener);
@@ -740,6 +767,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public boolean isBinColor(){
 		return isBinColor;
+	}
+	
+	public SmallBinView getSmallBinView(){
+		return haikuBinViewSmall;
 	}
 	
 	private boolean namesListIsEnlarged = false;

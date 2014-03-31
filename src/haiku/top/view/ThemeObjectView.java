@@ -87,6 +87,38 @@ public class ThemeObjectView extends LinearLayout{
 //		updateTextSize();
 	}
 	
+	
+	public ThemeObjectView(Context context, Theme theme, int width, int height) {
+		super(context);
+		this.context = context;
+		this.theme = theme;
+		themeText = new TextView(context);
+		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+		addView(themeText);
+		themeText.setGravity(Gravity.CENTER_VERTICAL);
+		setBackgroundColor(Color.rgb(251, 206, 13));
+	
+		themeText.setText(theme.getName());
+		themeText.setTextColor(Color.WHITE);
+		themeText.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
+		themeText.setTypeface(MainView.getInstance().getThemeTypeface());
+		
+		themeText.setPadding((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()), 0);
+		
+		String text = theme.getName();
+		Paint textPaint = themeText.getPaint();
+		Rect textRect;
+		int size = 0;  
+	    do {
+	    	size++;
+	    	textPaint.setTextSize(size);
+	        textRect = new Rect();
+	        textPaint.getTextBounds(text, 0, text.length(), textRect);
+	    } while(textPaint.measureText(text) < 4*width/5
+	    		&& textRect.height() <= 4*height/5);
+	}
+	
 //	private void updateTextSize(){
 //		int size = 0;
 //		//TODO 100 siffran är tagen från mainview.xml under theme scrollviewen. Om den ändras ska även det här värdet ändras!
