@@ -420,6 +420,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public void updateConversations(){
 		conversations.clear();
 		contactList.removeAllViews();
+		boolean haikuContactAdded = false;
 		Cursor cursor = HaikuActivity.getThreads(context);
 		if (cursor.moveToFirst()) {
 			do{
@@ -427,9 +428,15 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 				ConversationObjectView temp = new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")));
 				if(temp.isHaikuConversation()){
 					conversations.add(0, temp);
+					haikuContactAdded = true;
 				}
 				else{
-					conversations.add(temp);
+					for(int i = 0; i <= conversations.size(); i++){
+						if(!(i==0 && haikuContactAdded) && (i == conversations.size() || HaikuActivity.compareIgnoreCase(temp.getNames().get(0), conversations.get(i).getNames().get(0)) >= 0)){
+							conversations.add(i, temp);
+							break;
+						}
+					}
 				}
 				temp.setOnClickListener(this);
 				temp.setOnTouchListener(this);

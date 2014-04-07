@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class FindSentenceThread extends Thread{
 	private int syllables;
-	private ArrayList<Word> wordsUsed;
+	private ArrayList<PartOfSpeechList> wordsUsed;
 	private ArrayList<Word> backupWords; // words that are in the all theme. will only use these if it can't find one in the wordsUsed list.
 	private Random randomGenerator = new Random();
 	private Haiku haiku;
@@ -24,7 +24,7 @@ public class FindSentenceThread extends Thread{
 		this.syllables = numberOfSyllables;
 		this.haiku = haiku;
 		this.row = row;
-		wordsUsed = new ArrayList<Word>(HaikuGenerator.getWordsUsed());
+		wordsUsed = new ArrayList<PartOfSpeechList>(HaikuGenerator.getWordsUsed());
 		backupWords = new ArrayList<Word>(HaikuGenerator.getWordsUsedWithTheAllTheme());
 		themes = haiku.containsThemes();
 	}
@@ -59,10 +59,10 @@ public class FindSentenceThread extends Thread{
 	}
 	
 	private void updateWordList(ArrayList<Word> words){
-		// double all words (so that the avoid duplications has an effect
-		for(int i = words.size()-1; i >= 0; i--){
-			words.add(words.get(i));
-		}
+//		// double all words (so that the avoid duplications has an effect
+//		for(int i = words.size()-1; i >= 0; i--){
+//			words.add(words.get(i));
+//		}
 		//cue words
 		for(int i = words.size()-1; i >= 0; i--){
 			for(int a = 0; a < haiku.getCueWords().size(); a++){
@@ -373,13 +373,12 @@ public class FindSentenceThread extends Thread{
 	 * @return All words in the bin with the right part-of-speech
 	 */
 	private ArrayList<Word> getWords(String wordType){
-		ArrayList<Word> words = new ArrayList<Word>();
-		for(int i = 0; i < wordsUsed.size(); i++){
-			if(wordsUsed.get(i).getwordType().equals(wordType)){
-				words.add(wordsUsed.get(i));
+		for(PartOfSpeechList pl : wordsUsed){
+			if(wordType.equalsIgnoreCase(pl.getPartOfSpeech().getType())){
+				return new ArrayList<Word>(pl.getWords());
 			}
 		}
-		return words;
+		return new ArrayList<Word>(); //empty list
 	}
 	
 	/**
@@ -405,51 +404,51 @@ public class FindSentenceThread extends Thread{
 		return HaikuGenerator.getWords(sentence).size();
 	}
 	
-	private int countSyllables(String sentence){
-		int numberOfSyllables = 0;
-		ArrayList<String> words = HaikuGenerator.getWords(sentence);
-//		for(int i = words.size() - 1; i >= 0; i--){ //TODO 2/2/2014 den här ska nog inte vara här längre
-//			if(i > 0 && words.get(i).equals("an") && words.get(i-1).equals("a")){
-//				words.remove(i);
-//			}
-//			if(words.get(i).equals("a")){
-//				words.set(i, "a/an");
-//			}
-//		}
-		boolean found;
-		for(int i = 0; i < words.size(); i++){
-			found = false;
-			for(int a = 0; a < wordsUsed.size(); a++){
-				if(wordsUsed.get(a).getText().equals(words.get(i))){
-					numberOfSyllables += wordsUsed.get(a).getNumberOfSyllables();
-					found = true;
-					break;
-				}
-			}
-			if(found){
-				continue;
-			}
-			for(int a = 0; a < backupWords.size(); a++){
-				if(backupWords.get(a).getText().equals(words.get(i))){
-					numberOfSyllables += backupWords.get(a).getNumberOfSyllables();
-					found = true;
-					break;
-				}
-			}
-//			if(found){
-//				continue;
-//			}
-//			for(int a = 0; a < HaikuGenerator.getRulesWords().size(); a++){
-//				if(HaikuGenerator.getRulesWords().get(a).getText().equals(words.get(i))){
-//					numberOfSyllables += HaikuGenerator.getRulesWords().get(a).getNumberOfSyllables();
+//	private int countSyllables(String sentence){
+//		int numberOfSyllables = 0;
+//		ArrayList<String> words = HaikuGenerator.getWords(sentence);
+////		for(int i = words.size() - 1; i >= 0; i--){ //TODO 2/2/2014 den här ska nog inte vara här längre
+////			if(i > 0 && words.get(i).equals("an") && words.get(i-1).equals("a")){
+////				words.remove(i);
+////			}
+////			if(words.get(i).equals("a")){
+////				words.set(i, "a/an");
+////			}
+////		}
+//		boolean found;
+//		for(int i = 0; i < words.size(); i++){
+//			found = false;
+//			for(int a = 0; a < wordsUsed.size(); a++){
+//				if(wordsUsed.get(a).getText().equals(words.get(i))){
+//					numberOfSyllables += wordsUsed.get(a).getNumberOfSyllables();
 //					found = true;
 //					break;
 //				}
 //			}
-			if(!found){
-				Log.i("TAG", "ERROR: Word " + words.get(i) + " was not found!");
-			}
-		}
-		return numberOfSyllables;
-	}
+//			if(found){
+//				continue;
+//			}
+//			for(int a = 0; a < backupWords.size(); a++){
+//				if(backupWords.get(a).getText().equals(words.get(i))){
+//					numberOfSyllables += backupWords.get(a).getNumberOfSyllables();
+//					found = true;
+//					break;
+//				}
+//			}
+////			if(found){
+////				continue;
+////			}
+////			for(int a = 0; a < HaikuGenerator.getRulesWords().size(); a++){
+////				if(HaikuGenerator.getRulesWords().get(a).getText().equals(words.get(i))){
+////					numberOfSyllables += HaikuGenerator.getRulesWords().get(a).getNumberOfSyllables();
+////					found = true;
+////					break;
+////				}
+////			}
+//			if(!found){
+//				Log.i("TAG", "ERROR: Word " + words.get(i) + " was not found!");
+//			}
+//		}
+//		return numberOfSyllables;
+//	}
 }

@@ -37,7 +37,7 @@ public class HaikuGenerator {
 	private static ArrayList<YearMonthConvo> datesFromThreads = new ArrayList<YearMonthConvo>();
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 	private static Theme theAllTheme;
-	private static ArrayList<Word> smsLogWordsWithThemes = new ArrayList<Word>();
+//	private static ArrayList<Word> smsLogWordsWithThemes = new ArrayList<Word>();
 	private static ArrayList<Word> smsLogWordsWithTheAllTheme = new ArrayList<Word>();
 	private static ArrayList<Word> allSmsLogWords = new ArrayList<Word>();
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
@@ -46,7 +46,7 @@ public class HaikuGenerator {
 	private static final int NUMBER_OF_GENERATIONS = 4;
 	private static int generationsCounter;
 	
-	private static ArrayList<PartOfSpeech> allWordTypes = new ArrayList<PartOfSpeech>();
+	private static ArrayList<PartOfSpeechList> allWordsUsedWithThemesOrderedByTypes = new ArrayList<PartOfSpeechList>();
 	
 	// for example [the(1)]
 //	private static ArrayList<Word> wordsDefinedInRulesTextFile = new ArrayList<Word>();
@@ -152,12 +152,20 @@ public class HaikuGenerator {
 					allSmsLogWords.remove(a);
 				}
 			}
-			for(int a = smsLogWordsWithThemes.size() - 1; a >= 0; a--){
-				if(wordsRemoved.get(i).equals(smsLogWordsWithThemes.get(a).getText())){
-					smsLogWordsWithThemesRemoved.add(smsLogWordsWithThemes.get(a));
-					smsLogWordsWithThemes.remove(a);
+			for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+				for(int a = pl.getWords().size()-1; a >= 0; a--){
+					if(pl.getWords().get(a).getText().equalsIgnoreCase(wordsRemoved.get(i))){
+						smsLogWordsWithThemesRemoved.add(pl.getWords().get(a));
+						pl.getWords().remove(a);
+					}
 				}
 			}
+//			for(int a = smsLogWordsWithThemes.size() - 1; a >= 0; a--){
+//				if(wordsRemoved.get(i).equals(smsLogWordsWithThemes.get(a).getText())){
+//					smsLogWordsWithThemesRemoved.add(smsLogWordsWithThemes.get(a));
+//					smsLogWordsWithThemes.remove(a);
+//				}
+//			}
 			for(int a = smsLogWordsWithTheAllTheme.size() - 1; a >= 0; a--){
 				if(wordsRemoved.get(i).equals(smsLogWordsWithTheAllTheme.get(a).getText())){
 					smsLogWordsWithTheAllThemeRemoved.add(smsLogWordsWithTheAllTheme.get(a));
@@ -182,7 +190,10 @@ public class HaikuGenerator {
 		smses.clear();
 		dates.clear();
 		smsLogWordsWithTheAllTheme.clear();
-		smsLogWordsWithThemes.clear();
+		for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+			pl.getWords().clear();
+		}
+//		smsLogWordsWithThemes.clear();
 		allSmsLogWords.clear();
 		haikus.clear();
 		haikusRemovedLast.clear();
@@ -218,7 +229,8 @@ public class HaikuGenerator {
 			// The deleting process will reset and so must the words used
 			// Some words might have been deleted by updateWordsUsed()
 			allSmsLogWords.addAll(allSmsLogWordsRemoved);
-			smsLogWordsWithThemes.addAll(smsLogWordsWithThemesRemoved);
+			addWordsWithTheme(smsLogWordsWithThemesRemoved);
+//			smsLogWordsWithThemes.addAll(smsLogWordsWithThemesRemoved);
 			smsLogWordsWithTheAllTheme.addAll(smsLogWordsWithTheAllThemeRemoved);
 			allSmsLogWordsRemoved.clear();
 			smsLogWordsWithThemesRemoved.clear();
@@ -233,17 +245,49 @@ public class HaikuGenerator {
 		initNonWordsCharacters();
 	}
 	
+	private static void addWordsWithTheme(ArrayList<Word> words){
+		for(Word word : words){
+			for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+				if(word.getwordType().equalsIgnoreCase(pl.getPartOfSpeech().getType())){
+					pl.getWords().add(word);
+					break;
+				}
+			}
+		}
+	}
+	
+	private static void addWordWithTheme(Word word){
+		for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+			if(word.getwordType().equalsIgnoreCase(pl.getPartOfSpeech().getType())){
+				pl.getWords().add(word);
+				break;
+			}
+		}
+	}
+	
+	private static void removeWordsWithTheme(ArrayList<Word> words){
+		for(Word word : words){
+			for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+				pl.getWords().remove(word);
+			}
+		}
+	}
+	
 	public static PartOfSpeech getPartOfSpeechWithID(long id){
-		for(int i = 0; i < allWordTypes.size(); i++){
-			if(allWordTypes.get(i).getID() == id){
-				return allWordTypes.get(i);
+		for(int i = 0; i < allWordsUsedWithThemesOrderedByTypes.size(); i++){
+			if(allWordsUsedWithThemesOrderedByTypes.get(i).getPartOfSpeech().getID() == id){
+				return allWordsUsedWithThemesOrderedByTypes.get(i).getPartOfSpeech();
 			}
 		}
 		return null;
 	}
 	
+	
 	private static void initPartOfSpeech(){
-		allWordTypes = HaikuActivity.databaseHandler.getAllPartOfSpeeches();
+		ArrayList<PartOfSpeech> pos = HaikuActivity.databaseHandler.getAllPartOfSpeeches();
+		for(PartOfSpeech p : pos){
+			allWordsUsedWithThemesOrderedByTypes.add(new PartOfSpeechList(p));
+		}
 	}
 	
 	public static void addTheme(Theme theme){
@@ -395,12 +439,14 @@ public class HaikuGenerator {
 			smsSemaphore.acquire();
 			allSmsLogWords.addAll(sms.getWords());
 			if(themes.isEmpty()){
-				smsLogWordsWithThemes.addAll(sms.getWords());
+				addWordsWithTheme(sms.getWords());
+//				smsLogWordsWithThemes.addAll(sms.getWords());
 			}
 			else{
 				for(int i = 0; i < sms.getWords().size(); i++){
 					if(themeWordIDs.contains(sms.getWords().get(i).getID())){
-						smsLogWordsWithThemes.add(sms.getWords().get(i));
+//						smsLogWordsWithThemes.add(sms.getWords().get(i));
+						addWordWithTheme(sms.getWords().get(i));
 					}
 				}
 			}
@@ -425,7 +471,8 @@ public class HaikuGenerator {
 			e.printStackTrace();
 		}
 		allSmsLogWords.removeAll(sms.getWords());
-		smsLogWordsWithThemes.removeAll(sms.getWords());
+//		smsLogWordsWithThemes.removeAll(sms.getWords());
+		removeWordsWithTheme(sms.getWords());
 		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		smsSemaphore.release();
 	}
@@ -439,7 +486,8 @@ public class HaikuGenerator {
 			e.printStackTrace();
 		}
 		allSmsLogWords.removeAll(sms.getWords());
-		smsLogWordsWithThemes.removeAll(sms.getWords());
+//		smsLogWordsWithThemes.removeAll(sms.getWords());
+		removeWordsWithTheme(sms.getWords());
 		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		smsSemaphore.release();
 	}
@@ -752,38 +800,51 @@ public class HaikuGenerator {
 	 * @IMPORTANT The thread that calls this method MUST have the smsSemaphore!
 	 */
 	private static void updateUseWords(){
-		smsLogWordsWithThemes.clear();
+		for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+			pl.getWords().clear();
+		}
 		if(themes.isEmpty()){
-			smsLogWordsWithThemes.addAll(allSmsLogWords); // no theme(s) -> use all words
+			// no theme(s) -> use all words
+			addWordsWithTheme(allSmsLogWords);
 			return;
 		}
 		for(int i = 0; i < allSmsLogWords.size(); i++){
 			if(themeWordIDs.contains(allSmsLogWords.get(i).getID())){
-				smsLogWordsWithThemes.add(allSmsLogWords.get(i));
+				addWordWithTheme(allSmsLogWords.get(i));
 			}
 		}
+//		smsLogWordsWithThemes.clear();
+//		if(themes.isEmpty()){
+//			smsLogWordsWithThemes.addAll(allSmsLogWords); // no theme(s) -> use all words
+//			return;
+//		}
+//		for(int i = 0; i < allSmsLogWords.size(); i++){
+//			if(themeWordIDs.contains(allSmsLogWords.get(i).getID())){
+//				smsLogWordsWithThemes.add(allSmsLogWords.get(i));
+//			}
+//		}
 	}
 	
-	public static ArrayList<Word> getWordsUsed(){
-		return smsLogWordsWithThemes;
+	public static ArrayList<PartOfSpeechList> getWordsUsed(){
+		return allWordsUsedWithThemesOrderedByTypes;
 	}
 	
 	public static ArrayList<Word> getWordsUsedWithTheAllTheme(){
 		return smsLogWordsWithTheAllTheme;
 	}
 	
-	public static void printAllUsableWords(){
-		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){
-			smsLogWordsWithThemes.get(i).print("TAG2");
-		}
-		Log.i("TAG2", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
-		
-		for(int i = 0; i < smsLogWordsWithTheAllTheme.size(); i++){
-			smsLogWordsWithTheAllTheme.get(i).print("TAG2");
-		}
-		Log.i("TAG2", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
-		Log.i("TAG2", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
-	}
+//	public static void printAllUsableWords(){
+//		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){
+//			smsLogWordsWithThemes.get(i).print("TAG2");
+//		}
+//		Log.i("TAG2", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
+//		
+//		for(int i = 0; i < smsLogWordsWithTheAllTheme.size(); i++){
+//			smsLogWordsWithTheAllTheme.get(i).print("TAG2");
+//		}
+//		Log.i("TAG2", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
+//		Log.i("TAG2", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
+//	}
 	
 	/**
 	 * takes one String and divides it into smaller Strings, each with its own word

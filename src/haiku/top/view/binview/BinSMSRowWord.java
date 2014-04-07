@@ -84,7 +84,13 @@ public class BinSMSRowWord extends TextView{
 	}
 	
 	public void delete(){
-		row.delete(this);
+		ArrayList<BinSMSRowWord> wordsAbove =  row.delete(this);
+		if(wordsAbove != null){
+			for(int i = 0; i < wordsAbove.size(); i++){
+				row.wordFallingDown(wordsAbove.get(i));
+				wordsAbove.get(i).delete();
+			}
+		}
 	}
 	
 	/**

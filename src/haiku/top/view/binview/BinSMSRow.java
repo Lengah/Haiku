@@ -92,7 +92,7 @@ public class BinSMSRow extends RelativeLayout{
 		return returnWords;
 	}
 	
-	public void delete(BinSMSRowWord word){
+	public ArrayList<BinSMSRowWord> delete(BinSMSRowWord word){
 		ArrayList<BinSMSRowWord> wordsAbove = null;
 		if(rowIndex!=0){
 			float startPos = -1;
@@ -111,11 +111,12 @@ public class BinSMSRow extends RelativeLayout{
 			wordsAbove = parent.getRows().get(rowIndex-1).getWordsOverBlock(startPos, endPos);
 		}
 		removeWord(word);
-		if(wordsAbove != null){
-			for(int i = 0; i < wordsAbove.size(); i++){
-				wordFallingDown(wordsAbove.get(i));
-			}
-		}
+		return wordsAbove;
+//		if(wordsAbove != null){
+//			for(int i = 0; i < wordsAbove.size(); i++){
+//				wordFallingDown(wordsAbove.get(i));
+//			}
+//		}
 //		if(words.isEmpty()){
 //			BinView.getInstance().getBinCombinedSMSView().removeRow(this);
 //		}
@@ -132,7 +133,7 @@ public class BinSMSRow extends RelativeLayout{
 	/**
 	 * Deletes the word from its current row.
 	 * Checks if the word can fall down even further. If it can it calls this method on the row below with the same word,
-	 * if not the word it added to this row
+	 * if not the word is added to this row
 	 */
 	public void wordFallingDown(BinSMSRowWord word){
 		if(rowIndex != parent.getRows().size()-1 && parent.getRows().get(rowIndex+1).canAddWord(word)){
@@ -142,7 +143,7 @@ public class BinSMSRow extends RelativeLayout{
 			BinSMSRowWord newWord = new BinSMSRowWord(getContext(), word.getWord(), word.getStartPos(), word.getLength(), word.getRealWords(), this);
 			addWord(newWord);
 			parent.addFallingDownWord(newWord, rowIndex - word.getRow().rowIndex);
-			word.delete();
+//			word.delete();
 		}
 	}
 	

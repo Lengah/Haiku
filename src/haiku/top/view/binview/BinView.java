@@ -593,6 +593,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		return binView;
 	}
 	
+	public ScrollView getTextScroll(){
+		return textScroll;
+	}
+	
 	public void setAddingObjectDuringDeletion(View addingObjectDuringDeletion){
 		this.addingObjectDuringDeletion = addingObjectDuringDeletion;
 		this.addingObjectDuringDeletion.startDrag(null, new DragShadowBuilder(this.addingObjectDuringDeletion), null, 0);
@@ -629,16 +633,21 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			binCombinedSMSView.addSMS(smsView.get(i).getSMS());
 		}
 		stopAt = 25; //TODO
+		progressBar.setMaxProgress(0);
 		updateNumberOfWordsLeft();
 		binCombinedSMSView.init();
 	}
 	
 	public void updateNumberOfWordsLeft(){
+		Log.i("TAG4", "updateNumberOfWordsLeft");
+		float prev = numberOfWordsLeft;
 		numberOfWordsLeft = 0;
 		for(int i = 0; i < binCombinedSMSView.getRows().size(); i++){
 			numberOfWordsLeft += binCombinedSMSView.getRows().get(i).getWords().size();
 		}
-		progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
+		progressBar.setMaxProgress((int) (progressBar.getMaxProgress() + (numberOfWordsLeft-prev)));
+//		progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
+		progressBar.setProgress((int) (progressBar.getMaxProgress()-numberOfWordsLeft+stopAt));
 	}
 	
 	public BinCombinedSMS getBinCombinedSMSView(){
@@ -788,8 +797,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
 		MainView.getInstance().updateSMSView();
-		MainView.getInstance().getSmallBinView().clear();
 		updateThemeView();
+		MainView.getInstance().getSmallBinView().clear();
 	}
 	
 	public void allThreadsReady(){
@@ -1341,7 +1350,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					if(distance < oldDistance){
 						// delete
 						eventCounter++;
-						progressBar.incProgress();
+//						progressBar.incProgress();
 						if(eventCounter == eventsNeededForDelete){
 							//TODO - just a deletion marker
 							if(!deletionInProgress){
@@ -1483,7 +1492,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					else if(canUndo){
 						// undo
 						eventCounter--;
-						progressBar.decProgress();
+//						progressBar.decProgress();
 						if(eventCounter == -eventsNeededForUndo){
 							canUndo = false;
 							undoLastChange();
@@ -1495,7 +1504,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 //					Log.i("TAG", "stopAt: " + stopAt);
 //					Log.i("TAG", "progressBar.getMaxProgress(): " + progressBar.getMaxProgress());
 //					Log.i("TAG", "progress: " + ((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft)));
-					progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
+//					progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
+					if(deletionInProgress){
+						progressBar.setProgress((int) (progressBar.getMaxProgress()-numberOfWordsLeft+stopAt));
+					}
 				}
         		return true;
 			}

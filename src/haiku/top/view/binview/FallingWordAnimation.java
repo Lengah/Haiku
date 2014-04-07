@@ -68,11 +68,25 @@ public class FallingWordAnimation {
 		}
 	}
 	
+	private static int sizeY = BinView.getInstance().getHeightOfText();
+	private static int height = BinView.getInstance().getBinCombinedSMSView().getHeightOfRow();
+	
 	public void start(){
 		if(started){
 			return;
 		}
 		started = true;
+		int startRow = word.getRow().getRowIndex()-rows+1;
+		int endRow = getLastAnimation().getWord().getRow().getRowIndex() + 1;
+		int scrollY = BinView.getInstance().getTextScroll().getScrollY();
+		
+		
+		if(endRow*height < scrollY || startRow*height > scrollY+sizeY){
+			// is not in view now and will not be animated to fall into view -> don't animate it
+			setWordViewVisible();
+			finish();
+			return;
+		}
 		setMovingViewVisible();
 		
 		animation.setAnimationListener(new AnimationListener() {
@@ -126,6 +140,13 @@ public class FallingWordAnimation {
 		return rows;
 	}
 	
+	public FallingWordAnimation getLastAnimation(){
+		if(nextAnimation != null){
+			return nextAnimation.getLastAnimation();
+		}
+		return this;
+	}
+	
 	public int getRows(){
 		return (int) rows;
 	}
@@ -156,5 +177,8 @@ public class FallingWordAnimation {
 	
 	public void updateTextColor(int color){
 		movingView.setTextColor(color);
+		if(nextAnimation != null){
+			nextAnimation.updateTextColor(color);
+		}
 	}
 }

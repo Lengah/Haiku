@@ -128,7 +128,7 @@ public class SMSObject extends RelativeLayout{
 			date = sms.getDate().substring(sms.getDate().length()-2, sms.getDate().length());
 		}
 		seed = Long.parseLong("" + seed + comb + date);
-		Log.i("TAG2", "seed: " + seed);
+//		Log.i("TAG2", "seed: " + seed);
 	}
 	
 	public long getSeed(){

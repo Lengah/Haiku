@@ -7,12 +7,14 @@ import haiku.top.R;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class ConversationObjectView extends LinearLayout{
@@ -28,8 +30,15 @@ public class ConversationObjectView extends LinearLayout{
 		this.threadID = threadID;
 		addresses = HaikuActivity.getConversationNumbers(context, threadID);
 		names = new ArrayList<String>();
+		String temp;
 		for(int i = 0; i < addresses.size(); i++){
-			names.add(HaikuActivity.getContactName(context, addresses.get(i)));
+			temp = HaikuActivity.getContactName(context, addresses.get(i));
+			for(int a = 0; a <= names.size(); a++){
+				if(a == names.size() || HaikuActivity.compareIgnoreCase(names.get(a), temp) <= 0){
+					names.add(a, temp);
+					break;
+				}
+			}
 		}
 //		this.names = HaikuActivity.getContactName(context, address);
 		
@@ -38,23 +47,30 @@ public class ConversationObjectView extends LinearLayout{
 		
 		setBackgroundResource(android.R.drawable.list_selector_background);
 		
-		
+		RelativeLayout imageLayout = (RelativeLayout)findViewById(R.id.imageLayers);
 		image = (ImageView)findViewById(R.id.contactPic);
 		imageForeground = (ImageView)findViewById(R.id.contact_foreground);
 		TextView nameView1 = (TextView)findViewById(R.id.contactname1);
 		TextView nameView2 = (TextView)findViewById(R.id.contactname2);
 		TextView nameView3 = (TextView)findViewById(R.id.contactname3);
+		TextView nameView4 = (TextView)findViewById(R.id.contactname4);
+		TextView nameView5 = (TextView)findViewById(R.id.contactname5);
 		TextView plus = (TextView)findViewById(R.id.contactnameplus);
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
+		if(!isHaikuConversation()){
+			imageLayout.setVisibility(View.GONE);
+		}
 		if(names.size() == 1){
 			nameView1.setText(names.get(0));
 			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
 			
 			nameView2.setVisibility(View.GONE);
 			nameView3.setVisibility(View.GONE);
+			nameView4.setVisibility(View.GONE);
+			nameView5.setVisibility(View.GONE);
 		}
-		if(names.size() == 2){
+		else if(names.size() == 2){
 			nameView1.setText(names.get(0));
 			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
 			
@@ -62,8 +78,10 @@ public class ConversationObjectView extends LinearLayout{
 			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
 			
 			nameView3.setVisibility(View.GONE);
+			nameView4.setVisibility(View.GONE);
+			nameView5.setVisibility(View.GONE);
 		}
-		if(names.size() == 3){
+		else if(names.size() == 3){
 			nameView1.setText(names.get(0));
 			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
 			
@@ -72,8 +90,11 @@ public class ConversationObjectView extends LinearLayout{
 
 			nameView3.setText(names.get(2));
 			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView4.setVisibility(View.GONE);
+			nameView5.setVisibility(View.GONE);
 		}
-		if(names.size() > 3){
+		else if(names.size() == 4){
 			nameView1.setText(names.get(0));
 			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
 			
@@ -82,6 +103,43 @@ public class ConversationObjectView extends LinearLayout{
 
 			nameView3.setText(names.get(2));
 			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView4.setText(names.get(3));
+			nameView4.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView5.setVisibility(View.GONE);
+		}
+		else if(names.size() == 5){
+			nameView1.setText(names.get(0));
+			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView2.setText(names.get(1));
+			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
+
+			nameView3.setText(names.get(2));
+			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView4.setText(names.get(3));
+			nameView4.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView5.setText(names.get(4));
+			nameView5.setTypeface(MainView.getInstance().getContactsTypeface());
+		}
+		if(names.size() > 5){
+			nameView1.setText(names.get(0));
+			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView2.setText(names.get(1));
+			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
+
+			nameView3.setText(names.get(2));
+			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView4.setText(names.get(3));
+			nameView4.setTypeface(MainView.getInstance().getContactsTypeface());
+			
+			nameView5.setText(names.get(4));
+			nameView5.setTypeface(MainView.getInstance().getContactsTypeface());
 		}
 		else{
 			plus.setVisibility(View.GONE);
@@ -97,17 +155,17 @@ public class ConversationObjectView extends LinearLayout{
 		if(names.size() == 1){
 			picture = HaikuActivity.getContactPhoto(context, names.get(0)); // this method works
 		}
-		else{
-			picture = null;
+		if(picture == null){
+			picture = BitmapFactory.decodeResource(context.getResources(), R.drawable.contact_bg_default);
 		}
 //		picture = HaikuActivity.getImage(context, name);
 //	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, threadID));
 //	    if (input != null) {
 //	    	picture = BitmapFactory.decodeStream(input);
 		
-		if(picture != null){ //TODO
-	    	image.setImageBitmap(picture);
-		}
+//		if(picture != null){ //TODO works!!!
+//	    	image.setImageBitmap(picture);
+//		}
 		calculateForegroundAlpha();
 //		else{
 //			long id = HaikuActivity.getIDFromName(context, name);
@@ -144,12 +202,12 @@ public class ConversationObjectView extends LinearLayout{
 //		return cursor;
 //	}
 	
-	private static final double FULLY_VISIBLE = 50.0;
+	private static final double FULLY_VISIBLE = 50.0; // the number of sms needed
 	
 	public void calculateForegroundAlpha(){
-		int smsCount = HaikuActivity.getSMSCount(threadID);
-		float alpha = (float) Math.max(0, (1.0 - smsCount/FULLY_VISIBLE));
-		alpha = 0; //TODO 
+//		int smsCount = HaikuActivity.getSMSCount(threadID);
+//		float alpha = (float) Math.max(0, (1.0 - smsCount/FULLY_VISIBLE));
+		float alpha = 0; //TODO 
 		imageForeground.setAlpha(alpha);
 	}
 	

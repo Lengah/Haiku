@@ -205,6 +205,13 @@ public class BinCombinedSMS extends RelativeLayout{
 //				}
 //			}
 		}
+//		int scrollY = BinView.getInstance().getTextScroll().getScrollY();
+//		int sizeY = BinView.getInstance().getHeightOfText();
+//		
+//		if((word.getRow().getRowIndex()+1)*height < scrollY || (word.getRow().getRowIndex()+1-rows)*height > scrollY+sizeY){
+//			return; // is not in view now and will not be animated to fall into view -> don't animate it
+//		}
+		
 		TextView movingView = new TextView(context);
 		movingView.setTypeface(MainView.getInstance().getSmsBinCombinedTypeface());
 		movingView.setTextSize(TypedValue.COMPLEX_UNIT_SP, BinView.BIN_SMS_TEXT_SIZE_SP);

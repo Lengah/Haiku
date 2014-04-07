@@ -747,6 +747,34 @@ public class HaikuActivity extends Activity {
 		this.getContentResolver().delete(Uri.parse("content://sms/"), selection, selectionArg); //find and delete SMS using ID
     	Log.i("TAG", "Time to delete: " + (System.currentTimeMillis() - startTime));
 	}
+    
+	/**
+	 * Compares two Strings
+	 * @return +1 if firstString is before secondString  , 0 if firstString == secondsString and -1 if secondString is before firstString
+	 */
+	public static int compareIgnoreCase(String firstString, String secondString){
+		if(firstString.equalsIgnoreCase(secondString)){
+			return 0;
+		}
+		char[] firstStringCharArray = firstString.toLowerCase().toCharArray();
+		char[] secondStringCharArray = secondString.toLowerCase().toCharArray();
+		int i = 0;
+		while(true){
+			if(firstStringCharArray[i] < secondStringCharArray[i]){
+				return 1;
+			}
+			if(firstStringCharArray[i] > secondStringCharArray[i]){
+				return -1;
+			}
+			if(firstStringCharArray.length == i+1){
+				return 1;
+			}
+			if(secondStringCharArray.length == i+1){
+				return -1;
+			}
+			i++;
+		}
+	}
        
     public void addHaikuSMS(Haiku haiku) {
     	String name = "Haiku";
