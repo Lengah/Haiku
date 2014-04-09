@@ -28,10 +28,31 @@ public class AddSmsesThread extends Thread{
 //        	throw sqle; 
 //        }
 		DatabaseHandler.getInstance().initSMSES(smses);
+//		boolean shouldSkip;
 		for(int i = 0; i < smses.size(); i++){
-			HaikuGenerator.addSMS(smses.get(i));
+//			shouldSkip = false;
+//			for(int a = i-1; a >= 0; a--){
+//				Log.i("TAG4", "smses.get(" + a + ").getContactID(): " + smses.get(a).getContactID());
+//				Log.i("TAG4", "smses.get(" + i + ").getContactID(): " + smses.get(i).getContactID());
+//				Log.i("TAG4", "smses.get(" + a + ").getMessage().equals(smses.get(i).getMessage()) : " + smses.get(a).getMessage().equals(smses.get(i).getMessage()));
+//				Log.i("TAG4", "MainView.getInstance().getConversationObject(smses.get(" + i + ").getContactID()).getNames().size(): " + (MainView.getInstance().getConversationObject(smses.get(i).getContactID()).getNames().size()));
+//				Log.i("TAG4", "" + i + "-" + a + ": " + (i-a));
+//				if(smses.get(a).getContactID() == smses.get(i).getContactID() 
+//						&& smses.get(a).getMessage().equals(smses.get(i).getMessage()) 
+//						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()) != null
+//						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()).getNames().size() > i-a){
+//							// probably the same...
+//							shouldSkip = true;
+//							Log.i("TAG4", "shouldSkip = true");
+//							break;
+//						}
+//			}
+//			if(!shouldSkip){
+//				Log.i("TAG4", "add");
+				HaikuGenerator.addSMS(smses.get(i));
+//			}
 		}
-		Log.i("TAG", "smses Worker executed in: " + (System.currentTimeMillis() - startTime) + " ms");
+//		Log.i("TAG", "smses Worker executed in: " + (System.currentTimeMillis() - startTime) + " ms");
 		HaikuGenerator.removeThread(this);
 	}
 }

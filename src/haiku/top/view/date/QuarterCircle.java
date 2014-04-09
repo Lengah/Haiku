@@ -153,7 +153,7 @@ public class QuarterCircle extends View{
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setStyle(Paint.Style.STROKE);
         circlePaint.setColor(circleFillColor);
-//        Log.i("TAG", "circleRadius: " + circleRadius + ", drawOffset: " + drawOffset + ", circleRadius-drawOffset: " + (circleRadius-drawOffset));
+//        //Log.i("TAG", "circleRadius: " + circleRadius + ", drawOffset: " + drawOffset + ", circleRadius-drawOffset: " + (circleRadius-drawOffset));
         circlePaint.setStrokeWidth(circleRadius-drawOffset);
         circleStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circleStrokePaint.setStyle(Paint.Style.STROKE);
@@ -221,7 +221,7 @@ public class QuarterCircle extends View{
 
     @Override
     protected void onDraw(Canvas canvas) {
-//    	Log.i("TAG", "onDraw! " + text);
+//    	//Log.i("TAG", "onDraw! " + text);
     	if(circleStartAngle < -90 || circleEndAngle > 0){
     		// Out of view
     		return;
@@ -261,7 +261,7 @@ public class QuarterCircle extends View{
         	float xPos = (float)(radius*Math.cos(angle));
         	float yPos = circleRadius - (float)(radius*Math.sin(angle));
 //        	yPos = yPos - textRect.height()/2;
-//        	Log.i("TAG", text + ": " + "Offset: " + drawOffset + ", X: " + xPos + ", Y: " + yPos + ", Angle: " + (angle*180/Math.PI));
+//        	//Log.i("TAG", text + ": " + "Offset: " + drawOffset + ", X: " + xPos + ", Y: " + yPos + ", Angle: " + (angle*180/Math.PI));
         	canvas.rotate((circleEndAngle + circleStartAngle)/2, xPos, yPos);
         	
         	canvas.drawText(text, xPos, yPos, textPaint);
@@ -290,7 +290,7 @@ public class QuarterCircle extends View{
         int measuredHeight = measureHeight(heightMeasureSpec);
         setMeasuredDimension(measuredWidth, measuredHeight);
 //        setMeasuredDimension((int)(Math.max(rightTop.getXPos(), middleTop.getXPos()) - leftBottom.getXPos()), (int)(Math.max(leftTop.getYPos(), middleTop.getYPos()) - rightBottom.getYPos()));
-//        Log.i("TAG", "measuredHeight =>" + String.valueOf(measuredHeight) + "px measuredWidth => " + String.valueOf(measuredWidth) + "px");
+//        //Log.i("TAG", "measuredHeight =>" + String.valueOf(measuredHeight) + "px measuredWidth => " + String.valueOf(measuredWidth) + "px");
     }
 
     private int measureHeight(int measureSpec) {
@@ -322,8 +322,8 @@ public class QuarterCircle extends View{
     
     public boolean isPosInView(int x, int y){
     	Position pos = new Position(x, circleRadius-y);
-//    	Log.i("TAG", "X: " + pos.getXPos() + ", Y: " + pos.getYPos());
-//    	Log.i("TAG", getText() + ": " + "LB: (" + leftBottom.getXPos() + ", " + leftBottom.getYPos() + "), " +
+//    	//Log.i("TAG", "X: " + pos.getXPos() + ", Y: " + pos.getYPos());
+//    	//Log.i("TAG", getText() + ": " + "LB: (" + leftBottom.getXPos() + ", " + leftBottom.getYPos() + "), " +
 //    			"LT: (" + leftTop.getXPos() + ", " + leftTop.getYPos() + "), " +
 //    					"RB: (" + rightBottom.getXPos() + ", " + rightBottom.getYPos() + "), " +
 //    							"RT: (" + rightTop.getXPos() + ", " + rightTop.getYPos() + "), " +
@@ -333,15 +333,15 @@ public class QuarterCircle extends View{
     			&& pos.getXPos() <= Math.max(rightTop.getXPos(), middleTop.getXPos())
     			&& pos.getYPos() >= rightBottom.getYPos()
     	    	&& pos.getYPos() <= Math.max(leftTop.getYPos(), middleTop.getYPos())){
-//    		Log.i("TAG", getText());
+//    		//Log.i("TAG", getText());
     		float kRight = ((rightTop.getYPos()-rightBottom.getYPos())/(rightTop.getXPos()-rightBottom.getXPos()));
     		if(pos.getYPos() < kRight*pos.getXPos()){
-//    			Log.i("TAG", "false 1: KRight = " + kRight);
+//    			//Log.i("TAG", "false 1: KRight = " + kRight);
     			return false;
     		}
     		float kLeft = ((leftTop.getYPos()-leftBottom.getYPos())/(leftTop.getXPos()-leftBottom.getXPos()));
     		if(pos.getYPos() > kLeft*pos.getXPos() && leftTop.getXPos() > 0 && leftBottom.getXPos() > 0){
-//    			Log.i("TAG", "false 2: KLeft = " + kLeft);
+//    			//Log.i("TAG", "false 2: KLeft = " + kLeft);
     			return false;
     		}
     		return true;

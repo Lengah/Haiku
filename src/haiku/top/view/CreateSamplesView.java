@@ -278,7 +278,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 		}
 		ctx.getContentResolver().delete(Uri.parse("content://sms/"), selection, selectionArg); //find and delete SMS using ID
 //    	ctx.getContentResolver().delete(Uri.parse("content://sms/" + id), null, null); //find and delete SMS using ID
-		Log.i("TAG", "Time to delete " + ids.size() +" sms: " + (System.currentTimeMillis() - startTime));
+		//Log.i("TAG", "Time to delete " + ids.size() +" sms: " + (System.currentTimeMillis() - startTime));
 	}
     
     private class LoadTask extends AsyncTask<Void, Integer, Void> {

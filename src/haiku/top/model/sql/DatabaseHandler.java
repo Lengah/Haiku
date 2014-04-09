@@ -159,7 +159,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
      * This is done by transfering bytestream.
      * */
    private void copyDataBase() throws IOException {
-	   Log.i("TAG", "copyDataBase");
+//	   Log.i("TAG", "copyDataBase");
 	   //Open your local db as the input stream
 	   InputStream myInput = myContext.getAssets().open(DB_NAME);
 	   
@@ -212,7 +212,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
    @Override
    public synchronized void close() {   
 	   if(myDataBase != null)
-		   Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
+//		   Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
 		   myDataBase.close(); 
 	   super.close(); 
    }
@@ -288,7 +288,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 		int maxQuery = 500; // cap the query at this number. If the query is too big, the program will crash.
 		ArrayList<Word> words = new ArrayList<Word>();
 //		double startTime = System.currentTimeMillis();
-		Log.i("TAG", "getWords(): check " + texts.size() + " words");
+//		Log.i("TAG", "getWords(): check " + texts.size() + " words");
 		while(textCounter < texts.size()){
 			String selection = "";
 			selection += KEY_WORD_TEXT + " IN ( ?";
@@ -297,7 +297,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 			}
 			selection += ")";
 			String[] selectionArg = new String[Math.min(texts.size() - textCounter, maxQuery)];
-			Log.i("TAG", "getWords() inner: check " + selectionArg.length + " words");
+//			Log.i("TAG", "getWords() inner: check " + selectionArg.length + " words");
 			for(int i = 0; i < selectionArg.length; i++){
 				selectionArg[i] = texts.get(textCounter + i);
 			}

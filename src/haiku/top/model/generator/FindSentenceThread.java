@@ -98,6 +98,11 @@ public class FindSentenceThread extends Thread{
 		String firstPart = null;
 		String theRest = null;
 		if(structure.charAt(0) == '<'){
+			if(syllables == 0){
+				// no syllables left!
+//				Log.i("TAG4", "syllables == 0");
+				return null;
+			}
 			int endIndex = structure.indexOf('>');
 			firstPart = structure.substring(0, endIndex+1);
 			if(endIndex+1 != structure.length()){

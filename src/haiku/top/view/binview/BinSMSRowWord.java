@@ -30,11 +30,11 @@ public class BinSMSRowWord extends TextView{
 	
 	public BinSMSRowWord(Context context, String word, float startPos, float length, ArrayList<Word> realWords, BinSMSRow row){
 		super(context);
-//		Log.i("TAG", "add word: " + word + ", startPos: " + startPos + ", length: " + length + ", realwords: " + realWords.size());
+//		//Log.i("TAG", "add word: " + word + ", startPos: " + startPos + ", length: " + length + ", realwords: " + realWords.size());
 //		for(int i = 0; i < realWords.size(); i++){
-//			Log.i("TAG", "realWords " + (i+1) + ": " + realWords.get(i).getText());
+//			//Log.i("TAG", "realWords " + (i+1) + ": " + realWords.get(i).getText());
 //		}
-//		Log.i("TAG", "");
+//		//Log.i("TAG", "");
 		this.word = word;
 		this.startPos = startPos;
 		this.length = length;

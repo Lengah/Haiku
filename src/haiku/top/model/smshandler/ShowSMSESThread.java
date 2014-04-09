@@ -37,7 +37,7 @@ public class ShowSMSESThread extends Thread{
 		else{
 			cursor = HaikuActivity.getThread(context, threadID);
 		}
-		Log.i("TAG", "Count: " + cursor.getCount());
+//		Log.i("TAG", "Count: " + cursor.getCount());
 		int id;
 		String message;
 		String date;
@@ -54,8 +54,11 @@ public class ShowSMSESThread extends Thread{
 					continue;
 				}
 				// not in the list
-				for(int i = 0 ; i < recipients; i++){
-					unallowedIDs.add(id+i);
+				if (!type.equals("1")) {
+//			        // sent = true;
+					for(int i = 0 ; i < recipients; i++){
+						unallowedIDs.add(id+i);
+					}
 				}
 				
 				sms = new SMS(id, message, date, threadID, type);

@@ -355,6 +355,6 @@ public class BinSMSRow extends RelativeLayout{
 //		for(int i = 0; i < words.size(); i++){
 //			message += " " + words.get(i).getWord(); 
 //		}
-//		Log.i("TAG", "row " + rowIndex + ":" + message);
+//		//Log.i("TAG", "row " + rowIndex + ":" + message);
 //	}
 }

@@ -307,7 +307,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //					}
 //				   if(event.getAction() == MotionEvent.ACTION_UP){
 //						if(shouldSnapBack){
-//							Log.i("TAG", "snapback!");
+//							//Log.i("TAG", "snapback!");
 //							contactScroll.post(new Runnable() { 
 //						        public void run() { 
 //						        	contactScroll.smoothScrollTo(0, fillerHeight);
@@ -318,7 +318,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //					}
 //				   if(event.getAction() == MotionEvent.ACTION_MOVE){
 //						// Scrolling
-//						Log.i("TAG", "scrolling");
+//						//Log.i("TAG", "scrolling");
 //						if(!isScrollingPastTop && lastY < event.getY() && contactScroll.getScrollY() <= fillerHeight){
 //							isScrollingPastTop = true;
 //							shouldSnapBack = true;
@@ -328,14 +328,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //							shouldSnapBack = false;
 //						}
 //						if(isScrollingPastTop){
-//							Log.i("TAG", "custom scroll down");
+//							//Log.i("TAG", "custom scroll down");
 //							contactScroll.scrollBy(0, (int) (lastY - event.getY()));
 //							lastY = event.getY();
 //							return true;
 //						}
 //					}
 //					if(!isScrollingPastTop && contactScroll.getScrollY() < fillerHeight){
-//						Log.i("TAG", "too far!");
+//						//Log.i("TAG", "too far!");
 //						contactScroll.post(new Runnable() { 
 //					        public void run() {
 //					        	contactScroll.smoothScrollTo(0, fillerHeight);
@@ -414,6 +414,15 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return haikuBinDragListener;
 	}
 	
+	public ConversationObjectView getConversationObject(long threadID){
+		for(ConversationObjectView cov : conversations){
+			if(cov.getThreadID() == threadID){
+				return cov;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * A complete update of the conversations. Does a new database query and recreates all the conversation objects
 	 */
@@ -430,7 +439,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 					conversations.add(0, temp);
 					haikuContactAdded = true;
 				}
-				else{
+				else if(!temp.getNames().isEmpty()){
 					for(int i = 0; i <= conversations.size(); i++){
 						if(!(i==0 && haikuContactAdded) && (i == conversations.size() || HaikuActivity.compareIgnoreCase(temp.getNames().get(0), conversations.get(i).getNames().get(0)) >= 0)){
 							conversations.add(i, temp);
@@ -492,7 +501,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 ////			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
 //		}
 //		contactName.setText(chosenContact.getName());
-//		Log.i("TAG", "Count: " + cursor.getCount());
+//		//Log.i("TAG", "Count: " + cursor.getCount());
 //		if (cursor.moveToFirst()) {
 //			do{
 //				smsObjects.add(new SMSObjectView(context, cursor.getString(cursor.getColumnIndexOrThrow("type")),new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), cursor.getString(cursor.getColumnIndexOrThrow("body")), cursor.getString(cursor.getColumnIndexOrThrow("date")), threadID)));

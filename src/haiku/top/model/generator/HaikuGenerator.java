@@ -212,9 +212,9 @@ public class HaikuGenerator {
 			}
 		}
 		if(haikus.size() < size){
-			Log.i("TAG", (size - haikus.size()) + " haikus removed! " + haikus.size() + " haikus left");
+//			//Log.i("TAG", (size - haikus.size()) + " haikus removed! " + haikus.size() + " haikus left");
 			if(haikus.isEmpty()){
-				Log.i("TAG", "ERROR: No haikus left!");
+//				//Log.i("TAG", "ERROR: No haikus left!");
 			}
 		}
 	}
@@ -381,16 +381,34 @@ public class HaikuGenerator {
 	}
 	
 	public static void calculateSMSes(ArrayList<SMS> smses){
-		HaikuGenerator.smses.addAll(smses);
+		ArrayList<SMS> sms2 = new ArrayList<SMS>();
+		boolean shouldSkip;
 		for(int i = 0; i < smses.size(); i++){
-			if(!MainView.getInstance().getBinView().isDeleting()){
-				BinView.getInstance().addSMSBeforeDeletion(smses.get(i));
+			shouldSkip = false;
+			for(int a = i-1; a >= 0; a--){
+				if(smses.get(a).getContactID() == smses.get(i).getContactID() 
+						&& smses.get(a).getMessage().equals(smses.get(i).getMessage()) 
+						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()) != null
+						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()).getNames().size() > i-a){
+							// probably the same...
+							shouldSkip = true;
+							break;
+						}
 			}
-			else{
-				BinView.getInstance().addSMSDuringDeletion(smses.get(i));
+			if(!shouldSkip){
+				sms2.add(smses.get(i));
 			}
 		}
-		AddSmsesThread thread = new AddSmsesThread(smses);
+		HaikuGenerator.smses.addAll(sms2);
+		for(int i = 0; i < sms2.size(); i++){
+			if(!MainView.getInstance().getBinView().isDeleting()){
+				BinView.getInstance().addSMSBeforeDeletion(sms2.get(i));
+			}
+			else{
+				BinView.getInstance().addSMSDuringDeletion(sms2.get(i));
+			}
+		}
+		AddSmsesThread thread = new AddSmsesThread(sms2);
 		addThread(thread);
 		thread.start();
 	}
@@ -706,7 +724,7 @@ public class HaikuGenerator {
 		if(update){
 			MainView.getInstance().updateConversationsVisibility();
 		}
-		Log.i("TAG", "Time to check if whole conversations were added: " + (System.currentTimeMillis() - startTime) + " ms");
+//		//Log.i("TAG", "Time to check if whole conversations were added: " + (System.currentTimeMillis() - startTime) + " ms");
 	}
 	
 	public static ArrayList<YearMonth> getDates(){
@@ -767,7 +785,7 @@ public class HaikuGenerator {
 			haikus.add(new Haiku(!themes.isEmpty()));
 		}
 		else if(createdHaikusCounter == NUMBER_OF_GENERATIONS){
-			Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
+//			//Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
 			BinView.getInstance().allHaikusAreGenerated();
 		}
 	}
@@ -837,13 +855,13 @@ public class HaikuGenerator {
 //		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){
 //			smsLogWordsWithThemes.get(i).print("TAG2");
 //		}
-//		Log.i("TAG2", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
+//		//Log.i("TAG2", "Number of usable words with selected themes: " + smsLogWordsWithThemes.size());
 //		
 //		for(int i = 0; i < smsLogWordsWithTheAllTheme.size(); i++){
 //			smsLogWordsWithTheAllTheme.get(i).print("TAG2");
 //		}
-//		Log.i("TAG2", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
-//		Log.i("TAG2", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
+//		//Log.i("TAG2", "Total number of usable words with the all theme: " + smsLogWordsWithTheAllTheme.size());
+//		//Log.i("TAG2", "Total number of usable words: " + (smsLogWordsWithThemes.size() + smsLogWordsWithTheAllTheme.size()));
 //	}
 	
 	/**
@@ -904,9 +922,9 @@ public class HaikuGenerator {
 				break;
 			}
 		}
-//		Log.i("TAG2", "sentence: " + sentence);
+//		//Log.i("TAG2", "sentence: " + sentence);
 //		for(int i = 0; i < notRealWords.size(); i++){
-//			Log.i("TAG2", notRealWords.get(i));
+//			//Log.i("TAG2", notRealWords.get(i));
 //		}
 		return notRealWords;
 	}

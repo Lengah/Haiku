@@ -113,8 +113,8 @@ public class Haiku {
 	public void updateHaikuFinished(){
 		haikuFinished = (row1 != null && row2 != null && row3 != null);
 		if(haikuFinished){
-			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
-			print();
+//			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
+//			print();
 			initWordsUsed();
 			if(!row1.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL")){
 				BinView.getInstance().haikuIsFinished();

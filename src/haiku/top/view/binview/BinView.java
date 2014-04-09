@@ -639,7 +639,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void updateNumberOfWordsLeft(){
-		Log.i("TAG4", "updateNumberOfWordsLeft");
 		float prev = numberOfWordsLeft;
 		numberOfWordsLeft = 0;
 		for(int i = 0; i < binCombinedSMSView.getRows().size(); i++){
@@ -1132,9 +1131,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
 	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
-//	    Log.i("TAG", "haikuWidth: " + haikuWidth);
-//	    Log.i("TAG", "first width: " + textPaint.measureText(text));
-//	    Log.i("TAG", "second width: " + textRect.width());
+//	    //Log.i("TAG", "haikuWidth: " + haikuWidth);
+//	    //Log.i("TAG", "first width: " + textPaint.measureText(text));
+//	    //Log.i("TAG", "second width: " + textRect.width());
 	    
 	    text = (String) row2.getText();
 		textPaint = row2.getPaint(); 
@@ -1254,7 +1253,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public void allHaikusAreGenerated(){
 		if(!haikuFinished){
-			Log.i("TAG", "No haiku found!");
+			//Log.i("TAG", "No haiku found!");
 			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
 		        @Override
 		        public void run(){
@@ -1313,7 +1312,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			}
 		}
 		
-//		Log.i("TAG", "" + event.getPointerCount());
+//		//Log.i("TAG", "" + event.getPointerCount());
 		
 		if(event.getAction() == MotionEvent.ACTION_DOWN){
 			oldDistance = -1;
@@ -1359,7 +1358,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 								return true;
 							}
 							numberOfWordsLeft -= lastChanged.size();
-//							Log.i("TAG", "(delete) lastChanged.size(): " + lastChanged.size());
+//							//Log.i("TAG", "(delete) lastChanged.size(): " + lastChanged.size());
 							binCombinedSMSView.delete(lastChanged);
 //							ArrayList<BinSMSRowWord> lastChangedTemp = new ArrayList<BinSMSRowWord>();
 //							for(int i = 0; i < lastChanged.size(); i++){
@@ -1418,7 +1417,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 								if(temps.isEmpty()){
 									// no checks has to be made
 									// can remove it
-//									Log.i("TAG", "remove " + tempWords.get(t).getWord());
+//									//Log.i("TAG", "remove " + tempWords.get(t).getWord());
 									tempWords.get(t).setRemovedNext();
 									if(!lastChanged.contains(tempWords.get(t))){
 										lastChanged.add(tempWords.get(t));
@@ -1434,7 +1433,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 											if(wordsUsed.get(a).getWord().equals(temp)){
 												if(wordsUsed.get(a).getNumberOf() == 1){
 													// can not remove this word
-//													Log.i("TAG", "don't remove " + tempWords.get(t).getWord());
+//													//Log.i("TAG", "don't remove " + tempWords.get(t).getWord());
 													tempWords.get(t).undo(); // The object might have been set to be removed earlier
 													tempWords.remove(t);
 													removed = true;
@@ -1447,7 +1446,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 														lastChanged.add(tempWords.get(t));
 													}
 													tempWords.get(t).setRemovedNext();
-//													Log.i("TAG", "remove " + tempWords.get(t).getWord());
+//													//Log.i("TAG", "remove " + tempWords.get(t).getWord());
 												}
 												break;
 											}
@@ -1455,7 +1454,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 									}
 									else{
 										// can remove it
-//										Log.i("TAG", "remove " + tempWords.get(t).getWord());
+//										//Log.i("TAG", "remove " + tempWords.get(t).getWord());
 										tempWords.get(t).setRemovedNext();
 										if(!lastChanged.contains(tempWords.get(t))){
 											lastChanged.add(tempWords.get(t));
@@ -1500,10 +1499,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						}
 					}
 					oldDistance = distance;
-//					Log.i("TAG", "numberOfWordsLeft: " + numberOfWordsLeft);
-//					Log.i("TAG", "stopAt: " + stopAt);
-//					Log.i("TAG", "progressBar.getMaxProgress(): " + progressBar.getMaxProgress());
-//					Log.i("TAG", "progress: " + ((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft)));
+//					//Log.i("TAG", "numberOfWordsLeft: " + numberOfWordsLeft);
+//					//Log.i("TAG", "stopAt: " + stopAt);
+//					//Log.i("TAG", "progressBar.getMaxProgress(): " + progressBar.getMaxProgress());
+//					//Log.i("TAG", "progress: " + ((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft)));
 //					progressBar.setProgress((int)(progressBar.getMaxProgress()*stopAt/numberOfWordsLeft));
 					if(deletionInProgress){
 						progressBar.setProgress((int) (progressBar.getMaxProgress()-numberOfWordsLeft+stopAt));

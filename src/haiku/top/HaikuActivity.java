@@ -131,7 +131,7 @@ public class HaikuActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         if (databaseHandler != null) {
-        	Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
+        	//Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
         	databaseHandler.close();
         }
     }
@@ -244,31 +244,31 @@ public class HaikuActivity extends Activity {
         //----------------------------------------------------------------------------------------------------------------------
        	 //test database
 /*       	 if (databaseHandler.getWord("upplands-väsb") != null) 
-           	 Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
+           	 //Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
        	 else
-       		 Log.i("test", "upplands-väsb not found in dictionary"); //this happens
+       		 //Log.i("test", "upplands-väsb not found in dictionary"); //this happens
        	 
        	 if (databaseHandler.getWord("upplands-väsby") != null)
-           	 Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
+           	 //Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
        	 else
-       		 Log.i("test", "upplands-väsby not found in dictionary");
+       		 //Log.i("test", "upplands-väsby not found in dictionary");
        	 
        	 if (databaseHandler.getWord("asks") != null)
        	 {
-       		Log.i("test", "partofspeech in word \"asks\":");
+       		//Log.i("test", "partofspeech in word \"asks\":");
            	ArrayList<String> wordtypes = new ArrayList<String>(databaseHandler.getWord("asks").getwordTypes()); //get partofspeechs from a word
            	for (String s : wordtypes)
-           		Log.i("test", s);
+           		//Log.i("test", s);
        	 }
        	 	 
           	ArrayList<String> wordsids = databaseHandler.getWordsInSMS("2327");
-          	Log.i("wordinsms", wordsids.size() + "");
+          	//Log.i("wordinsms", wordsids.size() + "");
           	for (String id : wordsids)
-          		Log.i("wordsinsms", databaseHandler.getWordTextFromID(id));
+          		//Log.i("wordsinsms", databaseHandler.getWordTextFromID(id));
           	
           	ArrayList<Theme> themes = databaseHandler.getAllThemes();
           	for (Theme t : themes)
-          		Log.i("themes", t.getName());
+          		//Log.i("themes", t.getName());
           	 
    //----------------------------------------------------------------------------------------------------------------------	
         */
@@ -420,9 +420,13 @@ public class HaikuActivity extends Activity {
 
 	    if(mycursor.moveToFirst()){
             for(int i=0;i<mycursor.getCount();i++){
-            	String address = mycursor.getString(mycursor.getColumnIndexOrThrow("address")).toString();
-            	if(!numbers.contains(address)){
-            		numbers.add(address);
+            	try{
+	            	String address = mycursor.getString(mycursor.getColumnIndexOrThrow("address")).toString();
+	            	if(!numbers.contains(address)){
+	            		numbers.add(address);
+	            	}
+            	}catch(NullPointerException e){
+            		// address column can't be found
             	}
                 mycursor.moveToNext();
             }
@@ -442,7 +446,7 @@ public class HaikuActivity extends Activity {
 //                ContentResolver resolver = ctx.getContentResolver();
 //                Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
 //                c = resolver.query(uri, new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
-//                Log.i("TAG4", "c.getCount(): " + c.getCount()); //TODO
+//                //Log.i("TAG4", "c.getCount(): " + c.getCount()); //TODO
 //                if (c != null && c.moveToFirst()) {
 //                	do{
 //                		res = c.getString(c.getColumnIndex(CommonDataKinds.Phone.DISPLAY_NAME));
@@ -491,7 +495,7 @@ public class HaikuActivity extends Activity {
     }
     
     public static Bitmap getContactPhoto(Context ctx, String displayName){
-//    	Log.i("TAG", "get profile picture from contact: " + displayName);
+//    	//Log.i("TAG", "get profile picture from contact: " + displayName);
     	String[] projection = new String[] {
                 ContactsContract.Contacts.PHOTO_ID,
     			ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
@@ -513,7 +517,7 @@ public class HaikuActivity extends Activity {
 		        input = ContactsContract.Contacts.openContactPhotoInputStream(cr, uri);
 	       }
 	       if (input != null) {
-//	    	   Log.i("TAG","Got pic from contact (contact_id): " + displayName);
+//	    	   //Log.i("TAG","Got pic from contact (contact_id): " + displayName);
 	           return BitmapFactory.decodeStream(input);
 	       }
 	//        long photo_id = cursor.getLong(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.PHOTO_ID));
@@ -543,7 +547,7 @@ public class HaikuActivity extends Activity {
 	           try {
 	               if (c.moveToFirst()){
 	            	   photoBytes = c.getBlob(0);
-	//            	   Log.i("TAG", "photobytes! " + (photoBytes==null));
+	//            	   //Log.i("TAG", "photobytes! " + (photoBytes==null));
 	               }
 	           } catch (Exception e) {
 	               e.printStackTrace();
@@ -551,7 +555,7 @@ public class HaikuActivity extends Activity {
 	               c.close();
 	           }
 	           if (photoBytes != null){
-//	        	   Log.i("TAG","Got pic from contact (photo id): " + displayName);
+//	        	   //Log.i("TAG","Got pic from contact (photo id): " + displayName);
 	        	   return BitmapFactory.decodeByteArray(photoBytes,0,photoBytes.length);
 	           }
 	       }
@@ -561,10 +565,10 @@ public class HaikuActivity extends Activity {
 	        if (contactsCursor.moveToFirst()){
 	        	photoBytes = contactsCursor.getBlob(contactsCursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO));
 	//            	photoBytes = c.getBlob(0);
-	//            	Log.i("TAG", "photobytes! " + (photoBytes==null));
+	//            	//Log.i("TAG", "photobytes! " + (photoBytes==null));
 	        }
 	        if (photoBytes != null){
-//	        	Log.i("TAG","Got pic from contact (photo): " + displayName);
+//	        	//Log.i("TAG","Got pic from contact (photo): " + displayName);
 	            return BitmapFactory.decodeByteArray(photoBytes,0,photoBytes.length);
 	        }
 	        
@@ -581,7 +585,7 @@ public class HaikuActivity extends Activity {
 //	                return BitmapFactory.decodeStream(input);
 //	            }
 //	        }
-	//      Log.i("TAG","Failed to get pic from contact: " + displayName);
+	//      //Log.i("TAG","Failed to get pic from contact: " + displayName);
 	        return null;
        }finally{
     	   contactsCursor.close();    	   
@@ -745,7 +749,7 @@ public class HaikuActivity extends Activity {
 			selectionArg[i] = "" + sms.get(i).getID();
 		}
 		this.getContentResolver().delete(Uri.parse("content://sms/"), selection, selectionArg); //find and delete SMS using ID
-    	Log.i("TAG", "Time to delete: " + (System.currentTimeMillis() - startTime));
+    	//Log.i("TAG", "Time to delete: " + (System.currentTimeMillis() - startTime));
 	}
     
 	/**

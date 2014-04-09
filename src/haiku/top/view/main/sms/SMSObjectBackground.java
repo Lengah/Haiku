@@ -53,10 +53,10 @@ public class SMSObjectBackground extends View{
 		ArrayList<Position> allPositionsClockwise = generate();
 		
 		path.moveTo(allPositionsClockwise.get(0).getXPos(), allPositionsClockwise.get(0).getYPos());
-//		Log.i("TAG", "(x0, y0):  (" + generatedPositions.get(0).getXPos() + ", " +generatedPositions.get(0).getYPos() + ")");
+//		//Log.i("TAG", "(x0, y0):  (" + generatedPositions.get(0).getXPos() + ", " +generatedPositions.get(0).getYPos() + ")");
 		for(int i = 1; i < allPositionsClockwise.size(); i++){
 			path.lineTo(allPositionsClockwise.get(i).getXPos(), allPositionsClockwise.get(i).getYPos());
-//			Log.i("TAG", "(x" + i + ", y + " + i +"):  (" + generatedPositions.get(i).getXPos() + ", " +generatedPositions.get(i).getYPos() + ")");
+//			//Log.i("TAG", "(x" + i + ", y + " + i +"):  (" + generatedPositions.get(i).getXPos() + ", " +generatedPositions.get(i).getYPos() + ")");
 		}
 		path.close();
 	}
@@ -1301,9 +1301,9 @@ public class SMSObjectBackground extends View{
 		sorted.addAll(bottomSorted);
 		sorted.addAll(bottomLeftCornerSorted);
 		sorted.addAll(leftSorted);
-//		Log.i("TAG", "sort output: " + sorted.size());
+//		//Log.i("TAG", "sort output: " + sorted.size());
 //		for(int i = 0; i < sorted.size(); i++){
-//			Log.i("TAG", "     " + i + ": (" + sorted.get(i).getXPos() + ", " + sorted.get(i).getYPos() + ")");
+//			//Log.i("TAG", "     " + i + ": (" + sorted.get(i).getXPos() + ", " + sorted.get(i).getYPos() + ")");
 //		}
 		return sorted;
 	}
@@ -1594,7 +1594,7 @@ public class SMSObjectBackground extends View{
 			}
 			y = lastY - random.nextInt(rY);
 			if(y < minY){
-				Log.i("TAG", "y:" + y);
+				//Log.i("TAG", "y:" + y);
 				y = minY;
 			}
 			if(y > maxY){
@@ -1630,7 +1630,7 @@ public class SMSObjectBackground extends View{
 	
 	@Override
   protected void onDraw(Canvas canvas) {
-//		Log.i("TAG", "onDraw! " + (bottomPath != null));
+//		//Log.i("TAG", "onDraw! " + (bottomPath != null));
 		canvas.drawPath(path, paint);
 	}
 

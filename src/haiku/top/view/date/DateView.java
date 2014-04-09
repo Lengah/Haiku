@@ -51,7 +51,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 
 		addView(yearView);
 		for(int i = 0; i < MONTHS_NAME.length; i++){
-//			Log.i("TAG", "Start: " + (-90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH) + ", End: " + (-90 + SIZE_OF_MONTH*i));
+//			//Log.i("TAG", "Start: " + (-90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH) + ", End: " + (-90 + SIZE_OF_MONTH*i));
 //			months.add(new QuarterCircle(context, MONTHS_NAME[i], 180, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, yearView.getRadius()*SIZE_FACTOR));
 			months.add(new QuarterCircle(context, MONTHS_NAME[i], TOTAL_SIZE, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
 			months.get(i).setVisibility(GONE);
@@ -260,7 +260,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //			if(flinging){ // if the user presses down, the flinging will stop TODO fling code
 //				a.cancel();
 //			}
-//			Log.i("TAG", "ACTION_DOWN");
+//			//Log.i("TAG", "ACTION_DOWN");
 			isScrolling = false;
 			startX = eventX;
 			startY = eventY;
@@ -268,7 +268,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			pressedDownOn = null;
 			for(int i = 0; i < months.size(); i++){
 				if(months.get(i).isPosInView(startX, startY)){
-//					Log.i("TAG", months.get(i).getText() + " pressed");
+//					//Log.i("TAG", months.get(i).getText() + " pressed");
 					pressedDownOn = months.get(i);
 					return true;
 				}
@@ -276,15 +276,15 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			pressedDownOn = yearView;
 			return true;
 //			if(v.equals(yearView)){
-//				Log.i("TAG", "yearView pressed");
+//				//Log.i("TAG", "yearView pressed");
 //				pressedDownOn = yearView;
 //				return false;
 //			}
 		}
 		if(event.getAction() == MotionEvent.ACTION_UP){
-//			Log.i("TAG", "ACTION_UP");
+//			//Log.i("TAG", "ACTION_UP");
 			if(!isScrolling && MainView.CLICK_TIME > System.currentTimeMillis()-startTime){
-//				Log.i("TAG", "dateView clicked");
+//				//Log.i("TAG", "dateView clicked");
 				if(dateViewClosed){
 					openDateView();
 				}
@@ -313,7 +313,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			return false;
 		}
 		if(event.getAction() == MotionEvent.ACTION_MOVE){
-//			Log.i("TAG", "ACTION_MOVE");
+//			//Log.i("TAG", "ACTION_MOVE");
 			if(isScrolling){
 				// check that it is still in bounds
 				boolean inBounds = false;
@@ -337,13 +337,13 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 				
 				int angleChange = oldAngle-newAngle;
 				
-//				Log.i("TAG", "eventOld: (" + scrollXOld +", " + scrollYOld +"), eventNew: (" + scrollXNew + ", " + scrollYNew + ")");
-//				Log.i("TAG", "Old: " + oldAngle + ", new: " + newAngle +", change: " + angleChange);
+//				//Log.i("TAG", "eventOld: (" + scrollXOld +", " + scrollYOld +"), eventNew: (" + scrollXNew + ", " + scrollYNew + ")");
+//				//Log.i("TAG", "Old: " + oldAngle + ", new: " + newAngle +", change: " + angleChange);
 				
 				// Fling  TODO fling code
 //				double timeDiff = System.currentTimeMillis() - oldTime;
 //				// as soon as the speed is less than the minimum, then the fling is reset
-////				Log.i("TAG", "speed: " + Math.abs(((double)angleChange)/timeDiff)*1000);
+////				//Log.i("TAG", "speed: " + Math.abs(((double)angleChange)/timeDiff)*1000);
 //				if(Math.abs(((double)angleChange)/timeDiff*1000) < FLING_MIN_SPEED){
 //					flingTime = 0;
 //					flingDistance = 0;
@@ -367,7 +367,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //						oldTime = System.currentTimeMillis();
 //					}
 //				}
-//				Log.i("TAG", "fling time: " + flingTime);
+//				//Log.i("TAG", "fling time: " + flingTime);
 				
 				if(angleChange == 0){
 					return true;
@@ -400,7 +400,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			if(pressedDownOn == yearView){
 				if(distance > MainView.MOVE_TO_DRAG_RANGE && pressedDownOn.getAlpha() != MainView.OPACITY_USED_DATE){
 					// The angle doesn't matter here
-//					Log.i("TAG", "Start touch drag " + ((QuarterCircle)pressedDownOn).getText());
+//					//Log.i("TAG", "Start touch drag " + ((QuarterCircle)pressedDownOn).getText());
 					MainView.getInstance().setDraggedView(pressedDownOn);
 					v.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);
 					return true;
@@ -409,7 +409,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 			else if(pressedDownOn instanceof QuarterCircle){
 				// a month
 				if(distance > MainView.MOVE_TO_DRAG_RANGE){
-//					Log.i("TAG", "Drag range!");
+//					//Log.i("TAG", "Drag range!");
 					int startYTurned = ((QuarterCircle)pressedDownOn).getRadius() - startY; // easier to think this way ( (0, 0) is now in the bottom left instead of the top left)
 					int eventYTurned = ((QuarterCircle)pressedDownOn).getRadius() - eventY;
 					
@@ -434,7 +434,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 							/Math.sqrt((eventX-startX)*(eventX-startX)
 							+ (eventYTurned-startYTurned)*(eventYTurned-startYTurned)))*180/Math.PI);
 					
-//					Log.i("TAG", "1: Angle: " + angle + ", Min: " + minAngle + ", Max: " + maxAngle);
+//					//Log.i("TAG", "1: Angle: " + angle + ", Min: " + minAngle + ", Max: " + maxAngle);
 					
 					if(pressedDownOn.getLeftTop().getXPos() < startX){
 						// maxAngle is bigger than 90 degrees. Mirror it on the y-axis
@@ -455,13 +455,13 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 						angle = -angle;
 					}
 					
-//					Log.i("TAG", "2: Angle: " + angle + ", Min: " + minAngle + ", Max: " + maxAngle);
+//					//Log.i("TAG", "2: Angle: " + angle + ", Min: " + minAngle + ", Max: " + maxAngle);
 					if(!(pressedDownOn.getLeftTop().getYPos() < startYTurned // annoying to calculate and probably doesn't matter
 							|| pressedDownOn.getRightTop().getXPos() < startX
 							|| (eventX < startX && eventYTurned < startYTurned))){
-//						Log.i("TAG", "In range?");
+//						//Log.i("TAG", "In range?");
 						if(minAngle < angle	&& maxAngle > angle){
-//							Log.i("TAG", "Start touch drag " + ((QuarterCircle)pressedDownOn).getText());
+//							//Log.i("TAG", "Start touch drag " + ((QuarterCircle)pressedDownOn).getText());
 							// if the whole month isn't shown, scroll so it is
 							int angleChange = 0;
 							if(pressedDownOn.getStartAngle() > 0){
@@ -488,7 +488,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 					}
 					
 					// Scroll start
-//					Log.i("TAG", "Start scroll!");
+//					//Log.i("TAG", "Start scroll!");
 					isScrolling = true;
 					scrollXNew = eventX;
 					scrollYNew = eventYTurned;
@@ -503,7 +503,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	private boolean hasUpdated = false;
 	
 	public void animateScroll(final int angleChange){
-//		Log.i("TAG", "ANIMATE SCROLL!! " + angleChange);
+//		//Log.i("TAG", "ANIMATE SCROLL!! " + angleChange);
 		scrolledSoFar = 0;
 		scrolling = true;
 		hasUpdated = false;
@@ -511,8 +511,8 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
             @Override
             protected void applyTransformation(float interpolatedTime, Transformation t) {
             	int changeAngle = (int) (angleChange*interpolatedTime) - scrolledSoFar;
-//            	Log.i("TAG", "(int) (angleChange*interpolatedTime): " + (int) (angleChange*interpolatedTime));
-//            	Log.i("TAG", "Angle: " + changeAngle + ", intertime: " + interpolatedTime + ", angleChange: " + angleChange + ", SoFar: "+ scrolledSoFar);
+//            	//Log.i("TAG", "(int) (angleChange*interpolatedTime): " + (int) (angleChange*interpolatedTime));
+//            	//Log.i("TAG", "Angle: " + changeAngle + ", intertime: " + interpolatedTime + ", angleChange: " + angleChange + ", SoFar: "+ scrolledSoFar);
             	scrolledSoFar += changeAngle;
             	// If the months from the previous/next year are no longer shown, all months are updated.
             	if(!hasUpdated && angleChange < 0){
@@ -620,10 +620,10 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //		long animationTime = Math.abs((long) (1/(FLING_SPEED/angleChange)*1000));
 //		scrolledSoFar = 0;
 //		flinging = true;
-//		Log.i("TAG", "AngleOffset: " + angleOffset);
-//		Log.i("TAG", "total time: " + flingTime + ", total distance: " + flingDistance);
-//		Log.i("TAG", "Fling! " + "distance: " + angleChange + ", time: " + animationTime);
-//		Log.i("TAG", " ");
+//		//Log.i("TAG", "AngleOffset: " + angleOffset);
+//		//Log.i("TAG", "total time: " + flingTime + ", total distance: " + flingDistance);
+//		//Log.i("TAG", "Fling! " + "distance: " + angleChange + ", time: " + animationTime);
+//		//Log.i("TAG", " ");
 //		a = new Animation(){
 //            @Override
 //            protected void applyTransformation(float interpolatedTime, Transformation t) {
@@ -660,7 +660,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 
 //	@Override
 //	public boolean onLongClick(View v) {
-//		Log.i("TAG", "OnLongClick, " + (pressedDownOn==null));
+//		//Log.i("TAG", "OnLongClick, " + (pressedDownOn==null));
 //		if(pressedDownOn == null || isScrolling){
 //			return false;
 //		}
@@ -668,7 +668,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //			// The view is already in the bin
 //			return false;
 //		}
-//		Log.i("TAG", "Start drag " + ((QuarterCircle)pressedDownOn).getText());
+//		//Log.i("TAG", "Start drag " + ((QuarterCircle)pressedDownOn).getText());
 //		if(v.equals(yearView)){
 //			MainView.getInstance().setDraggedView(pressedDownOn);
 //			v.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);

@@ -298,7 +298,7 @@ public class BinCombinedSMS extends RelativeLayout{
 		for(BinSMSRowWord word : wordsDeletedLast){
 			wordDeleted(word);
 		}
-//		Log.i("TAG", "Animations: " + animations.size());
+//		//Log.i("TAG", "Animations: " + animations.size());
 		for(int i = 0; i < animations.size(); i++){
 			animations.get(i).start();
 		}
@@ -338,7 +338,7 @@ public class BinCombinedSMS extends RelativeLayout{
 	
 	public ArrayList<BinSMSRowWord> setToBeDeleted(){
 		ArrayList<BinSMSRowWord> wordsToDelete = new ArrayList<BinSMSRowWord>();
-//		Log.i("TAG", "rows.size(): " + rows.size());
+//		//Log.i("TAG", "rows.size(): " + rows.size());
 		for(int i = 0; i < rows.size(); i++){
 			wordsToDelete.addAll(rows.get(i).setToBeDeleted());
 		}
@@ -414,12 +414,12 @@ public class BinCombinedSMS extends RelativeLayout{
 	}
 	
 	public int availablePosition(int row, int xPos){
-//		Log.i("TAG", "check row: " + row);
+//		//Log.i("TAG", "check row: " + row);
 		for(int i = 0; i < rows.get(row).getWords().size(); i++){
 			if(rows.get(row).getWords().get(i).getStartPos() <= xPos
 					&& rows.get(row).getWords().get(i).getStartPos() + rows.get(row).getWords().get(i).getLength() > xPos){
 				// on a word -> change the xPos so it points on the end of the word
-//				Log.i("TAG", "holding over word: " + rows.get(row).getWords().get(i).getWord());
+//				//Log.i("TAG", "holding over word: " + rows.get(row).getWords().get(i).getWord());
 				return (int) (rows.get(row).getWords().get(i).getStartPos() + rows.get(row).getWords().get(i).getLength());
 			}
 		}
@@ -487,11 +487,11 @@ public class BinCombinedSMS extends RelativeLayout{
 	
 	public void addSMS(SMS sms){
 		//TEST
-//		Log.i("TAG4", "SMS words");
+//		//Log.i("TAG4", "SMS words");
 //		for(int i = 0; i < sms.getWords().size(); i++){
-//			Log.i("TAG4", "'" + sms.getWords().get(i).getText() + "', " + sms.getWords().get(i).getwordType());
+//			//Log.i("TAG4", "'" + sms.getWords().get(i).getText() + "', " + sms.getWords().get(i).getwordType());
 //		}
-//		Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
 //		ArrayList<Word> testForPrint = new ArrayList<Word>();
 		// /TEST
 		float spaceLeft;
@@ -538,12 +538,12 @@ public class BinCombinedSMS extends RelativeLayout{
 //			testForPrint.addAll(realWordsInBlock);
 			rows.get(rows.size()-1).addWord(new BinSMSRowWord(context, temp, rows.get(rows.size()-1).getCurrentOffset() + offset, length, realWordsInBlock, rows.get(rows.size()-1)));
 		}
-//		Log.i("TAG4", "Words found");
+//		//Log.i("TAG4", "Words found");
 //		for(int i = 0; i < testForPrint.size(); i++){
-//			Log.i("TAG4", "'" + testForPrint.get(i).getText() + "', " + testForPrint.get(i).getwordType());
+//			//Log.i("TAG4", "'" + testForPrint.get(i).getText() + "', " + testForPrint.get(i).getwordType());
 //		}
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "Words not found");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "Words not found");
 //		boolean found;
 //		for(int t = 0; t < sms.getWords().size(); t++){
 //			found = false;
@@ -554,19 +554,19 @@ public class BinCombinedSMS extends RelativeLayout{
 //				}
 //			}
 //			if(!found){
-//				Log.i("TAG4", "'" + sms.getWords().get(t).getText() + "', " + sms.getWords().get(t).getwordType());
+//				//Log.i("TAG4", "'" + sms.getWords().get(t).getText() + "', " + sms.getWords().get(t).getwordType());
 //			}
 //		}
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
-//		Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
+//		//Log.i("TAG4", "--------------------------");
 	}
 	
 	public static ArrayList<String> findWordParts(String text){

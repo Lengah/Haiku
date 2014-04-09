@@ -104,13 +104,13 @@ public class SMSObjectCenter extends RelativeLayout{
 //			String tempString = "";
 //			String temptempString = "";
 //			String[] words = text.split(" ");
-//			Log.i("TAG4", "words.length: " + words.length);
+//			//Log.i("TAG4", "words.length: " + words.length);
 //			if(words.length == 0){
 //				words = new String[]{text};
 //			}
-//			Log.i("TAG4", "words:");
+//			//Log.i("TAG4", "words:");
 //			for(String w : words){
-//				Log.i("TAG4", "    '" + w + "'");
+//				//Log.i("TAG4", "    '" + w + "'");
 //			}
 //			for(int i = 0; i < words.length && paint.measureText(tempString) <= maxWidth; i++){
 //				if(words[i].equals(" ") || words[i].equals("")){
@@ -126,7 +126,7 @@ public class SMSObjectCenter extends RelativeLayout{
 //				}
 //				tempString += words[i];
 //			}
-//			Log.i("TAG4", "temptempString: " + temptempString);
+//			//Log.i("TAG4", "temptempString: " + temptempString);
 //			return 1 + getRows(paint, text.substring(temptempString.length()), width);
 //		}
 //		return 1;

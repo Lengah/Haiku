@@ -144,7 +144,7 @@ public class BinSMSView extends LinearLayout{
 		for(int i = 0; i < usedWordsIndexes.size(); i++){
 			pos1 = words.get(usedWordsIndexes.get(i)).getStartPos();
 			pos2 = words.get(usedWordsIndexes.get(i)).getEndPos();
-//			Log.i("TAG", "pos1: " + pos1 + ", pos2: " + pos2 + ", message length: " + sms.getMessage().length() + ", word: " + words.get(usedWordsIndexes.get(i)).getWord());
+//			//Log.i("TAG", "pos1: " + pos1 + ", pos2: " + pos2 + ", message length: " + sms.getMessage().length() + ", word: " + words.get(usedWordsIndexes.get(i)).getWord());
 			message += "<font color='black'>" + sms.getMessage().substring(lastPos, pos1) + "</font>" + "<font color='grey'>" + sms.getMessage().substring(pos1, pos2) + "</font>";
 			lastPos = pos2;
 		}
