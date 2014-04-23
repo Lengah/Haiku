@@ -30,7 +30,8 @@ public class FindSentenceThread extends Thread{
 	}
 	
 	public void run(){
-		String sentence = getSentence(START_OBJECT, false);
+//		String sentence = getSentence(START_OBJECT, false);
+		String sentence = getSentence();
 		if(sentence == null){
 			sentence = "NULL";
 		}
@@ -92,6 +93,55 @@ public class FindSentenceThread extends Thread{
 		}
 	}
 	
+	private String getSentence(){
+		ArrayList<RuleRow> rules;
+		if(row == 1){
+			rules = HaikuGenerator.getRule1Copy();
+		}
+		else if(row == 2){
+			rules = HaikuGenerator.getRule2Copy();
+		}
+		else{ // row = 3
+			rules = HaikuGenerator.getRule3Copy();
+		}
+		
+		int weightSum;
+		int randomIndex;
+		int indexChosen;
+		int counter;
+		
+		String sentence;
+		
+		while(!rules.isEmpty()){
+			weightSum = 0;
+			for(RuleRow rr : rules){
+				weightSum += rr.getWeight();
+			}
+			randomIndex = randomGenerator.nextInt(weightSum)+1; // [1, weightSum]
+			indexChosen = -1;
+			counter = 0;
+			for(int i = 0; i < rules.size(); i++){
+				counter += rules.get(i).getWeight();
+				if(counter >= randomIndex){
+					indexChosen = i;
+					break;
+				}
+			}
+			sentence = getSentence(rules.get(indexChosen).getRuleText(), false);
+			if(sentence != null){
+				return sentence;
+			}
+			rules.remove(indexChosen);
+		}
+		return null;
+	}
+	
+	/**
+	 * OLD. Changed to getSentence() 2014-04-21 
+	 * @param structure
+	 * @param inner
+	 * @return
+	 */
 	private String getSentence(String structure, boolean inner){
 		int randomIndex;
 		String returnString;

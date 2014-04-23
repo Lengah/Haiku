@@ -43,7 +43,7 @@ public class HaikuGenerator {
 	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
-	private static final int NUMBER_OF_GENERATIONS = 4;
+	private static final int NUMBER_OF_GENERATIONS = 32;
 	private static int generationsCounter;
 	
 	private static ArrayList<PartOfSpeechList> allWordsUsedWithThemesOrderedByTypes = new ArrayList<PartOfSpeechList>();
@@ -70,7 +70,7 @@ public class HaikuGenerator {
 	public static final Character[] ALL_WORD_CHARACTERS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 
 										'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 
 										's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'é', 
-										'è', 'å', 'ä', 'ö'};//, '\''}; // ' doesn't seem to work
+										'è', 'å', 'ä', 'ö', '\''}; // the character ' doesn't seem to work
 	
 	/**
 	 * Words in rules.txt which are not words (words in [] brackets)
@@ -80,22 +80,65 @@ public class HaikuGenerator {
 	
 	private static String[] rules;
 	
+	private static ArrayList<RuleRow> rule1 = new ArrayList<RuleRow>();
+	private static ArrayList<RuleRow> rule2 = new ArrayList<RuleRow>();
+	private static ArrayList<RuleRow> rule3 = new ArrayList<RuleRow>();
+	
+	public static ArrayList<RuleRow> getRule1Copy(){
+		return new ArrayList<RuleRow>(rule1);
+	}
+	
+	public static ArrayList<RuleRow> getRule2Copy(){
+		return new ArrayList<RuleRow>(rule2);
+	}
+	
+	public static ArrayList<RuleRow> getRule3Copy(){
+		return new ArrayList<RuleRow>(rule3);
+	}
+	
 	private static void initRules(){
 		try {
-			InputStream rulesF = HaikuActivity.getInstance().getAssets().open("rules.txt");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(rulesF));
-			ArrayList<String> rowsString = new ArrayList<String>();
+			InputStream rules1 = HaikuActivity.getInstance().getAssets().open("rules/row1.txt");
+			BufferedReader reader1 = new BufferedReader(new InputStreamReader(rules1));
+			
+			InputStream rules2 = HaikuActivity.getInstance().getAssets().open("rules/row2.txt");
+			BufferedReader reader2 = new BufferedReader(new InputStreamReader(rules2));
+			
+			InputStream rules3 = HaikuActivity.getInstance().getAssets().open("rules/row3.txt");
+			BufferedReader reader3 = new BufferedReader(new InputStreamReader(rules3));
+			
 			String tempText;
-			while ((tempText = reader.readLine()) != null) {
-				rowsString.add(tempText);
+			while ((tempText = reader1.readLine()) != null) {
+				rule1.add(new RuleRow(tempText));
 			}
-			rules = new String[rowsString.size()];
-			for(int i = 0; i < rowsString.size(); i++){
-				rules[i] = rowsString.get(i);
+			
+			while ((tempText = reader2.readLine()) != null) {
+				rule2.add(new RuleRow(tempText));
+			}
+			
+			while ((tempText = reader3.readLine()) != null) {
+				rule3.add(new RuleRow(tempText));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		// old with only 1 set of rules
+//		try {
+//			InputStream rulesF = HaikuActivity.getInstance().getAssets().open("rules.txt");
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(rulesF));
+//			ArrayList<String> rowsString = new ArrayList<String>();
+//			String tempText;
+//			while ((tempText = reader.readLine()) != null) {
+//				rowsString.add(tempText);
+//			}
+//			rules = new String[rowsString.size()];
+//			for(int i = 0; i < rowsString.size(); i++){
+//				rules[i] = rowsString.get(i);
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	public static ArrayList<String> getNonWordsInRules(){
@@ -103,20 +146,54 @@ public class HaikuGenerator {
 	}
 	
 	private static void initNonWordsCharacters(){
-		int startIndex;
-		int endIndex;
 		String temp;
-		String[] rulesTemp = rules.clone();
-		for(int i = 0; i < rulesTemp.length; i++){
-			while((startIndex = rulesTemp[i].indexOf('[')) != -1){
-				endIndex = rulesTemp[i].indexOf(']');
-				temp = rulesTemp[i].substring(startIndex+1, endIndex);
-				if(!nonWordsInRules.contains(temp)){
-					nonWordsInRules.add(temp);
+		for(RuleRow rr : rule1){
+			for(String s : rr.getRuleStructs()){
+				if(s.charAt(0) == '['){
+					temp = s.substring(1, s.indexOf(']'));
+					if(!nonWordsInRules.contains(temp)){
+						nonWordsInRules.add(temp);
+					}
 				}
-				rulesTemp[i] = rulesTemp[i].substring(endIndex+1);
 			}
 		}
+		
+		for(RuleRow rr : rule2){
+			for(String s : rr.getRuleStructs()){
+				if(s.charAt(0) == '['){
+					temp = s.substring(1, s.indexOf(']'));
+					if(!nonWordsInRules.contains(temp)){
+						nonWordsInRules.add(temp);
+					}
+				}
+			}
+		}
+		
+		for(RuleRow rr : rule3){
+			for(String s : rr.getRuleStructs()){
+				if(s.charAt(0) == '['){
+					temp = s.substring(1, s.indexOf(']'));
+					if(!nonWordsInRules.contains(temp)){
+						nonWordsInRules.add(temp);
+					}
+				}
+			}
+		}
+		
+//		int startIndex;
+//		int endIndex;
+//		String temp;
+//		String[] rulesTemp = rules.clone();
+//		for(int i = 0; i < rulesTemp.length; i++){
+//			while((startIndex = rulesTemp[i].indexOf('[')) != -1){
+//				endIndex = rulesTemp[i].indexOf(']');
+//				temp = rulesTemp[i].substring(startIndex+1, endIndex);
+//				if(!nonWordsInRules.contains(temp)){
+//					nonWordsInRules.add(temp);
+//				}
+//				rulesTemp[i] = rulesTemp[i].substring(endIndex+1);
+//			}
+//		}
 	}
 	
 	public static String[] getRules(){
@@ -785,7 +862,7 @@ public class HaikuGenerator {
 			haikus.add(new Haiku(!themes.isEmpty()));
 		}
 		else if(createdHaikusCounter == NUMBER_OF_GENERATIONS){
-//			//Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
+			//Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
 			BinView.getInstance().allHaikusAreGenerated();
 		}
 	}
