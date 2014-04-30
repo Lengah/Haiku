@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import android.util.Log;
 
 public class Haiku {
-	private String row1;
-	private String row2;
-	private String row3;
+	private ArrayList<Word> row1;
+	private ArrayList<Word> row2;
+	private ArrayList<Word> row3;
 	private boolean haikuFinished = false;
 	private double startTime = System.currentTimeMillis();
 	private boolean themes;
@@ -81,7 +81,7 @@ public class Haiku {
 		return row1 + "\n" + row2 + "\n" + row3;
 	}
 	
-	public String getRow(int row){
+	public ArrayList<Word> getRow(int row){
 		if(row == 1){
 			return row1;
 		}
@@ -116,14 +116,26 @@ public class Haiku {
 			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
 			print();
 			initWordsUsed();
-			if(!row1.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL")){
-				BinView.getInstance().haikuIsFinished();
-			}
-			else{
-				HaikuGenerator.nullHaikuGenerated();
-			}
+			BinView.getInstance().haikuIsFinished();
 			HaikuGenerator.nextHaiku();
 		}
+		else{
+			HaikuGenerator.nullHaikuGenerated();
+		}
+		
+//		haikuFinished = (row1 != null && row2 != null && row3 != null);
+//		if(haikuFinished){
+//			Log.i("TAG", "Time to finish one haiku: " + (System.currentTimeMillis() - startTime) + " ms");
+//			print();
+//			initWordsUsed();
+//			if(!row1.equalsIgnoreCase("NULL") && !row2.equalsIgnoreCase("NULL") && !row3.equalsIgnoreCase("NULL")){
+//				BinView.getInstance().haikuIsFinished();
+//			}
+//			else{
+//				HaikuGenerator.nullHaikuGenerated();
+//			}
+//			HaikuGenerator.nextHaiku();
+//		}
 	}
 	
 	public ArrayList<String> getWordsUsed(){
@@ -131,9 +143,9 @@ public class Haiku {
 	}
 	
 	public void initWordsUsed(){
-		wordsUsed.addAll(HaikuGenerator.getWords(row1));
-		wordsUsed.addAll(HaikuGenerator.getWords(row2));
-		wordsUsed.addAll(HaikuGenerator.getWords(row3));
+		wordsUsed.addAll(getStringWords(row1));
+		wordsUsed.addAll(getStringWords(row2));
+		wordsUsed.addAll(getStringWords(row3));
 		ArrayList<String> wordsRemoved = BinView.getInstance().getAllWordsRemoved();
 		for(int i = 0; i < wordsRemoved.size(); i++){
 			if(wordsUsed.contains(wordsRemoved.get(i))){// && !HaikuGenerator.getRulesWords().contains(wordsRemoved.get(i))){
@@ -143,11 +155,19 @@ public class Haiku {
 		}
 	}
 	
+	public ArrayList<String> getStringWords(ArrayList<Word> words){
+		ArrayList<String> r = new ArrayList<String>();
+		for(Word w : words){
+			r.add(w.getText());
+		}
+		return r;
+	}
+	
 	public boolean isHaikuFinished(){
 		return haikuFinished;
 	}
 	
-	public synchronized void addRow(int row, String text){
+	public synchronized void addRow(int row, ArrayList<Word> text){
 		if(row == 1){
 			row1 = text;
 		}
@@ -160,10 +180,21 @@ public class Haiku {
 		updateHaikuFinished();
 	}
 	
+	public String getStringOfList(ArrayList<Word> words){
+		String s = "";
+		for(int i = 0; i < words.size(); i++){
+			s += words.get(i).getText();
+			if(i != words.size()-1){
+				s += " ";
+			}
+		}
+		return s;
+	}
+	
 	public void print(){
-		Log.i("TAG", "" + row1);
-		Log.i("TAG", "" + row2);
-		Log.i("TAG", "" + row3);
+		Log.i("TAG", "" + getStringOfList(row1));
+		Log.i("TAG", "" + getStringOfList(row2));
+		Log.i("TAG", "" + getStringOfList(row3));
 		printUsedWords();
 		Log.i("TAG", "Cue words: " + cueWords.size());
 		Log.i("TAG", " ");

@@ -31,10 +31,11 @@ public class FindSentenceThread extends Thread{
 	
 	public void run(){
 //		String sentence = getSentence(START_OBJECT, false);
-		String sentence = getSentence();
-		if(sentence == null){
-			sentence = "NULL";
-		}
+//		String sentence = getSentence();
+		ArrayList<Word> sentence = getCompletelyRandomSentence(getAllWords(), syllables);
+//		if(sentence == null){
+//			sentence = "NULL";
+//		}
 //		while(sentence.contains("a/an")){
 //			int index = sentence.indexOf("a/an");
 //			index += 5;
@@ -45,13 +46,13 @@ public class FindSentenceThread extends Thread{
 //				sentence = sentence.substring(0, index-5) + "a " + sentence.substring(index);
 //			}
 //		}
-		for(int i = 0; i < HaikuGenerator.getNonWordsInRules().size(); i++){
-			while(sentence.contains(" " + HaikuGenerator.getNonWordsInRules().get(i) + " ")){
-				int index = sentence.indexOf(" " + HaikuGenerator.getNonWordsInRules().get(i) + " ");
-				sentence = sentence.substring(0, index) + HaikuGenerator.getNonWordsInRules().get(i) + " " + sentence.substring(index+3);
-			}
-		}
-		sentence = sentence.substring(0, 1).toUpperCase() + sentence.substring(1);
+//		for(int i = 0; i < HaikuGenerator.getNonWordsInRules().size(); i++){
+//			while(sentence.contains(" " + HaikuGenerator.getNonWordsInRules().get(i) + " ")){
+//				int index = sentence.indexOf(" " + HaikuGenerator.getNonWordsInRules().get(i) + " ");
+//				sentence = sentence.substring(0, index) + HaikuGenerator.getNonWordsInRules().get(i) + " " + sentence.substring(index+3);
+//			}
+//		}
+//		sentence = sentence.substring(0, 1).toUpperCase() + sentence.substring(1);
 //		sentence = sentence.toUpperCase();
 		haiku.addRow(row, sentence);
 		if(row != 3){
@@ -91,6 +92,45 @@ public class FindSentenceThread extends Thread{
 				}
 			}
 		}
+	}
+	
+	private ArrayList<Word> getCompletelyRandomSentence(ArrayList<Word> wordsLeft, int syllables){
+		ArrayList<Word> words = new ArrayList<Word>();
+		while(!wordsLeft.isEmpty()){
+			int index = randomGenerator.nextInt(wordsLeft.size());
+			int syllcount = wordsLeft.get(index).getNumberOfSyllables();
+			if(syllables - syllcount < 0){
+				for(int i = wordsLeft.size()-1; i >= 0; i--){
+					if(wordsLeft.get(i).getNumberOfSyllables() >= syllcount){
+						wordsLeft.remove(i);
+					}
+				}
+				continue;
+			}
+			if(syllables - syllcount == 0){
+				// found a sentence!
+//				return wordsLeft.get(index).getText();
+				words.add(wordsLeft.get(index));
+				return words;
+			}
+			// go deeper
+			ArrayList<Word> input = new ArrayList<Word>(wordsLeft);
+			input.remove(index);
+			ArrayList<Word> returnWords = getCompletelyRandomSentence(input, syllables - syllcount);
+			if(returnWords == null){
+				for(int i = wordsLeft.size()-1; i >= 0; i--){
+					if(wordsLeft.get(i).getNumberOfSyllables() == syllcount){
+						wordsLeft.remove(i);
+					}
+				}
+				continue;
+			}
+			words.add(wordsLeft.get(index));
+			words.addAll(returnWords);
+			return words;
+//			return wordsLeft.get(index).getText() + " " + returnString;
+		}
+		return null;
 	}
 	
 	private String getSentence(){
@@ -434,6 +474,14 @@ public class FindSentenceThread extends Thread{
 			}
 		}
 		return new ArrayList<Word>(); //empty list
+	}
+	
+	private ArrayList<Word> getAllWords(){
+		ArrayList<Word> words = new ArrayList<Word>();
+		for(PartOfSpeechList pl : wordsUsed){
+			words.addAll(pl.getWords());
+		}
+		return words;
 	}
 	
 	/**

@@ -15,6 +15,8 @@ import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.view.ThemeObjectView;
+import haiku.top.view.binview.haiku.HaikuRowWord;
+import haiku.top.view.binview.haiku.HaikuView;
 import haiku.top.view.date.QuarterCircle;
 import haiku.top.view.date.YearMonthView;
 import haiku.top.view.main.ConversationObjectView;
@@ -48,6 +50,7 @@ import android.view.View.OnTouchListener;
 import android.view.View.OnDragListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -78,13 +81,13 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final String SAVE_TEXT = "Save";
 	private static final String SHARE_TEXT = "Share";
 	
-	private BinButton saveButton;
-	private BinButton shareButton;
+	private Button saveButton;
+	private Button shareButton;
 	
-	private LinearLayout haikuView;
-	private TextView row1;
-	private TextView row2;
-	private TextView row3;
+	private HaikuView haikuView;
+//	private TextView row1;
+//	private TextView row2;
+//	private TextView row3;
 	
 	private ArrayList<YearMonthView> datesView = new ArrayList<YearMonthView>();
 	private ArrayList<BinSMSView> smsView = new ArrayList<BinSMSView>();
@@ -183,16 +186,20 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int HAIKU_WIDTH = 530;
 	private static final int HAIKU_HEIGHT = 250;
 	private int haikuWidth; // used to calculate the text size of the rows
+	private int haikuHeight;
+	
+	private int haikuMarginLeft;
+	private int haikuMarginTop;
 	
 	// the save button
-	private static final Position SAVE_UPPER_LEFT = new Position(448, 960);
-	private static final int SAVE_WIDTH = 250;
-	private static final int SAVE_HEIGHT = (int) (250.0 * (446.0/655.0)); // the actual image file is 655x446 px
+	private static final Position SAVE_UPPER_LEFT = new Position(448, 1010);
+	private static final int SAVE_WIDTH = 175;
+	private static final int SAVE_HEIGHT = (int) (SAVE_WIDTH * (259.0/265.0)); // the actual image file is 265x259 px
 	
-	// the share button is just as big as the save button
+	// the share button
 	private static final Position SHARE_UPPER_LEFT = new Position(168, 960);
 	private static final int SHARE_WIDTH = 250;
-	private static final int SHARE_HEIGHT = (int) (250.0 * (454.0/641.0)); // the actual image file is 641x454 px
+	private static final int SHARE_HEIGHT = SHARE_WIDTH; // the actual image file is a square
 	
 	// the date list
 	private static final Position DATE_UPPER_LEFT = new Position(70, 870);
@@ -350,42 +357,43 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		
 		// HAIKU
 		haikuWidth = (int)(((double)HAIKU_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
-		int haikuHeight = (int)(((double)HAIKU_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		haikuHeight = (int)(((double)HAIKU_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		int haikuMarginLeft = (int)(((double)HAIKU_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
-		int haikuMarginTop = (int)(((double)HAIKU_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
+		haikuMarginLeft = (int)(((double)HAIKU_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		haikuMarginTop = (int)(((double)HAIKU_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		haikuView = new LinearLayout(context);
-		row1 = new TextView(context);
-		row2 = new TextView(context);
-		row3 = new TextView(context);
+		haikuView = new HaikuView(context);
+//		row1 = new TextView(context);
+//		row2 = new TextView(context);
+//		row3 = new TextView(context);
+//		
+//		
+//		haikuView.setOrientation(LinearLayout.VERTICAL);
 		
-		
-		haikuView.setOrientation(LinearLayout.VERTICAL);
-		
-		row1.setGravity(CENTER_VERTICAL);
-		row2.setGravity(CENTER_VERTICAL);
-		row3.setGravity(CENTER_VERTICAL);
-		row1.setTextColor(Color.BLACK);
-		row2.setTextColor(Color.BLACK);
-		row3.setTextColor(Color.BLACK);
-//		row1.setTextSize(13);
-//		row2.setTextSize(13);
-//		row3.setTextSize(13);
-		row1.setTypeface(MainView.getInstance().getHaikuTypeface());
-		row2.setTypeface(MainView.getInstance().getHaikuTypeface());
-		row3.setTypeface(MainView.getInstance().getHaikuTypeface());
+//		row1.setGravity(CENTER_VERTICAL);
+//		row2.setGravity(CENTER_VERTICAL);
+//		row3.setGravity(CENTER_VERTICAL);
+//		row1.setTextColor(Color.BLACK);
+//		row2.setTextColor(Color.BLACK);
+//		row3.setTextColor(Color.BLACK);
+////		row1.setTextSize(13);
+////		row2.setTextSize(13);
+////		row3.setTextSize(13);
+//		row1.setTypeface(MainView.getInstance().getHaikuTypeface());
+//		row2.setTypeface(MainView.getInstance().getHaikuTypeface());
+//		row3.setTypeface(MainView.getInstance().getHaikuTypeface());
 		
 		LayoutParams haikuParams = new RelativeLayout.LayoutParams(haikuWidth, haikuHeight);
 		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		haikuParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 		haikuParams.setMargins(haikuMarginLeft, haikuMarginTop, 0, 0);
 		haikuView.setLayoutParams(haikuParams);
-		haikuView.addView(row1);
-		haikuView.addView(row2);
-		haikuView.addView(row3);
+//		haikuView.addView(row1);
+//		haikuView.addView(row2);
+//		haikuView.addView(row3);
 		addView(haikuView);
 		haikuView.setVisibility(GONE);
+//		haikuView.setOnTouchListener(this); //TODO
 	
 		// SAVE BUTTON
 		int saveWidth = (int)(((double)SAVE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
@@ -394,9 +402,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		int saveMarginLeft = (int)(((double)SAVE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int saveMarginTop = (int)(((double)SAVE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		saveButton = new BinButton(context, SAVE_TEXT, saveHeight, saveWidth);
-		saveButton.setTypeface(MainView.getInstance().getSaveTypeface());
-		int saveButtonMaxSize = saveButton.calculateMaxSize();
+//		saveButton = new BinButton(context, SAVE_TEXT, saveHeight, saveWidth);
+		saveButton = new Button(context);
+//		saveButton.setTypeface(MainView.getInstance().getSaveTypeface());
+//		int saveButtonMaxSize = saveButton.calculateMaxSize();
 		LayoutParams saveParams = new RelativeLayout.LayoutParams(saveWidth, saveHeight);
 		saveParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		saveParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
@@ -405,6 +414,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		addView(saveButton);
 		saveButton.setBackgroundResource(R.drawable.save_button);
 		saveButton.setVisibility(GONE);
+		saveButton.setOnClickListener(this);
 		
 		
 		// SHARE BUTTON
@@ -412,22 +422,25 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		int shareHeight = (int)(((double)SHARE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
 		
 		int shareMarginLeft = (int)(((double)SHARE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		int shareMarginTop = (int)(((double)SHARE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		shareButton = new BinButton(context, SHARE_TEXT, shareHeight, shareWidth);
-		shareButton.setTypeface(MainView.getInstance().getShareTypeface());
-		int shareButtonMaxSize = shareButton.calculateMaxSize();
+//		shareButton = new BinButton(context, SHARE_TEXT, shareHeight, shareWidth);
+		shareButton = new Button(context);
+//		shareButton.setTypeface(MainView.getInstance().getShareTypeface());
+//		int shareButtonMaxSize = shareButton.calculateMaxSize();
 		LayoutParams shareParams = new RelativeLayout.LayoutParams(shareWidth, shareHeight);
 		shareParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		shareParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		shareParams.setMargins(shareMarginLeft, saveMarginTop, 0, 0); // same margin top as save
+		shareParams.setMargins(shareMarginLeft, shareMarginTop, 0, 0); // same margin top as save
 		shareButton.setLayoutParams(shareParams);
 		addView(shareButton);
 		shareButton.setBackgroundResource(R.drawable.share_button);
 		shareButton.setVisibility(GONE);
+		shareButton.setOnClickListener(this);
 		
-		int sharedMaxSize = Math.min(saveButtonMaxSize, shareButtonMaxSize);
-		saveButton.setTextSize(sharedMaxSize);
-		shareButton.setTextSize(sharedMaxSize);
+//		int sharedMaxSize = Math.min(saveButtonMaxSize, shareButtonMaxSize);
+//		saveButton.setTextSize(sharedMaxSize);
+//		shareButton.setTextSize(sharedMaxSize);
 		
 		// DATE
 		dateWidth = (int)(((double)DATE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
@@ -1097,16 +1110,17 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public void haikuReady(){
 		endHaiku = HaikuGenerator.getRandomReadyHaiku();
 //		setHaikuFonts();
-		row1.setText(endHaiku.getRow(1));
-		row2.setText(endHaiku.getRow(2));
-		row3.setText(endHaiku.getRow(3));
-		int size = getMaxTextSizeForHaiku();
+		haikuView.update(endHaiku.getRow(1), endHaiku.getRow(2), endHaiku.getRow(3));
+//		row1.setText(endHaiku.getRow(1));
+//		row2.setText(endHaiku.getRow(2));
+//		row3.setText(endHaiku.getRow(3));
+//		int size = getMaxTextSizeForHaiku();
 //		row1.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
 //		row2.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
 //		row3.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-		row1.setTextSize(size);
-		row2.setTextSize(size);
-		row3.setTextSize(size);
+//		row1.setTextSize(size);
+//		row2.setTextSize(size);
+//		row3.setTextSize(size);
 		haikuView.setVisibility(VISIBLE);
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
@@ -1116,48 +1130,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		deletionInProgress = false;//TODO
 	}
 	
-	private int getMaxTextSizeForHaiku(){
-		int size1 = 0;
-		int size2 = 0;
-		int size3 = 0;
-		String text = (String) row1.getText();
-		Paint textPaint = row1.getPaint(); 
-		Rect textRect;
-	    do {
-	    	size1++;
-//	    	textPaint.setTextSize(size1);
-	    	row1.setTextSize(size1);
-	    	textPaint = row1.getPaint(); 
-	        textRect = new Rect();
-	        textPaint.getTextBounds(text, 0, text.length(), textRect);
-	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
-//	    //Log.i("TAG", "haikuWidth: " + haikuWidth);
-//	    //Log.i("TAG", "first width: " + textPaint.measureText(text));
-//	    //Log.i("TAG", "second width: " + textRect.width());
-	    
-	    text = (String) row2.getText();
-		textPaint = row2.getPaint(); 
-	    do {
-	    	size2++;
-//	    	textPaint.setTextSize(size2);
-	    	row2.setTextSize(size2);
-	    	textPaint = row2.getPaint(); 
-	        textRect = new Rect();
-	        textPaint.getTextBounds(text, 0, text.length(), textRect);
-	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
-	    
-	    text = (String) row3.getText();
-		textPaint = row3.getPaint(); 
-	    do {
-	    	size3++;
-//	    	textPaint.setTextSize(size3);
-	    	row3.setTextSize(size3);
-	    	textPaint = row3.getPaint(); 
-	        textRect = new Rect();
-	        textPaint.getTextBounds(text, 0, text.length(), textRect);
-	    } while(textPaint.measureText(text) < 9*haikuWidth/10);
-	    
-		return Math.min(size1, Math.min(size2, size3));
+	public int getHaikuWidth(){
+		return haikuWidth;
 	}
 	
 	public boolean isShowingHaiku(){
@@ -1299,6 +1273,39 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		Log.i("TAG4", "MotionEvent: " + event.getAction());
+		if(haikuView.isDragging()){
+			Log.i("TAG4", "haikuView.isDragging()");
+			Position dragPosition = new Position(event.getX() - haikuMarginLeft, event.getY() - haikuMarginTop);
+			if (event.getAction() == MotionEvent.ACTION_MOVE) {
+				Log.i("TAG4", "MotionEvent.ACTION_MOVE");
+				haikuView.dragEvent(dragPosition);
+				return false;
+			}
+			if(event.getAction() == MotionEvent.ACTION_UP){
+				Log.i("TAG4", "MotionEvent.ACTION_UP");
+				haikuView.dragStopped(dragPosition);
+				return true;
+			}
+		}
+		if(isShowingHaiku() && event.getAction() == MotionEvent.ACTION_DOWN){
+			getParent().requestDisallowInterceptTouchEvent(true);
+			Log.i("TAG4", "MotionEvent.ACTION_DOWN");
+			if(event.getX() > haikuMarginLeft && event.getX() < haikuMarginLeft + haikuWidth
+					&& event.getY() > haikuMarginTop && event.getY() < haikuMarginTop + haikuHeight){
+				// Inside the haikuView -> start word drag
+				Position dragPosition = new Position(event.getX() - haikuMarginLeft, event.getY() - haikuMarginTop);
+//				Position dragPosition = new Position(event.getX(), event.getY());
+				HaikuRowWord word = haikuView.dragStarted(dragPosition);
+				if(word == null){
+					return false;
+				}
+//				word.startDrag(null, new DragShadowBuilder(word), null, 0);
+				word.getRow().initDrag(word);
+				return true;
+			}
+		}
+		
 		int eventX = (int) event.getX();
 		int eventY = (int) event.getY();
 		if(event.getPointerCount() == 2){
@@ -1557,7 +1564,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						smsToDelete.add(smsView.get(i).getSMS());
 					}
 					HaikuActivity.getInstance().deleteSMS(smsToDelete);
-					
 				}
 				HaikuActivity.getInstance().addHaikuSMS(endHaiku);
 				doneSaving();
@@ -1583,27 +1589,27 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 
 	@Override
 	public void onClick(View v) {
-//		if(v.equals(saveButton)){
-//			save();
-//		}
-//		else if(v.equals(shareButton)){
-//			share();
-//		}
-//		else{
-			// close bin view
-			stateChanged = false;
-			MainView.getInstance().closeBinView();
-//		}
-	}
-	
-	public void clickedButton(View v){
 		if(v.equals(saveButton)){
 			save();
 		}
 		else if(v.equals(shareButton)){
 			share();
 		}
+		else{
+//			 close bin view
+			stateChanged = false;
+			MainView.getInstance().closeBinView();
+		}
 	}
+	
+//	public void clickedButton(View v){
+//		if(v.equals(saveButton)){
+//			save();
+//		}
+//		else if(v.equals(shareButton)){
+//			share();
+//		}
+//	}
 	
 	private int rowIndex = 0;
 	private int xIndex = 0;
@@ -1747,6 +1753,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
+		if(showHaiku){// TODO ????
+			return true;
+		}
 		int action = event.getAction();
 	    switch (action) {
 	    	case DragEvent.ACTION_DRAG_STARTED:
