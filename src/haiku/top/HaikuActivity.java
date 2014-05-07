@@ -831,7 +831,8 @@ public class HaikuActivity extends Activity {
 		values.put("address", phone);
 		values.put("date", System.currentTimeMillis());
 		values.put("read", 0); //mark as already read message
-		values.put("body", haiku.getStringOfList(haiku.getRow(1)) + "\n" + haiku.getStringOfList(haiku.getRow(2)) + "\n" + haiku.getStringOfList(haiku.getRow(3)));
+//		values.put("body", haiku.getStringOfList(haiku.getRow(1)) + "\n" + haiku.getStringOfList(haiku.getRow(2)) + "\n" + haiku.getStringOfList(haiku.getRow(3)));
+		values.put("body", haiku.getHaikuPoem());
 		this.getContentResolver().insert(Uri.parse("content://sms/inbox"), values); //add to database
 
 	}

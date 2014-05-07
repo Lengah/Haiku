@@ -25,6 +25,12 @@ public class Haiku {
 		generate(1);
 	}
 	
+	public Haiku(ArrayList<Word> row1, ArrayList<Word> row2, ArrayList<Word> row3){
+		this.row1 = row1;
+		this.row2 = row2;
+		this.row3 = row3;
+	}
+	
 	public void addCueWords(ArrayList<Long> cueWords){
 		this.cueWords.addAll(cueWords);
 	}
@@ -78,7 +84,8 @@ public class Haiku {
 	}
 	
 	public String getHaikuPoem(){
-		return row1 + "\n" + row2 + "\n" + row3;
+//		return row1 + "\n" + row2 + "\n" + row3;
+		return getStringOfList(getRow(1)) + "\n" + getStringOfList(getRow(2)) + "\n" + getStringOfList(getRow(3));
 	}
 	
 	public ArrayList<Word> getRow(int row){

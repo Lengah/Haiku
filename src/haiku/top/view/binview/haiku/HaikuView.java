@@ -19,7 +19,7 @@ import android.view.View.OnTouchListener;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class HaikuView  extends RelativeLayout implements OnTouchListener{
+public class HaikuView  extends RelativeLayout{
 	private float lengthOfSpace;
 	private ArrayList<HaikuRow> rows = new ArrayList<HaikuRow>();
 	
@@ -31,7 +31,6 @@ public class HaikuView  extends RelativeLayout implements OnTouchListener{
 	
 	public HaikuView(Context context){
 		super(context);
-//		setOnTouchListener(this);
 	}
 	
 	public void update(ArrayList<Word> row1, ArrayList<Word> row2, ArrayList<Word> row3){
@@ -75,6 +74,10 @@ public class HaikuView  extends RelativeLayout implements OnTouchListener{
 		hRow1.setWords(row1);
 		hRow2.setWords(row2);
 		hRow3.setWords(row3);
+	}
+	
+	public ArrayList<HaikuRow> getRows(){
+		return rows;
 	}
 	
 	public int getTextSize(){
@@ -155,7 +158,6 @@ public class HaikuView  extends RelativeLayout implements OnTouchListener{
 	
 	public void initDrag(HaikuRowWord word){
 		dragPosition = new Position(word.getStartPos() + word.getLength()/2, 0);
-//		word.startDrag(null, new DragShadowBuilder(word), null, 0);
 		setDraggedView(word);
 	}
 
@@ -177,13 +179,16 @@ public class HaikuView  extends RelativeLayout implements OnTouchListener{
 		return draggedView != null;
 	}
 	
+	public int getHeightOfOneRow(){
+		return height;
+	}
+	
 	private int currentRow;
 	
 	public void dragEvent(Position dragPosition){
 		this.dragPosition = dragPosition;
-		Log.i("TAG4", "dragEvent");
 		int newRow = (int) (dragPosition.getYPos()/height);
-		newRow = Math.min(newRow, 2);
+		newRow = Math.max(0, Math.min(newRow, 2));
 		if(newRow != currentRow){
 			if(currentRow != -1){
 				rows.get(currentRow).dragExitedRow();
@@ -194,68 +199,26 @@ public class HaikuView  extends RelativeLayout implements OnTouchListener{
 		rows.get(currentRow).dragEvent();
 	}
 	
+	public void dragLeftArea(){
+		rows.get(currentRow).dragExitedRow();
+	}
+	
 	public void dragStopped(Position dragPosition){
 		this.dragPosition = dragPosition;
-		Log.i("TAG4", "dragStopped");
 		rows.get(currentRow).dragEndedOnRow();
 		currentRow = -1;
 		draggedView = null;
 	}
 	
 	public HaikuRowWord dragStarted(Position dragPosition){
-		Log.i("TAG4", "dragStarted");
 		currentRow = (int) (dragPosition.getYPos()/height);
 		currentRow = Math.min(currentRow, 2);
 		return rows.get(currentRow).getWordAtXPos((int) dragPosition.getXPos());
 	}
 	
-//	public boolean dragStarted(Position dragPosition){
-//		currentRow = (int) (dragPosition.getYPos()/height);
-//		currentRow = Math.min(currentRow, 2);
-//		HaikuRowWord wordSelected = rows.get(currentRow).getWordAtXPos((int) dragPosition.getXPos());
-//		if(wordSelected == null){
-//			return false;
-//		}
-//		wordSelected.dragStarted();
-//		return true;
-//	}
-	
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		Log.i("TAG4", "MotionEvent: " + event.getAction());
-		Log.i("TAG4", "X, Y: " + event.getX() + ", " + event.getY());
-		if(event.getAction() == MotionEvent.ACTION_DOWN){
-			// Find the correct word
-			dragPosition = new Position(event.getX(), event.getY());
-			currentRow = (int) (dragPosition.getYPos()/height);
-			currentRow = Math.min(currentRow, 2);
-			HaikuRowWord wordSelected = rows.get(currentRow).getWordAtXPos((int) dragPosition.getXPos());
-			if(wordSelected == null){
-				return false;
-			}
-			wordSelected.dragStarted();
-			return true;
-		}
-		if (event.getAction() == MotionEvent.ACTION_MOVE) {
-			Log.i("TAG4", "MotionEvent.ACTION_MOVE");
-			dragPosition = new Position(event.getX(), event.getY());
-			int newRow = (int) (dragPosition.getYPos()/height);
-			newRow = Math.min(newRow, 2);
-			if(newRow != currentRow){
-				if(currentRow != -1){
-					rows.get(currentRow).dragExitedRow();
-					rows.get(newRow).dragEnteredRow();
-				}
-				currentRow = newRow;
-			}
-			rows.get(currentRow).dragEvent();
-		}
-		if(event.getAction() == MotionEvent.ACTION_UP){
-			Log.i("TAG4", "MotionEvent.ACTION_UP");
-			rows.get(currentRow).dragEndedOnRow();
-			currentRow = -1;
-			return false;
-		}
-		return true;
+	public void addToExtraRow(HaikuRowWord word){
+		BinView.getInstance().getHaikuRestView().addWord(word);
 	}
+
+	
 }

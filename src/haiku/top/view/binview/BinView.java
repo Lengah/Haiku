@@ -15,6 +15,8 @@ import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.view.ThemeObjectView;
+import haiku.top.view.binview.haiku.HaikuExtraRow;
+import haiku.top.view.binview.haiku.HaikuRow;
 import haiku.top.view.binview.haiku.HaikuRowWord;
 import haiku.top.view.binview.haiku.HaikuView;
 import haiku.top.view.date.QuarterCircle;
@@ -85,6 +87,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private Button shareButton;
 	
 	private HaikuView haikuView;
+	private HaikuExtraRow haikuRestView;
 //	private TextView row1;
 //	private TextView row2;
 //	private TextView row3;
@@ -181,9 +184,19 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int TEXT_WIDTH = 470;
 	private static final int TEXT_HEIGHT = 750;
 	
+	// the extra words
+	private static final Position HAIKU_REST_UPPER_LEFT = new Position(350, 230);
+	private static final int HAIKU_REST_WIDTH = 370;
+	private static final int HAIKU_REST_HEIGHT = 320;
+	private int haikuRestWidth;
+	private int haikuRestHeight;
+	
+	private int haikuRestMarginLeft;
+	private int haikuRestMarginTop;
+	
 	// the haiku
 	private static final Position HAIKU_UPPER_LEFT = new Position(200, 570);
-	private static final int HAIKU_WIDTH = 530;
+	private static final int HAIKU_WIDTH = 520;
 	private static final int HAIKU_HEIGHT = 250;
 	private int haikuWidth; // used to calculate the text size of the rows
 	private int haikuHeight;
@@ -355,6 +368,23 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		contactNameHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
 		contactName.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, contactNameHeight));
 		
+		// HAIKU REST
+		haikuRestWidth = (int)(((double)HAIKU_REST_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		haikuRestHeight = (int)(((double)HAIKU_REST_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		
+		haikuRestMarginLeft = (int)(((double)HAIKU_REST_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		haikuRestMarginTop = (int)(((double)HAIKU_REST_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
+		
+		haikuRestView = new HaikuExtraRow(context);
+		
+		LayoutParams haikuRestParams = new RelativeLayout.LayoutParams(haikuRestWidth, haikuRestHeight);
+		haikuRestParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		haikuRestParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		haikuRestParams.setMargins(haikuRestMarginLeft, haikuRestMarginTop, 0, 0);
+		haikuRestView.setLayoutParams(haikuRestParams);
+		addView(haikuRestView);
+		haikuRestView.setVisibility(GONE);
+		
 		// HAIKU
 		haikuWidth = (int)(((double)HAIKU_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
 		haikuHeight = (int)(((double)HAIKU_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
@@ -363,6 +393,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		haikuMarginTop = (int)(((double)HAIKU_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
 		haikuView = new HaikuView(context);
+		
 //		row1 = new TextView(context);
 //		row2 = new TextView(context);
 //		row3 = new TextView(context);
@@ -393,7 +424,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 //		haikuView.addView(row3);
 		addView(haikuView);
 		haikuView.setVisibility(GONE);
-//		haikuView.setOnTouchListener(this); //TODO
 	
 		// SAVE BUTTON
 		int saveWidth = (int)(((double)SAVE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
@@ -641,6 +671,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textList.removeAllViews();
 //		textScroll.removeAllViews();
 		binCombinedSMSView = new BinCombinedSMS(context);
+		binCombinedSMSView.setOnClickListener(this);
 		textList.addView(binCombinedSMSView);
 		for(int i = 0; i < smsView.size(); i++){
 			binCombinedSMSView.addSMS(smsView.get(i).getSMS());
@@ -785,6 +816,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		numberOfWordsLeft = 0;
 		progressBar.resetProgress();
 		haikuView.setVisibility(GONE);
+		haikuRestView.setVisibility(GONE);
+		haikuRestView.reset();
 		textScroll.setVisibility(VISIBLE);
 		saveButton.setVisibility(GONE);
 		shareButton.setVisibility(GONE);
@@ -890,6 +923,14 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				}
 			}
 		}
+	}
+	
+	public HaikuView getHaikuView(){
+		return haikuView;
+	}
+	
+	public HaikuExtraRow getHaikuRestView(){
+		return haikuRestView;
 	}
 	
 	public boolean isShowingContactName(){
@@ -1122,6 +1163,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 //		row2.setTextSize(size);
 //		row3.setTextSize(size);
 		haikuView.setVisibility(VISIBLE);
+		haikuRestView.setVisibility(VISIBLE);
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
 		shareButton.setVisibility(VISIBLE);
@@ -1132,6 +1174,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	public int getHaikuWidth(){
 		return haikuWidth;
+	}
+	
+	public int getHaikuRestWidth(){
+		return haikuRestWidth;
 	}
 	
 	public boolean isShowingHaiku(){
@@ -1270,27 +1316,42 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private int noWordsRemovedCounter = 0;
 	private static final int TRIES_UNTIL_AUTO_COMPLETION = 3;
-
+	
+	private boolean insideHaikuArea = false;
+	
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		Log.i("TAG4", "MotionEvent: " + event.getAction());
 		if(haikuView.isDragging()){
-			Log.i("TAG4", "haikuView.isDragging()");
+			currentDragPos = new Position(event.getX(), event.getY());
 			Position dragPosition = new Position(event.getX() - haikuMarginLeft, event.getY() - haikuMarginTop);
-			if (event.getAction() == MotionEvent.ACTION_MOVE) {
-				Log.i("TAG4", "MotionEvent.ACTION_MOVE");
-				haikuView.dragEvent(dragPosition);
-				return false;
+			if( event.getAction() == MotionEvent.ACTION_MOVE) {
+				updateTextDrag();
+				if (dragPosition.getXPos() > 0 && dragPosition.getXPos() < haikuWidth
+						&& dragPosition.getYPos() > 0 - haikuView.getHeightOfOneRow()*3*0.10 && dragPosition.getYPos() < haikuView.getHeightOfOneRow()*3 + haikuView.getHeightOfOneRow()*3*0.10){
+					insideHaikuArea = true;
+					haikuView.dragEvent(dragPosition);
+				}
+				else if(insideHaikuArea){
+					haikuView.dragLeftArea();
+					insideHaikuArea = false;
+				}
 			}
+			
 			if(event.getAction() == MotionEvent.ACTION_UP){
-				Log.i("TAG4", "MotionEvent.ACTION_UP");
-				haikuView.dragStopped(dragPosition);
+				if(insideHaikuArea){
+					haikuView.dragStopped(dragPosition);
+				}
+				else{
+					haikuRestView.dragEndedOnRow();
+				}
+				removeTextDrag();
 				return true;
 			}
+			return false;
 		}
 		if(isShowingHaiku() && event.getAction() == MotionEvent.ACTION_DOWN){
-			getParent().requestDisallowInterceptTouchEvent(true);
-			Log.i("TAG4", "MotionEvent.ACTION_DOWN");
+			startTime = System.currentTimeMillis();
+			currentDragPos = new Position(event.getX(), event.getY());
 			if(event.getX() > haikuMarginLeft && event.getX() < haikuMarginLeft + haikuWidth
 					&& event.getY() > haikuMarginTop && event.getY() < haikuMarginTop + haikuHeight){
 				// Inside the haikuView -> start word drag
@@ -1302,6 +1363,20 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				}
 //				word.startDrag(null, new DragShadowBuilder(word), null, 0);
 				word.getRow().initDrag(word);
+				startTextDrag(word);
+				insideHaikuArea = true;
+				return true;
+			}
+			if (event.getX() > haikuRestMarginLeft && event.getX() < haikuRestWidth + haikuRestMarginLeft
+					&& event.getY() > haikuRestMarginTop && event.getY() < haikuRestHeight + haikuRestMarginTop){
+				// Inside the haikuRestView -> start word drag
+				HaikuRowWord word = haikuRestView.getWordAtPos(new Position(event.getX() - haikuRestMarginLeft, event.getY() - haikuRestMarginTop));
+				if(word == null){
+					return false;
+				}
+				haikuRestView.initDrag(word);
+				startTextDrag(word);
+				insideHaikuArea = false;
 				return true;
 			}
 		}
@@ -1565,7 +1640,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					}
 					HaikuActivity.getInstance().deleteSMS(smsToDelete);
 				}
-				HaikuActivity.getInstance().addHaikuSMS(endHaiku);
+				HaikuActivity.getInstance().addHaikuSMS(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()));
 				doneSaving();
 			}
 		}.start();
@@ -1584,7 +1659,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void share(){
-		HaikuActivity.getInstance().shareMessage(endHaiku.getHaikuPoem());
+		HaikuActivity.getInstance().shareMessage(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()).getHaikuPoem());
 	}
 
 	@Override
@@ -1595,10 +1670,14 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		else if(v.equals(shareButton)){
 			share();
 		}
-		else{
-//			 close bin view
+		else if(v.equals(binCombinedSMSView)){
 			stateChanged = false;
 			MainView.getInstance().closeBinView();
+		}
+		else{
+//			 close bin view //TODO Should this be done? It seems to happen when it shouldn't
+//			stateChanged = false;
+//			MainView.getInstance().closeBinView();
 		}
 	}
 	
@@ -1747,6 +1826,27 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			params.setMargins(xIndex + textMarginLeft, (rowIndex*binCombinedSMSView.getHeightOfRow() + textMarginTop - textScroll.getScrollY()), 0, 0);
 		}
 		addView(pointerView, params);
+	}
+	
+	private HaikuRowWord textDrag;
+	private Position currentDragPos;
+	
+	private void startTextDrag(HaikuRowWord word){
+		textDrag = new HaikuRowWord(getContext(), word.getWord(), word.getStartPos(), word.getLength(), word.getRow());
+		updateTextDrag();
+		addView(textDrag);
+	}
+	
+	private void updateTextDrag(){
+		LayoutParams params = new RelativeLayout.LayoutParams((int) textDrag.getLength(), haikuView.getHeightOfOneRow());
+		params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		params.setMargins((int)(currentDragPos.getXPos() - textDrag.getLength()/2), (int)(currentDragPos.getYPos() - haikuView.getHeightOfOneRow()/2), 0, 0);
+		textDrag.setLayoutParams(params);
+	}
+	
+	private void removeTextDrag(){
+		removeView(textDrag);
 	}
 
 	private boolean ended = false;

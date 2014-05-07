@@ -20,10 +20,9 @@ public class HaikuRowWord extends TextView{
 	private Word word;
 	private float length; // in PX
 	private float startPos; // in PX
-	private HaikuRow row;
+	private Row row;
 	
-	
-	public HaikuRowWord(Context context, Word word, float startPos, float length, HaikuRow row){
+	public HaikuRowWord(Context context, Word word, float startPos, float length, Row row){
 		super(context);
 		this.word = word;
 		this.startPos = startPos;
@@ -46,16 +45,14 @@ public class HaikuRowWord extends TextView{
 		}
 		setText(Html.fromHtml(message), TextView.BufferType.SPANNABLE);
 		setTypeface(MainView.getInstance().getHaikuTypeface());
-		setTextSize(TypedValue.COMPLEX_UNIT_SP, row.getHaikuView().getTextSize());
-		
-//		setOnTouchListener(this);
+		setTextSize(TypedValue.COMPLEX_UNIT_SP, BinView.getInstance().getHaikuView().getTextSize());
 	}
 	
-	public void setRow(HaikuRow row){
+	public void setRow(Row row){
 		this.row = row;
 	}
 	
-	public HaikuRow getRow(){
+	public Row getRow(){
 		return row;
 	}
 	
@@ -76,17 +73,6 @@ public class HaikuRowWord extends TextView{
 	}
 	
 	public void dragStarted(){
-		Log.i("TAG4", "Start drag on word '" + word.getText() + "'");
 		row.initDrag(this);
 	}
-
-//	@Override
-//	public boolean onTouch(View v, MotionEvent event) {
-//		if(event.getAction() == MotionEvent.ACTION_DOWN){
-//			Log.i("TAG4", "Start drag on word '" + word.getText() + "'");
-//			row.initDrag(this);
-//			return true;
-//		}
-//		return false;
-//	}
 }
