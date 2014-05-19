@@ -459,22 +459,22 @@ public class HaikuGenerator {
 	
 	public static void calculateSMSes(ArrayList<SMS> smses){
 		ArrayList<SMS> sms2 = new ArrayList<SMS>();
-		boolean shouldSkip;
+//		boolean shouldSkip;
 		for(int i = 0; i < smses.size(); i++){
-			shouldSkip = false;
-			for(int a = i-1; a >= 0; a--){
-				if(smses.get(a).getContactID() == smses.get(i).getContactID() 
-						&& smses.get(a).getMessage().equals(smses.get(i).getMessage()) 
-						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()) != null
-						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()).getNames().size() > i-a){
-							// probably the same...
-							shouldSkip = true;
-							break;
-						}
-			}
-			if(!shouldSkip){
+//			shouldSkip = false;
+//			for(int a = i-1; a >= 0; a--){
+//				if(smses.get(a).getContactID() == smses.get(i).getContactID() 
+//						&& smses.get(a).getMessage().equals(smses.get(i).getMessage()) 
+//						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()) != null
+//						&& MainView.getInstance().getConversationObject(smses.get(i).getContactID()).getNames().size() > i-a){
+//							// probably the same...
+//							shouldSkip = true;
+//							break;
+//						}
+//			}
+//			if(!shouldSkip){
 				sms2.add(smses.get(i));
-			}
+//			}
 		}
 		HaikuGenerator.smses.addAll(sms2);
 		for(int i = 0; i < sms2.size(); i++){

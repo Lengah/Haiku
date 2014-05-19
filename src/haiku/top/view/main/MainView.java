@@ -87,7 +87,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final int THEME_ROTATION = -5;
 	
 	public static final int BACKGROUND_COLOR_DEFAULT = Color.WHITE;
-	public static final int BACKGROUND_COLOR_BIN_REMOVE = Color.RED;
+	public static final int BACKGROUND_COLOR_BIN_REMOVE = Color.WHITE; // no change atm
 	
 	private ScrollView themeScroll;
 	private LinearLayout themeList;
@@ -169,6 +169,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		int smallBinViewHeight = HaikuActivity.getInstance().getWindowHeight()-themeViewHeight;
 		
 		themeScroll = new ScrollView(context);
+		themeScroll.setVerticalScrollBarEnabled(false);
 		themeScroll.setBackgroundColor(COLOR_THEME_BACKGROUND);
 		themeScroll.setRotation(THEME_ROTATION);
 		LayoutParams themeParams = new RelativeLayout.LayoutParams((int) rightViewsWidth, themeViewHeight);
@@ -423,6 +424,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return null;
 	}
 	
+	private int biggestSMSCount = 0;
+	private int latestCounter = 5;
+	
 	/**
 	 * A complete update of the conversations. Does a new database query and recreates all the conversation objects
 	 */
@@ -430,12 +434,19 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		conversations.clear();
 		contactList.removeAllViews();
 		boolean haikuContactAdded = false;
+		boolean recent;
 		Cursor cursor = HaikuActivity.getThreads(context);
 		if (cursor.moveToFirst()) {
 			do{
+				recent = false;
+				if(latestCounter > 0){
+					latestCounter--;
+					recent = true;
+				}
 //				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
-				ConversationObjectView temp = new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")));
+				ConversationObjectView temp = new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), recent);
 				if(temp.isHaikuConversation()){
+					latestCounter++;
 					conversations.add(0, temp);
 					haikuContactAdded = true;
 				}
@@ -454,6 +465,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 //		contactList.addView(filler);
 		for(int i = 0; i < conversations.size(); i++){
+			if(conversations.get(i).getSMSCount() > biggestSMSCount){
+				biggestSMSCount = conversations.get(i).getSMSCount();
+			}
+		}
+		for(int i = 0; i < conversations.size(); i++){
+			conversations.get(i).calculateAndSetSpacing(biggestSMSCount);
 			contactList.addView(conversations.get(i));
 //			conversations.get(i).setAlpha(OPACITY_DEFAULT); // Lags
 		}
@@ -654,7 +671,11 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 //			smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
 //			smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
 //		}
-		final SMSObject smsObject = new SMSObject(context, sms);
+		SMS prevSMS = null;
+		if(!smsObjects.isEmpty()){
+			prevSMS = smsObjects.get(smsObjects.size()-1).getSMS();
+		}
+		final SMSObject smsObject = new SMSObject(context, sms, prevSMS);
 		
 		smsObjects.add(smsObject);
 		smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);

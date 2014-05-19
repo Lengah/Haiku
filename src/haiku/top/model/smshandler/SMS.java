@@ -20,7 +20,8 @@ public class SMS {
 	private String date;
 	private long contactID;
 	private boolean sent = false; // if false -> received
-	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+//	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	private ArrayList<Word> wordsInSms;
 	
 	private ArrayList<String> notRealWords;
@@ -141,13 +142,68 @@ public class SMS {
 		return date;
 	}
 	
+	private boolean convertedDateFormat = false;
+	private String convertedDateString;
+	
 	/**
 	 * converts the date to a more readable format
-	 * @return dd/MM/yyyy HH:mm
 	 */
 	public String getFullDate(){
-		Date obj = new Date(Long.parseLong(date));
-		return sdf.format(obj.getTime());
+		if(!convertedDateFormat){
+			Date obj = new Date(Long.parseLong(date));
+			String ds = sdf.format(obj.getTime());
+			if(ds.charAt(0) == '0'){
+				ds = ds.substring(1);
+			}
+			String dr = ds.substring(0, ds.indexOf('/')) + " ";
+			ds = ds.substring(ds.indexOf('/')+1);
+			dr += getMonthString(Integer.parseInt(ds.substring(0, ds.indexOf('/')))) + " ";
+			ds = ds.substring(ds.indexOf('/')+3);
+			dr += "'" + ds;
+			convertedDateString = dr;
+			convertedDateFormat = true;
+		}
+		return convertedDateString;
+	}
+	
+	private String getMonthString(int monthNr){
+		if(monthNr == 1){
+			return Month.January.toString();
+		}
+		if(monthNr == 2){
+			return Month.February.toString();
+		}
+		if(monthNr == 3){
+			return Month.March.toString();
+		}
+		if(monthNr == 4){
+			return Month.April.toString();
+		}
+		if(monthNr == 5){
+			return Month.May.toString();
+		}
+		if(monthNr == 6){
+			return Month.June.toString();
+		}
+		if(monthNr == 7){
+			return Month.July.toString();
+		}
+		if(monthNr == 8){
+			return Month.August.toString();
+		}
+		if(monthNr == 9){
+			return Month.September.toString();
+		}
+		if(monthNr == 10){
+			return Month.October.toString();
+		}
+		if(monthNr == 11){
+			return Month.November.toString();
+		}
+		if(monthNr == 12){
+			return Month.December.toString();
+		}
+		return "NULL";
 	}
 	
 	public YearMonth getYearMonth(){

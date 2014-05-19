@@ -658,6 +658,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		return rowWidth;
 	}
 	
+	public int getMaxHeightOfHaikuView(){
+		return haikuHeight;
+	}
+	
 	/**
 	 * If the user has initiated deletion (if the SMSes has been combined)
 	 * @return
@@ -1326,7 +1330,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			Position dragPosition = new Position(event.getX() - haikuMarginLeft, event.getY() - haikuMarginTop);
 			if( event.getAction() == MotionEvent.ACTION_MOVE) {
 				updateTextDrag();
-				if (dragPosition.getXPos() > 0 && dragPosition.getXPos() < haikuWidth
+				if (dragPosition.getXPos() > 0 - haikuWidth*0.10 && dragPosition.getXPos() < haikuWidth
 						&& dragPosition.getYPos() > 0 - haikuView.getHeightOfOneRow()*3*0.10 && dragPosition.getYPos() < haikuView.getHeightOfOneRow()*3 + haikuView.getHeightOfOneRow()*3*0.10){
 					insideHaikuArea = true;
 					haikuView.dragEvent(dragPosition);
@@ -1639,6 +1643,14 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 						smsToDelete.add(smsView.get(i).getSMS());
 					}
 					HaikuActivity.getInstance().deleteSMS(smsToDelete);
+					HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+				        public void run() {
+				        	MainView.getInstance().updateConversations();
+							if(MainView.getInstance().isShowingSMS()){
+								MainView.getInstance().closeSMSView();
+							}
+				        }
+				    });
 				}
 				HaikuActivity.getInstance().addHaikuSMS(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()));
 				doneSaving();
@@ -1853,7 +1865,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
-		if(showHaiku){// TODO ????
+		if(showHaiku){
 			return true;
 		}
 		int action = event.getAction();
@@ -1885,7 +1897,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    		if(addingObjectDuringDeletion != null){
 	    			if(x > textMarginLeft && x < textMarginLeft + textWidth && event.getY() > textMarginTop && event.getY() < textMarginTop + textHeight){
 	    				updateTextArea(x, event.getY());
-	    				//TODO
 	    				//scroll
 	    				if((!showingContactName && event.getY() < textMarginTop + textHeight*SCROLL_HEIGHT)
 	    						|| (showingContactName && event.getY() < (textMarginTop+contactNameHeight) + (textHeight-contactNameHeight)*SCROLL_HEIGHT)){

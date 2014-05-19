@@ -12,20 +12,20 @@ public class ShowSMSESThread extends Thread{
 	private int threadID;
 	private boolean stop = false;
 	private boolean lookingAtHaikus;
-	private int recipients;
+//	private int recipients;
 	
 //	private String lastMessage = null;
 //	private int recipientsCounter = 0;
 	
-	private ArrayList<Integer> unallowedIDs = new ArrayList<Integer>();
+//	private ArrayList<Integer> unallowedIDs = new ArrayList<Integer>();
 	
 	public ShowSMSESThread(int threadID, boolean lookingAtHaikus){
 		this.threadID = threadID;
 		this.lookingAtHaikus = lookingAtHaikus;
-		recipients = HaikuActivity.getConversationNumbers(HaikuActivity.getInstance(), threadID).size();
-		if(recipients > 1){
-			this.lookingAtHaikus = false;
-		}
+//		recipients = HaikuActivity.getConversationNumbers(HaikuActivity.getInstance(), threadID).size();
+//		if(recipients > 1){
+//			this.lookingAtHaikus = false;
+//		}
 	}
 	
 	public void run(){
@@ -50,16 +50,16 @@ public class ShowSMSESThread extends Thread{
 				date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
 				type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
 				
-				if(unallowedIDs.contains(id)){
-					continue;
-				}
-				// not in the list
-				if (!type.equals("1")) {
-//			        // sent = true;
-					for(int i = 0 ; i < recipients; i++){
-						unallowedIDs.add(id+i);
-					}
-				}
+//				if(unallowedIDs.contains(id)){
+//					continue;
+//				}
+//				// not in the list
+//				if (!type.equals("1")) {
+////			        // sent = true;
+//					for(int i = 0 ; i < recipients; i++){
+//						unallowedIDs.add(id+i);
+//					}
+//				}
 				
 				sms = new SMS(id, message, date, threadID, type);
 				MainView.getInstance().addSMSToView(sms);

@@ -19,11 +19,11 @@ import android.widget.TextView;
 import android.widget.RelativeLayout.LayoutParams;
 
 public class SMSObject extends RelativeLayout{
-//	public static final int COLOR_OF_SENT_SMS = Color.rgb(204, 247, 201);
-	public static final int COLOR_OF_SENT_SMS = Color.rgb(207, 224, 231);
+//	public static final int COLOR_OF_SENT_SMS = Color.rgb(207, 224, 231);
+	public static final int COLOR_OF_SENT_SMS = Color.rgb(255, 255, 255);
 	
-//	public static final int COLOR_OF_RECEIVED_SMS = Color.rgb(252, 252, 166);
-	public static final int COLOR_OF_RECEIVED_SMS = Color.rgb(235, 237, 190);
+//	public static final int COLOR_OF_RECEIVED_SMS = Color.rgb(235, 237, 190);
+	public static final int COLOR_OF_RECEIVED_SMS = Color.rgb(255, 255, 255);
 	
 	/**
 	 * The padding to the right and left (depending whether it is a sent or a received message) in % of the list width.
@@ -78,7 +78,7 @@ public class SMSObject extends RelativeLayout{
 	
 	private long seed;
 
-	public SMSObject(Context context, SMS sms) {
+	public SMSObject(Context context, SMS sms, SMS prevSMS) {
 		super(context);
 		this.sms = sms;
 		calcSeed();
@@ -89,7 +89,7 @@ public class SMSObject extends RelativeLayout{
 //			margin = paddingSides;
 //		}
 		// generate middle box
-		centerBox = new SMSObjectCenter(context, sms); // generates in constructor
+		centerBox = new SMSObjectCenter(context, sms, prevSMS); // generates in constructor
 		
 		background = new SMSObjectBackground(context, this);
 		

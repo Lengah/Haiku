@@ -126,7 +126,8 @@ public class HaikuView  extends RelativeLayout{
 	    	textPaint = row1.getPaint(); 
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
-	    } while(textPaint.measureText(text) < 9*BinView.getInstance().getHaikuWidth()/10);
+	    } while(textPaint.measureText(text) < 9*BinView.getInstance().getHaikuWidth()/10
+	    		&& textRect.height() < BinView.getInstance().getMaxHeightOfHaikuView()/4);
 //	    //Log.i("TAG", "BinView.getInstance().getHaikuWidth(): " + BinView.getInstance().getHaikuWidth());
 //	    //Log.i("TAG", "first width: " + textPaint.measureText(text));
 //	    //Log.i("TAG", "second width: " + textRect.width());
@@ -140,7 +141,8 @@ public class HaikuView  extends RelativeLayout{
 	    	textPaint = row2.getPaint(); 
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
-	    } while(textPaint.measureText(text) < 9*BinView.getInstance().getHaikuWidth()/10);
+	    } while(textPaint.measureText(text) < 9*BinView.getInstance().getHaikuWidth()/10
+	    		&& textRect.height() < BinView.getInstance().getMaxHeightOfHaikuView()/4);
 	    
 	    text = (String) row3.getText();
 		textPaint = row3.getPaint(); 
@@ -151,7 +153,8 @@ public class HaikuView  extends RelativeLayout{
 	    	textPaint = row3.getPaint(); 
 	        textRect = new Rect();
 	        textPaint.getTextBounds(text, 0, text.length(), textRect);
-	    } while(textPaint.measureText(text) < 9*BinView.getInstance().getHaikuWidth()/10);
+	    } while(textPaint.measureText(text) < 9*BinView.getInstance().getHaikuWidth()/10
+	    		&& textRect.height() < BinView.getInstance().getMaxHeightOfHaikuView()/4);
 	    
 		return Math.min(size1, Math.min(size2, size3));
 	}

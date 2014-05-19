@@ -37,28 +37,33 @@ public class SMSObjectCenter extends RelativeLayout{
 	 */
 	public static final double SIDE_MARGIN = 1.0;
 	
-	public SMSObjectCenter(Context context, SMS sms){
+	public SMSObjectCenter(Context context, SMS sms, SMS prevSMS){
 		super(context);
 		this.sms = sms;
 		smsTextView = new TextView(context);
-		smsDateView = new TextView(context);
-		
 		smsTextView.setTextColor(Color.BLACK);
-		smsDateView.setTextColor(Color.BLACK);
-		
-		int sideMargin = (int) (MainView.getInstance().getListWidth()*SIDE_MARGIN/100.0);
-		
 		smsTextView.setTypeface(MainView.getInstance().getSmsListTypeface());
-		smsDateView.setTypeface(MainView.getInstance().getSmsListTypeface());
 		smsTextView.setText(sms.getMessage(), TextView.BufferType.SPANNABLE);
-		smsDateView.setText(sms.getFullDate());
 		smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);
-		smsDateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DATE_TEXT_SIZE_SP);
 		smsTextView.setPaintFlags(smsTextView.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
 		
-		double textLength = smsTextView.getPaint().measureText(smsTextView.getText().toString());
-		double dateLength = smsDateView.getPaint().measureText(smsDateView.getText().toString());
-		dateLength += dateLength/10; // The view length must be slightly bigger than dateLength to be able to show the date properly.
+		double dateLength = 0;
+		
+		boolean shouldShowDate = prevSMS == null || !sms.getFullDate().equals(prevSMS.getFullDate());
+		
+		if(shouldShowDate){
+			smsDateView = new TextView(context);
+			smsDateView.setTextColor(Color.BLACK);
+			smsDateView.setTypeface(MainView.getInstance().getSmsListTypeface());
+			smsDateView.setText(sms.getFullDate());
+			smsDateView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DATE_TEXT_SIZE_SP);
+			dateLength = smsDateView.getPaint().measureText(smsDateView.getText().toString());
+			dateLength += dateLength/10; // The view length must be slightly bigger than dateLength to be able to show the date properly.
+		}
+		int sideMargin = (int) (MainView.getInstance().getListWidth()*SIDE_MARGIN/100.0);
+		
+		double textLength = smsTextView.getPaint().measureText(smsTextView.getText().toString())*1.2;
+		
 		// what's remaining of the list's width after padding, margin and min side width
 		int temp = (int) (SMSObject.getMaxWidth() - 2*sideMargin - 2*SMSObject.getHeightOfTextRow()*SMSObject.WIDTH_OF_SIDES_IN_ROWS);
 		
@@ -67,18 +72,22 @@ public class SMSObjectCenter extends RelativeLayout{
 		
 		int heightOfSMSText = getHeight(context, smsTextView.getText().toString());
 		int padding = (int) (SMSObject.getHeightOfTextRow() * PADDING_BETWEEN_TEXT_AND_DATE/100.0); // padding
-		int heightOfDateText = SMSObject.getHeightOfTextRow();
+		int heightOfDateText = 0;
+		if(shouldShowDate){
+			heightOfDateText = (int) (SMSObject.getHeightOfTextRow()*1.5);
+		}
 		viewHeight = heightOfSMSText + padding + heightOfDateText + 2*sideMargin;
 		
 		LayoutParams textParams = new RelativeLayout.LayoutParams(viewWidth, heightOfSMSText);
 		textParams.setMargins(sideMargin, sideMargin, 0, 0);
 		addView(smsTextView, textParams);
-
-		smsDateView.setGravity(Gravity.RIGHT);
 		
-		LayoutParams dateParams = new RelativeLayout.LayoutParams(viewWidth, heightOfDateText);
-		dateParams.setMargins(0, sideMargin + heightOfSMSText + padding, sideMargin, 0);
-		addView(smsDateView, dateParams);
+		if(shouldShowDate){
+			smsDateView.setGravity(Gravity.RIGHT);
+			LayoutParams dateParams = new RelativeLayout.LayoutParams(viewWidth, heightOfDateText);
+			dateParams.setMargins(0, sideMargin + heightOfSMSText + padding, sideMargin, 0);
+			addView(smsDateView, dateParams);
+		}
 	}
 	
 	private int getHeight(Context context, CharSequence text) {

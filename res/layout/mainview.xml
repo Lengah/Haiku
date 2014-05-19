@@ -8,7 +8,8 @@
        	android:id="@+id/scrollofcontacts"
        	android:layout_width="match_parent"
        	android:layout_height="match_parent" 
-       	android:layout_marginRight="110dp">
+       	android:layout_marginRight="110dp"
+       	android:scrollbars="none">
        	
    	     <LinearLayout 
       		android:id="@+id/listofcontacts"
@@ -53,7 +54,8 @@
 		       	android:id="@+id/scrollofnames"
 		       	android:layout_width="match_parent"
 		       	android:layout_height="wrap_content"
-		       	android:layout_marginLeft="3dp">
+		       	android:layout_marginLeft="3dp"
+		       	android:scrollbars="none">
 
 			</ScrollView>
 		
@@ -64,7 +66,8 @@
 	       	android:layout_width="match_parent"
 	       	android:layout_height="match_parent" 
 	       	android:layout_marginRight="110dp"
-	       	android:layout_marginTop="10dp">
+	       	android:layout_marginTop="10dp"
+	       	android:scrollbars="none">
 	       	
 	   	     <RelativeLayout 
 	      		android:id="@+id/listofsms"
