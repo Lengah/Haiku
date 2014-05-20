@@ -424,13 +424,17 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return null;
 	}
 	
+	private static final int BOLD_CONTACTS = 5;
+	
 	private int biggestSMSCount = 0;
-	private int latestCounter = 5;
+	private int latestCounter = BOLD_CONTACTS;
 	
 	/**
 	 * A complete update of the conversations. Does a new database query and recreates all the conversation objects
 	 */
 	public void updateConversations(){
+		biggestSMSCount = 0;
+		latestCounter = BOLD_CONTACTS;
 		conversations.clear();
 		contactList.removeAllViews();
 		boolean haikuContactAdded = false;

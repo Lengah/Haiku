@@ -146,7 +146,7 @@ public class QuarterCircle extends View{
 	
 	public QuarterCircle(Context context, Month month, int radius, int startAngle, int endAngle, int offset) {
 		super(context);
-		circleRadius = radius;
+		this.circleRadius = radius;
 		this.drawOffset = offset;
         init(startAngle, endAngle);
 
@@ -214,9 +214,13 @@ public class QuarterCircle extends View{
         
         // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
-        circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
-        circleOuterArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
-        circleInnerArc = new RectF(-drawOffset, circleRadius-drawOffset, drawOffset, drawOffset*2+(circleRadius-drawOffset));
+//        circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
+//        circleOuterArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
+//        circleInnerArc = new RectF(-drawOffset, circleRadius-drawOffset, drawOffset, drawOffset*2+(circleRadius-drawOffset));
+        
+        circleArc = new RectF(); // they are set in onMeasure()
+        circleOuterArc = new RectF();
+        circleInnerArc = new RectF();
 	}
 
     @Override
@@ -280,7 +284,6 @@ public class QuarterCircle extends View{
         	// Since I want everything on the inside I have to adjust the height so the center of the arc is in the center of the slice.
         	// The width also has to be adjusted so it remains a circle.
         	circleArc.set(-circleRadius + (circleRadius-drawOffset)/2, (circleRadius-drawOffset)/2, circleRadius - (circleRadius-drawOffset)/2, circleRadius*2 - (circleRadius-drawOffset)/2);
-        	
 
             circleOuterArc.set(-circleRadius, 0, circleRadius, circleRadius*2);
             circleInnerArc.set(-drawOffset, circleRadius-drawOffset, drawOffset, drawOffset*2+(circleRadius-drawOffset));

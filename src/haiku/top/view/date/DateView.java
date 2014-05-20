@@ -13,6 +13,7 @@ import java.util.Calendar;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,12 +30,17 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	public static final Month[] MONTHS_NAME = new Month[] 
 			{Month.January, Month.February, Month.March, Month.April, Month.May, Month.June, Month.July, Month.August, Month.September, Month.October, Month.November, Month.December};
 	
+	public static final Integer[] MONTHS_LENGTH = new Integer[] {
+		31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+	};
+	
 	public static final int SIZE_OF_MONTH = 25;
 	public static final int ANIMATION_NEW_YEAR_DURATION = 500;
 	public static final double YEAR_VIEW_FULL_SIZE = 130.0; // 100 Originally
 	public static final double TIME_SMALL_SIZE = 90.0; // 50 Originally
 	public static final int SIZE_FACTOR = 2;
-	public static final int TOTAL_SIZE = 210; // 180 Originally. The Months' size will be TOTAL_SIZE - YEAR_VIEW_FULL_SIZE
+//	public static final int TOTAL_SIZE = 210; // 180 Originally. The Months' size will be TOTAL_SIZE - YEAR_VIEW_FULL_SIZE
+	public static final int DAY_SIZE = 7;
 	//The size of the months will be TOTAL_SIZE - YEAR_VIEW_FULL_SIZE
 	public static final int DEGREES_TO_NEW_YEAR = 30;
 	private boolean dateViewClosed = true;
@@ -45,16 +51,18 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //		yearView = new QuarterCircle(context, YEAR_VIEW_FULL_SIZE/SIZE_FACTOR);
 		yearView = new QuarterCircle(context, (int)TIME_SMALL_SIZE);
 		yearView.setText("Time");
-		LayoutParams params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-		params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		LayoutParams params1;
 
 		addView(yearView);
 		for(int i = 0; i < MONTHS_NAME.length; i++){
 //			//Log.i("TAG", "Start: " + (-90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH) + ", End: " + (-90 + SIZE_OF_MONTH*i));
 //			months.add(new QuarterCircle(context, MONTHS_NAME[i], 180, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, yearView.getRadius()*SIZE_FACTOR));
-			months.add(new QuarterCircle(context, MONTHS_NAME[i], TOTAL_SIZE, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
+//			months.add(new QuarterCircle(context, MONTHS_NAME[i], 210, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
+			months.add(new QuarterCircle(context, MONTHS_NAME[i], getDays(i) * DAY_SIZE, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
 			months.get(i).setVisibility(GONE);
+			params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+			params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 			months.get(i).setLayoutParams(params1);
 			addView(months.get(i));
 //			months.get(i).setOnTouchListener(this);
@@ -82,8 +90,28 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 		return now.get(Calendar.YEAR);
 	}
 	
+	private int getDays(int monthIndex){
+		return MONTHS_LENGTH[monthIndex];
+	}
+	
+	public static int getBiggestMonthRadiusDP(){
+		int radius = 0;
+		for(Integer i : MONTHS_LENGTH){
+			if(i > radius){
+				radius = i;
+			}
+		}
+		return radius*DAY_SIZE;
+	}
+	
 	public int getRadius(){
-		return months.get(0).getRadius();
+		int radius = 0;
+		for(QuarterCircle qc : months){
+			if(qc.getRadius() > radius){
+				radius = qc.getRadius();
+			}
+		}
+		return radius;
 	}
 	
 	public void updateMonthWithIndex(int index){
