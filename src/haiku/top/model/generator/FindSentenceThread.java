@@ -1,5 +1,7 @@
 package haiku.top.model.generator;
 
+import haiku.top.model.NonWordText;
+import haiku.top.model.Text;
 import haiku.top.model.Word;
 import java.util.ArrayList;
 import java.util.Random;
@@ -27,12 +29,14 @@ public class FindSentenceThread extends Thread{
 		wordsUsed = new ArrayList<PartOfSpeechList>(HaikuGenerator.getWordsUsed());
 		backupWords = new ArrayList<Word>(HaikuGenerator.getWordsUsedWithTheAllTheme());
 		themes = haiku.containsThemes();
+//		Log.i("TAG4", "findsentence row: " + row);
 	}
 	
 	public void run(){
 //		String sentence = getSentence(START_OBJECT, false);
 //		String sentence = getSentence();
-		ArrayList<Word> sentence = getCompletelyRandomSentence(getAllWords(), syllables);
+//		ArrayList<Word> sentence = getCompletelyRandomSentence(getAllWords(), syllables);
+		ArrayList<Text> sentence = getSentence();
 //		if(sentence == null){
 //			sentence = "NULL";
 //		}
@@ -133,7 +137,7 @@ public class FindSentenceThread extends Thread{
 		return null;
 	}
 	
-	private String getSentence(){
+	private ArrayList<Text> getSentence(){
 		ArrayList<RuleRow> rules;
 		if(row == 1){
 			rules = HaikuGenerator.getRule1Copy();
@@ -150,7 +154,7 @@ public class FindSentenceThread extends Thread{
 		int indexChosen;
 		int counter;
 		
-		String sentence;
+		ArrayList<Text> sentence;
 		
 		while(!rules.isEmpty()){
 			weightSum = 0;
@@ -167,11 +171,189 @@ public class FindSentenceThread extends Thread{
 					break;
 				}
 			}
-			sentence = getSentence(rules.get(indexChosen).getRuleText(), false);
-			if(sentence != null){
+			sentence = getSentence(rules.get(indexChosen).getRuleText());
+			if(sentence != null && !sentence.isEmpty()){
 				return sentence;
 			}
 			rules.remove(indexChosen);
+		}
+		return null;
+	}
+	
+	private ArrayList<Text> getSentence(String structure){
+		int randomIndex;
+		ArrayList<Text> returnSentence;
+		String theRest = null;
+		ArrayList<Text> sentence;
+		if(structure.charAt(0) == '('){
+			boolean switched = false;
+			boolean startWithThemeList = true;
+			randomIndex = randomGenerator.nextInt(100+1);
+			if(randomIndex > CHANCE_TO_START_WITH_THEME_LIST){
+				startWithThemeList = false;
+			}
+			int endIndex = structure.indexOf(')');
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			String wordType = structure.substring(1, endIndex);
+			ArrayList<Word> availableWords;
+			if(!themes){
+				// if there are no selected themes, then the getWords() method will return all words available. There is no need for a switch
+				switched = true;
+				availableWords = getWords(wordType);
+			}
+			else{
+				if(startWithThemeList){
+					availableWords = getWords(wordType);
+				}
+				else{
+					availableWords = getBackUpWords(wordType);
+				}
+			}
+			if(availableWords.isEmpty() && !switched){
+				switched = true;
+				if(startWithThemeList){
+					availableWords = getBackUpWords(wordType);
+				}
+				else{
+					availableWords = getWords(wordType);
+				}
+			}
+//			Log.i("TAG2", "before: " + availableWords.size());
+			updateWordList(availableWords);
+//			Log.i("TAG2", "after: " + availableWords.size());
+			if(theRest == null){
+				// the last object
+				// find a word with the right amount of syllables
+				ArrayList<Word> rightAmountOfSyllablesWords = new ArrayList<Word>();
+				for(int i = 0; i < availableWords.size(); i++){
+					if(availableWords.get(i).getNumberOfSyllables() == syllables){
+						rightAmountOfSyllablesWords.add(availableWords.get(i));
+					}
+				}
+				if(rightAmountOfSyllablesWords.isEmpty()){
+					// no words found
+					// check the other list
+					if(startWithThemeList){
+						availableWords = getBackUpWords(wordType);
+					}
+					else{
+						availableWords = getWords(wordType);
+					}
+					updateWordList(availableWords);
+					rightAmountOfSyllablesWords = new ArrayList<Word>();
+					for(int i = 0; i < availableWords.size(); i++){
+						if(availableWords.get(i).getNumberOfSyllables() == syllables){
+							rightAmountOfSyllablesWords.add(availableWords.get(i));
+						}
+					}
+					if(rightAmountOfSyllablesWords.isEmpty()){
+						// no words found
+						return null;
+					}
+					
+				}
+				randomIndex = randomGenerator.nextInt(rightAmountOfSyllablesWords.size());
+				// A whole sentence has been found!
+				haiku.getCueWords().addAll(rightAmountOfSyllablesWords.get(randomIndex).getCueWordIDs());//TODO
+				haiku.getUsedWords().add(rightAmountOfSyllablesWords.get(randomIndex));
+				sentence = new ArrayList<Text>();
+				sentence.add(rightAmountOfSyllablesWords.get(randomIndex));
+				return sentence;
+//				return rightAmountOfSyllablesWords.get(randomIndex).getText();
+			}
+			// not the last object
+			// pick a random word that doesn't have too many syllables
+			int tempSyllabels;
+			while(!availableWords.isEmpty()){
+				randomIndex = randomGenerator.nextInt(availableWords.size());
+				syllables -= availableWords.get(randomIndex).getNumberOfSyllables();
+				if(syllables <= 0){
+					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
+					syllables += tempSyllabels;
+					// since we know that words with the same amount of syllables or more as the word we just tried won't work, we can remove them from the list
+					availableWords.remove(randomIndex);
+					for(int i = availableWords.size()-1; i >= 0; i--){
+						if(availableWords.get(i).getNumberOfSyllables() >= tempSyllabels){
+							availableWords.remove(i);
+						}
+					}
+					if(availableWords.isEmpty() && !switched){
+						switched = true;
+						if(startWithThemeList){
+							availableWords = getBackUpWords(wordType);
+						}
+						else{
+							availableWords = getWords(wordType);
+						}
+					}
+					continue;
+				}
+				haiku.getCueWords().addAll(availableWords.get(randomIndex).getCueWordIDs());//TODO
+				haiku.getUsedWords().add(availableWords.get(randomIndex));
+				returnSentence = getSentence(theRest);
+				if(returnSentence == null){
+					// the rest of the sentence can not be completed with this word
+					tempSyllabels = availableWords.get(randomIndex).getNumberOfSyllables();
+					syllables += tempSyllabels;
+					haiku.removeCueWords(availableWords.get(randomIndex).getCueWordIDs());
+					haiku.removeUsedWord(availableWords.get(randomIndex));
+					// since we know that words with the same amount of syllables as the word we just tried won't work, we can remove them from the list
+					availableWords.remove(randomIndex);
+					for(int i = availableWords.size()-1; i >= 0; i--){
+						if(availableWords.get(i).getNumberOfSyllables() == tempSyllabels){
+							availableWords.remove(i);
+						}
+					}
+					if(availableWords.isEmpty() && !switched){
+						switched = true;
+						if(startWithThemeList){
+							availableWords = getBackUpWords(wordType);
+						}
+						else{
+							availableWords = getWords(wordType);
+						}
+						updateWordList(availableWords);
+					}
+					continue;
+				}
+				// return string did return something!
+				// we have found a complete sentence!
+				sentence = new ArrayList<Text>();
+				sentence.add(availableWords.get(randomIndex));
+				sentence.addAll(returnSentence);
+				return sentence;
+//				return availableWords.get(randomIndex).getText() + " " + returnSentence;
+			}
+			return null; // no words with the right word types exist in the bin
+		}
+		else if(structure.charAt(0) == '['){
+			int endIndex = structure.indexOf(']');
+			if(endIndex+1 != structure.length()){
+				theRest = structure.substring(endIndex+1);
+			}
+			if(theRest == null){
+				if(syllables != 0){
+					// was the last object, but wrong amount of syllables used
+					return null;
+				}
+				// syllables == 0
+				sentence = new ArrayList<Text>();
+				sentence.add(new NonWordText(structure.substring(1, endIndex)));
+				return sentence;
+//				return structure.substring(1, endIndex);
+			}
+			// The sentence isn't finished
+			returnSentence = getSentence(theRest);
+			if(returnSentence == null){
+				return null;
+			}
+			sentence = new ArrayList<Text>();
+			sentence.add(new NonWordText(structure.substring(1, endIndex)));
+			sentence.addAll(returnSentence);
+			return sentence;
+//			return structure.substring(1, endIndex) + " " + returnSentence;
 		}
 		return null;
 	}

@@ -47,7 +47,10 @@ public class ConversationObjectView extends LinearLayout{
 		for(int i = 0; i < addresses.size(); i++){
 			temp = HaikuActivity.getContactName(context, addresses.get(i));
 			for(int a = 0; a <= names.size(); a++){
-				if(a == names.size() || HaikuActivity.compareIgnoreCase(names.get(a), temp) <= 0){
+				if(a < names.size() && names.get(a).equals(temp)){
+					break; // duplicate
+				}
+				if(a == names.size() || HaikuActivity.compareIgnoreCase(names.get(a), temp) < 0){
 					names.add(a, temp);
 					break;
 				}

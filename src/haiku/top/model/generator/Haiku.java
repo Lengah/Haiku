@@ -1,6 +1,7 @@
 package haiku.top.model.generator;
 
 
+import haiku.top.model.Text;
 import haiku.top.model.Word;
 import haiku.top.model.WordAndNumber;
 import haiku.top.view.binview.BinView;
@@ -10,9 +11,9 @@ import java.util.ArrayList;
 import android.util.Log;
 
 public class Haiku {
-	private ArrayList<Word> row1;
-	private ArrayList<Word> row2;
-	private ArrayList<Word> row3;
+	private ArrayList<Text> row1;
+	private ArrayList<Text> row2;
+	private ArrayList<Text> row3;
 	private boolean haikuFinished = false;
 	private double startTime = System.currentTimeMillis();
 	private boolean themes;
@@ -25,7 +26,7 @@ public class Haiku {
 		generate(1);
 	}
 	
-	public Haiku(ArrayList<Word> row1, ArrayList<Word> row2, ArrayList<Word> row3){
+	public Haiku(ArrayList<Text> row1, ArrayList<Text> row2, ArrayList<Text> row3){
 		this.row1 = row1;
 		this.row2 = row2;
 		this.row3 = row3;
@@ -88,7 +89,7 @@ public class Haiku {
 		return getStringOfList(getRow(1)) + "\n" + getStringOfList(getRow(2)) + "\n" + getStringOfList(getRow(3));
 	}
 	
-	public ArrayList<Word> getRow(int row){
+	public ArrayList<Text> getRow(int row){
 		if(row == 1){
 			return row1;
 		}
@@ -127,6 +128,7 @@ public class Haiku {
 			HaikuGenerator.nextHaiku();
 		}
 		else{
+			Log.i("TAG", "HaikuGenerator.nullHaikuGenerated();");
 			HaikuGenerator.nullHaikuGenerated();
 		}
 		
@@ -162,9 +164,9 @@ public class Haiku {
 		}
 	}
 	
-	public ArrayList<String> getStringWords(ArrayList<Word> words){
+	public ArrayList<String> getStringWords(ArrayList<Text> words){
 		ArrayList<String> r = new ArrayList<String>();
-		for(Word w : words){
+		for(Text w : words){
 			r.add(w.getText());
 		}
 		return r;
@@ -174,24 +176,33 @@ public class Haiku {
 		return haikuFinished;
 	}
 	
-	public synchronized void addRow(int row, ArrayList<Word> text){
+	private boolean row1Added = false;
+	private boolean row2Added = false;
+	private boolean row3Added = false;
+	
+	public synchronized void addRow(int row, ArrayList<Text> text){
 		if(row == 1){
 			row1 = text;
+			row1Added = true;
 		}
 		if(row == 2){
 			row2 = text;
+			row2Added = true;
 		}
 		if(row == 3){
 			row3 = text;
+			row3Added = true;
 		}
-		updateHaikuFinished();
+		if(row1Added && row2Added && row3Added){
+			updateHaikuFinished();
+		}
 	}
 	
-	public String getStringOfList(ArrayList<Word> words){
+	public String getStringOfList(ArrayList<Text> words){
 		String s = "";
 		for(int i = 0; i < words.size(); i++){
 			s += words.get(i).getText();
-			if(i != words.size()-1){
+			if(i != words.size()-1 && words.get(i+1) instanceof Word){
 				s += " ";
 			}
 		}

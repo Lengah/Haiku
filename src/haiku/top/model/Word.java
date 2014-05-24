@@ -4,9 +4,8 @@ import java.util.ArrayList;
 
 import android.util.Log;
 
-public class Word {
+public class Word extends Text{
 	private long id;
-	private String text;
 	private String syllables;
 	private String wordType; //parthofspeech
 	private int numberOfSyllables;
@@ -32,8 +31,8 @@ public class Word {
 	}*/
 	
 	public Word(long id, String text, String syllables, String wordType, ArrayList<Long> cueWordIDs) {
+		super(text);
 		this.id = id;
-		this.text = text;
 		this.syllables = syllables;
 		this.wordType = wordType;
 		this.cueWordIDs = cueWordIDs;
@@ -68,9 +67,6 @@ public class Word {
 		return id;
 	}
 	
-	public String getText() {
-		return text;
-	}
 	public String getSyllables() {
 		return syllables;
 	}

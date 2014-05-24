@@ -53,24 +53,26 @@ public class BinSMSRow extends RelativeLayout{
 	}
 	
 	private static Random randomGenerator = new Random();
-	public static final int MIN_CHANCE_TO_DELETE = 15; // in %
-	public static final double MAX_INC_OF_CHANCE_TO_DELETE = 10.0; // in %
-	public static final double ROWS_AT_MAX = 100.0;
+//	public static final int MIN_CHANCE_TO_DELETE = 15; // in %
+//	public static final double MAX_INC_OF_CHANCE_TO_DELETE = 10.0; // in %
+//	public static final double ROWS_AT_MAX = 100.0;
+	private static final int CHANCE_TO_DELETE = 10;
 	
 	public ArrayList<BinSMSRowWord> setToBeDeleted(){
 		ArrayList<BinSMSRowWord> wordsToDelete = new ArrayList<BinSMSRowWord>();
 		for(int i = 0; i < words.size(); i++){
-			if(randomGenerator.nextInt(100) < getChanceToDelete()){
+//			if(randomGenerator.nextInt(100) < getChanceToDelete()){
+			if(randomGenerator.nextInt(100) < CHANCE_TO_DELETE){
 				wordsToDelete.add(words.get(i));
 			}
 		}
 		return wordsToDelete;
 	}
 	
-	// This calculation has to be done by EVERY row every time.
-	private int getChanceToDelete(){
-		return (int) (MIN_CHANCE_TO_DELETE + ((double)parent.getRows().size())/ROWS_AT_MAX * MAX_INC_OF_CHANCE_TO_DELETE);
-	}
+//	// This calculation has to be done by EVERY row every time.
+//	private int getChanceToDelete(){
+//		return (int) (MIN_CHANCE_TO_DELETE + ((double)parent.getRows().size())/ROWS_AT_MAX * MAX_INC_OF_CHANCE_TO_DELETE);
+//	}
 	
 	public ArrayList<BinSMSRowWord> getWords(){
 		return words;

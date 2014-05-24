@@ -11,18 +11,19 @@ import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.View.OnTouchListener;
 import android.widget.TextView;
+import haiku.top.model.Text;
 import haiku.top.model.Word;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.main.MainView;
 
 
 public class HaikuRowWord extends TextView{
-	private Word word;
+	private Text word;
 	private float length; // in PX
 	private float startPos; // in PX
 	private Row row;
 	
-	public HaikuRowWord(Context context, Word word, float startPos, float length, Row row){
+	public HaikuRowWord(Context context, Text word, float startPos, float length, Row row){
 		super(context);
 		this.word = word;
 		this.startPos = startPos;
@@ -32,16 +33,21 @@ public class HaikuRowWord extends TextView{
 		String startGrey = "<font color='grey'>";
 		String endColor = "</font>";
 		String message = "";
-		boolean onBlack = true;
-		String[] parts = word.getSyllables().split("·");
-		for(String s : parts){
-			if(onBlack){
-				message += startBlack + s + endColor;
+		if(word instanceof Word){
+			boolean onBlack = true;
+			String[] parts = ((Word)word).getSyllables().split("·");
+			for(String s : parts){
+				if(onBlack){
+					message += startBlack + s + endColor;
+				}
+				else{
+					message += startGrey + s + endColor;
+				}
+				onBlack = !onBlack;
 			}
-			else{
-				message += startGrey + s + endColor;
-			}
-			onBlack = !onBlack;
+		}
+		else{
+			message = startBlack + word.getText() + endColor;
 		}
 		setText(Html.fromHtml(message), TextView.BufferType.SPANNABLE);
 		setTypeface(MainView.getInstance().getHaikuTypeface());
@@ -56,7 +62,7 @@ public class HaikuRowWord extends TextView{
 		return row;
 	}
 	
-	public Word getWord(){
+	public Text getWord(){
 		return word;
 	}
 

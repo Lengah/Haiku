@@ -1,5 +1,7 @@
 package haiku.top.view.binview.haiku;
 
+import haiku.top.model.NonWordText;
+import haiku.top.model.Text;
 import haiku.top.model.Word;
 import haiku.top.view.binview.BinView;
 
@@ -33,16 +35,17 @@ public class HaikuRow extends Row{
 		return null;
 	}
 	
-	public void setWords(ArrayList<Word> words){
+	public void setWords(ArrayList<Text> words){
 		Paint paint = parent.getPaint();
 		int position = 0;
 		int length;
 		HaikuRowWord temp;
 		LayoutParams params;
-		for(Word w : words){
-//			paint.getTextBounds(w.getText(), 0, w.getText().length(), textRect);
+		for(Text w : words){
 			length = (int) paint.measureText(w.getText());
-//			length = textRect.width();
+			if(w instanceof NonWordText){
+				position = (int) Math.max(0, position-parent.getLengthOfSpace());
+			}
 			temp = new HaikuRowWord(getContext(), w, position, length, this);
 			this.words.add(temp);
 			params = new RelativeLayout.LayoutParams((int) temp.getLength(), LayoutParams.MATCH_PARENT);
@@ -150,10 +153,20 @@ public class HaikuRow extends Row{
 				words.get(i).setStartPos(0);
 			}
 			else{
-				words.get(i).setStartPos(words.get(i-1).getStartPos() + words.get(i-1).getLength() + parent.getLengthOfSpace());
+				if(words.get(i).getWord() instanceof NonWordText){
+					words.get(i).setStartPos(words.get(i-1).getStartPos() + words.get(i-1).getLength());
+				}
+				else{
+					words.get(i).setStartPos(words.get(i-1).getStartPos() + words.get(i-1).getLength() + parent.getLengthOfSpace());
+				}
 			}
 			if(i == currentIndex){
-				words.get(i).setStartPos(words.get(i).getStartPos() + parent.getDraggedView().getLength() + parent.getLengthOfSpace());
+				if(words.get(i).getWord() instanceof NonWordText){
+					words.get(i).setStartPos(words.get(i).getStartPos() + parent.getDraggedView().getLength());
+				}
+				else{
+					words.get(i).setStartPos(words.get(i).getStartPos() + parent.getDraggedView().getLength() + parent.getLengthOfSpace());
+				}
 			}
 			if(added && words.get(i).getStartPos() + words.get(i).getLength() > BinView.getInstance().getHaikuWidth()){
 				// does not fit

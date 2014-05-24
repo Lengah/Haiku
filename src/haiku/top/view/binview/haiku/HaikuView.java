@@ -1,6 +1,7 @@
 package haiku.top.view.binview.haiku;
 
 import haiku.top.model.Position;
+import haiku.top.model.Text;
 import haiku.top.model.Word;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.main.MainView;
@@ -33,7 +34,7 @@ public class HaikuView  extends RelativeLayout{
 		super(context);
 	}
 	
-	public void update(ArrayList<Word> row1, ArrayList<Word> row2, ArrayList<Word> row3){
+	public void update(ArrayList<Text> row1, ArrayList<Text> row2, ArrayList<Text> row3){
 		removeAllViews();
 		rows.clear();
 		
@@ -84,11 +85,11 @@ public class HaikuView  extends RelativeLayout{
 		return textSize;
 	}
 	
-	public String getStringOfList(ArrayList<Word> words){
+	public String getStringOfList(ArrayList<Text> words){
 		String s = "";
 		for(int i = 0; i < words.size(); i++){
 			s += words.get(i).getText();
-			if(i != words.size()-1){
+			if(i != words.size()-1 && words.get(i+1) instanceof Word){
 				s += " ";
 			}
 		}

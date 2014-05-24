@@ -861,8 +861,8 @@ public class HaikuGenerator {
 			generationsCounter++;
 			haikus.add(new Haiku(!themes.isEmpty()));
 		}
-		else if(createdHaikusCounter == NUMBER_OF_GENERATIONS){
-			//Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
+		else if(createdHaikusCounter >= NUMBER_OF_GENERATIONS){
+//			Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");
 			BinView.getInstance().allHaikusAreGenerated();
 		}
 	}

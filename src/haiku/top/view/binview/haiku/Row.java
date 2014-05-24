@@ -1,5 +1,6 @@
 package haiku.top.view.binview.haiku;
 
+import haiku.top.model.Text;
 import haiku.top.model.Word;
 
 import java.util.ArrayList;
@@ -15,8 +16,8 @@ public abstract class Row extends RelativeLayout{
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ArrayList<Word> getWords(){
-		ArrayList<Word> retWords = new ArrayList<Word>();
+	public ArrayList<Text> getWords(){
+		ArrayList<Text> retWords = new ArrayList<Text>();
 		for(HaikuRowWord ws : words){
 			retWords.add(ws.getWord());
 		}
