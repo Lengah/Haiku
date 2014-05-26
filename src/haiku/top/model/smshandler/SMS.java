@@ -26,6 +26,9 @@ public class SMS {
 	
 	private ArrayList<String> notRealWords;
 	
+	private Month month;
+	private int year;
+	
 	public SMS(long id, String message, String date, long contactID, String sentString){
 		this.id = id;
 		this.message = message;
@@ -151,7 +154,8 @@ public class SMS {
 	public String getFullDate(){
 		if(!convertedDateFormat){
 			Date obj = new Date(Long.parseLong(date));
-			String ds = sdf.format(obj.getTime());
+			String dateString = sdf.format(obj.getTime());
+			String ds = dateString;
 			if(ds.charAt(0) == '0'){
 				ds = ds.substring(1);
 			}
@@ -162,6 +166,9 @@ public class SMS {
 			dr += "'" + ds;
 			convertedDateString = dr;
 			convertedDateFormat = true;
+			int monthPos = Integer.parseInt(dateString.substring(dateString.indexOf('/')+1, dateString.lastIndexOf('/')));
+			month = DateView.MONTHS_NAME[monthPos-1];
+			year = Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1));
 		}
 		return convertedDateString;
 	}
@@ -207,16 +214,19 @@ public class SMS {
 	}
 	
 	public YearMonth getYearMonth(){
-		String dateString = getFullDate();
-		int monthPos = Integer.parseInt(dateString.substring(dateString.indexOf('/')+1, dateString.lastIndexOf('/')));
-		Month month = DateView.MONTHS_NAME[monthPos-1];
-		int year = Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1, dateString.indexOf(' ')));
+//		String dateString = getFullDate();
+//		int monthPos = Integer.parseInt(dateString.substring(dateString.indexOf('/')+1, dateString.lastIndexOf('/')));
+//		Month month = DateView.MONTHS_NAME[monthPos-1];
+//		int year = Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1, dateString.indexOf(' ')));
+		getFullDate();
 		return new YearMonth(year, month);
 	}
 	
 	public int getYear(){
-		String dateString = getFullDate();
-		return Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1, dateString.indexOf(' ')));
+//		String dateString = getFullDate();
+//		return Integer.parseInt(dateString.substring(dateString.lastIndexOf('/')+1, dateString.indexOf(' ')));
+		getFullDate();
+		return year;
 	}
 	
 	public void setDate(String date){
