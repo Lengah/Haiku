@@ -42,6 +42,9 @@ public class SMSObjectCenter extends RelativeLayout{
 		this.sms = sms;
 		smsTextView = new TextView(context);
 		smsTextView.setTextColor(Color.BLACK);
+		if(sms.isSent()){
+			smsTextView.setGravity(Gravity.RIGHT);
+		}
 		smsTextView.setTypeface(MainView.getInstance().getSmsListTypeface());
 		smsTextView.setText(sms.getMessage(), TextView.BufferType.SPANNABLE);
 		smsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, SMS_TEXT_SIZE_SP);

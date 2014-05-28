@@ -225,6 +225,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		pickedContactLayout = (LinearLayout)findViewById(R.id.pickedcontact_layout);
 		pickedContactNamesLayout = (LinearLayout)findViewById(R.id.pickedcontactnames_layout);
 		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
+		contactPic.setVisibility(GONE);
 		namesScroll = (ScrollView)findViewById(R.id.scrollofnames);
 		
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
@@ -579,13 +580,17 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		namesScroll.removeAllViews();
 		pickedContactNamesLayout.setVisibility(View.VISIBLE);
 		namesScroll.setVisibility(View.GONE);
+		int leftMargin = (int) HaikuActivity.convertDpToPixel(10);
 		if(chosenContact.getNames().size() == 1){
 			canEnlargeNamesList = false; // can not enlarge it because there is only one
 			TextView temp = new TextView(context);
+			temp.setTypeface(getContactsTypeface(), Typeface.BOLD);
 			temp.setTextColor(Color.BLACK);
 			int layoutHeight = 50;
 			int textSize = 15;
-			temp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight)));
+			LinearLayout.LayoutParams tempParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight));
+			tempParams.setMargins(leftMargin, 0, 0, 0);
+			temp.setLayoutParams(tempParams);
 			temp.setTextSize(textSize);
 			temp.setGravity(Gravity.CENTER_VERTICAL);
 			temp.setText(chosenContact.getNames().get(0));
@@ -606,14 +611,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			namesScrollLayout.setOnClickListener(this);
 			namesScroll.addView(namesScrollLayout);
 			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,listHeight);
-			params.setMargins((int) HaikuActivity.convertDpToPixel(3), 0, 0, 0);
 			namesScroll.setLayoutParams(params);
 			
 			
 			for(String s : chosenContact.getNames()){
 				temp = new TextView(context);
+				temp.setTypeface(getContactsTypeface(), Typeface.BOLD);
 				temp.setTextColor(Color.BLACK);
-				temp.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight)));
+				LinearLayout.LayoutParams tempParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight));
+				tempParams.setMargins(leftMargin, 0, 0, 0);
+				temp.setLayoutParams(tempParams);
 				temp.setTextSize(textSize); // sp as default
 				temp.setGravity(Gravity.CENTER_VERTICAL);
 				temp.setText(s);
@@ -621,8 +628,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 				
 				
 				temp2 = new TextView(context);
+				temp2.setTypeface(getContactsTypeface(), Typeface.BOLD);
 				temp2.setTextColor(Color.BLACK);
-				temp2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight)));
+				LinearLayout.LayoutParams temp2Params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight));
+				temp2Params.setMargins(leftMargin, 0, 0, 0);
+				temp2.setLayoutParams(temp2Params);
+				
 				temp2.setTextSize(textSize); // sp as default
 				temp2.setGravity(Gravity.CENTER_VERTICAL);
 				temp2.setText(s);

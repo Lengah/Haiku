@@ -41,7 +41,7 @@ public class SMSObject extends RelativeLayout{
 	 * The side boxes' max width defined by the size of the center box in %.
 	 * The bigger the box the bigger max size of the side boxes
 	 */
-	public static final double WIDTH_OF_SIDES = 5.0;
+	public static final double WIDTH_OF_SIDES = 0.0; // 5.0
 	
 	/**
 	 * 1 = the height a row takes up in the sms, 2 = 2 rows etc

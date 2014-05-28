@@ -344,6 +344,10 @@ public class HaikuActivity extends Activity {
 		display.getSize(size);
 		screenWidth = size.x;
 		screenHeight = size.y - getStatusBarHeight() - getActionBarHeight();
+//		Log.i("TAG4", "getActionBarHeight():" + getActionBarHeight());
+//		Log.i("TAG4", "getStatusBarHeight():" + getStatusBarHeight());
+//		Log.i("TAG4", "screenHeight:" + screenHeight);
+//		Log.i("TAG4", "screenWidth:" + screenWidth);
     }
     
     public int getStatusBarHeight() {
@@ -753,7 +757,7 @@ public class HaikuActivity extends Activity {
 	}
     
 	/**
-	 * Compares two Strings
+	 * Compares two Strings. A letter is "before" a non-letter character such as a number
 	 * @return +1 if firstString is before secondString  , 0 if firstString == secondsString and -1 if secondString is before firstString
 	 */
 	public static int compareIgnoreCase(String firstString, String secondString){
@@ -762,6 +766,18 @@ public class HaikuActivity extends Activity {
 		}
 		char[] firstStringCharArray = firstString.toLowerCase().toCharArray();
 		char[] secondStringCharArray = secondString.toLowerCase().toCharArray();
+		if(firstStringCharArray.length > 0 && !HaikuGenerator.isAWordCharacter(firstStringCharArray[0])
+				&& secondStringCharArray.length > 0 && HaikuGenerator.isAWordCharacter(secondStringCharArray[0])){
+			// First string starts with a non-word character (such as a number) while the second starts with a word-character (such as 'a')
+			// -> the second string should be before the first string
+			return -1;
+		}
+		if(firstStringCharArray.length > 0 && HaikuGenerator.isAWordCharacter(firstStringCharArray[0])
+				&& secondStringCharArray.length > 0 && !HaikuGenerator.isAWordCharacter(secondStringCharArray[0])){
+			// First string starts with a word-character (such as 'a') while the second starts with a non-word character (such as a number)
+			// -> the first string should be before the second string
+			return 1;
+		}
 		int i = 0;
 		while(true){
 			if(firstStringCharArray[i] < secondStringCharArray[i]){

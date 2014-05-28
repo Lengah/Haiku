@@ -186,6 +186,7 @@ public class QuarterCircle extends View{
         
         // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
+        drawOffset = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, drawOffset, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
         // Google tells us to call recycle.
         attrsArray.recycle();
@@ -200,6 +201,7 @@ public class QuarterCircle extends View{
         
         // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
+        drawOffset = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, drawOffset, getResources().getDisplayMetrics());
         circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
         
 //        radiansRotation = (float) (((double)Math.abs(TIME_YEAR_ROTATION))/180.0*Math.PI); // The rotation in radians
@@ -214,6 +216,7 @@ public class QuarterCircle extends View{
         
         // See the circleRadius value as a dp value and convert it to a px value
         circleRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, circleRadius, getResources().getDisplayMetrics());
+        drawOffset = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, drawOffset, getResources().getDisplayMetrics());
 //        circleArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
 //        circleOuterArc = new RectF(-circleRadius, 0, circleRadius, circleRadius*2);
 //        circleInnerArc = new RectF(-drawOffset, circleRadius-drawOffset, drawOffset, drawOffset*2+(circleRadius-drawOffset));

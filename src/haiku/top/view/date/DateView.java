@@ -58,7 +58,7 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 //			//Log.i("TAG", "Start: " + (-90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH) + ", End: " + (-90 + SIZE_OF_MONTH*i));
 //			months.add(new QuarterCircle(context, MONTHS_NAME[i], 180, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, yearView.getRadius()*SIZE_FACTOR));
 //			months.add(new QuarterCircle(context, MONTHS_NAME[i], 210, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
-			months.add(new QuarterCircle(context, MONTHS_NAME[i], getDays(i) * DAY_SIZE, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE*SIZE_FACTOR));
+			months.add(new QuarterCircle(context, MONTHS_NAME[i], getDays(i) * DAY_SIZE, -90 + SIZE_OF_MONTH*i + SIZE_OF_MONTH, -90 + SIZE_OF_MONTH*i, (int)YEAR_VIEW_FULL_SIZE));
 			months.get(i).setVisibility(GONE);
 			params1 = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			params1.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);

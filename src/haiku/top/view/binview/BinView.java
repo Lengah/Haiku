@@ -427,7 +427,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 		// SAVE BUTTON
 		int saveWidth = (int)(((double)SAVE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
-		int saveHeight = (int)(((double)SAVE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+//		int saveHeight = (int)(((double)SAVE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		
+		int saveHeight = (int) (saveWidth * (259.0/265.0));
 		
 		int saveMarginLeft = (int)(((double)SAVE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int saveMarginTop = (int)(((double)SAVE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
@@ -449,7 +451,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		
 		// SHARE BUTTON
 		int shareWidth = (int)(((double)SHARE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
-		int shareHeight = (int)(((double)SHARE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+//		int shareHeight = (int)(((double)SHARE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		int shareHeight = shareWidth;
+		
 		
 		int shareMarginLeft = (int)(((double)SHARE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int shareMarginTop = (int)(((double)SHARE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);

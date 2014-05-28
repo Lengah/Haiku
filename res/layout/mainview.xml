@@ -45,8 +45,7 @@
 			    android:id="@+id/pickedcontactnames_layout"
 			    android:layout_width="match_parent"
 		        android:layout_height="50dp"
-		        android:orientation="vertical"
-		        android:layout_marginLeft="3dp">
+		        android:orientation="vertical">
 				    
 			</LinearLayout>
 			
