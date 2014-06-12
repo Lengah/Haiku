@@ -23,19 +23,17 @@ import android.widget.RelativeLayout.LayoutParams;
 
 public class ConversationObjectView extends LinearLayout{
 	private static final int TEXT_SIZE = 15;
-	private ImageView image;
-	private ImageView imageForeground;
+
 	private int threadID;
-	private Bitmap picture;
+//	private Bitmap picture;
 	private ArrayList<String> names;
 	private ArrayList<String> addresses;
 	
 	private LetterSpacingTextView nameView1;
 	private LetterSpacingTextView nameView2;
 	private LetterSpacingTextView nameView3;
-	private LetterSpacingTextView nameView4;
-	private LetterSpacingTextView nameView5;
-	
+	private TextView plus;
+
 	private int smsCount;
 	
 	public ConversationObjectView(Context context, int threadID, boolean recent){//, String address) {
@@ -63,118 +61,81 @@ public class ConversationObjectView extends LinearLayout{
 		
 		setBackgroundResource(android.R.drawable.list_selector_background);
 		
-		RelativeLayout imageLayout = (RelativeLayout)findViewById(R.id.imageLayers);
-		image = (ImageView)findViewById(R.id.contactPic);
-		imageForeground = (ImageView)findViewById(R.id.contact_foreground);
-		
 		LinearLayout l1 = (LinearLayout)findViewById(R.id.contactname1);
 		LinearLayout l2 = (LinearLayout)findViewById(R.id.contactname2);
 		LinearLayout l3 = (LinearLayout)findViewById(R.id.contactname3);
-		LinearLayout l4 = (LinearLayout)findViewById(R.id.contactname4);
-		LinearLayout l5 = (LinearLayout)findViewById(R.id.contactname5);
-		
+		plus = (TextView)findViewById(R.id.contact_plus);
 		nameView1 = new LetterSpacingTextView(context);
 		nameView2 = new LetterSpacingTextView(context);
 		nameView3 = new LetterSpacingTextView(context);
-		nameView4 = new LetterSpacingTextView(context);
-		nameView5 = new LetterSpacingTextView(context);
 		
 		if(recent && !isHaikuConversation()){
 			nameView1.setTypeface(MainView.getInstance().getContactsTypeface(), Typeface.BOLD);
 			nameView2.setTypeface(MainView.getInstance().getContactsTypeface(), Typeface.BOLD);
 			nameView3.setTypeface(MainView.getInstance().getContactsTypeface(), Typeface.BOLD);
-			nameView4.setTypeface(MainView.getInstance().getContactsTypeface(), Typeface.BOLD);
-			nameView5.setTypeface(MainView.getInstance().getContactsTypeface(), Typeface.BOLD);
+			plus.setTypeface(MainView.getInstance().getContactsTypeface(), Typeface.BOLD);
 		}
 		else{
 			nameView1.setTypeface(MainView.getInstance().getContactsTypeface());
 			nameView2.setTypeface(MainView.getInstance().getContactsTypeface());
 			nameView3.setTypeface(MainView.getInstance().getContactsTypeface());
-			nameView4.setTypeface(MainView.getInstance().getContactsTypeface());
-			nameView5.setTypeface(MainView.getInstance().getContactsTypeface());
+			plus.setTypeface(MainView.getInstance().getContactsTypeface());
 		}
-		
-//		nameView1.setLetterSpacing(12);
-//		nameView2.setLetterSpacing(10);
-//		nameView3.setLetterSpacing(8);
-//		nameView4.setLetterSpacing(3);
-//		nameView5.setLetterSpacing(5);
-//		nameView1.setScaleX((float) 0.5);
-//		nameView2.setScaleX((float) 0.8);
-//		nameView3.setScaleX((float) 0.6);
-//		nameView4.setScaleX((float) 0.5);
-//		nameView5.setScaleX(5);
 		
 		nameView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE);
 		nameView2.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE);
 		nameView3.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE);
-		nameView4.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE);
-		nameView5.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE);
+		plus.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SIZE);
 		
 		nameView1.setTextColor(Color.BLACK);
 		nameView2.setTextColor(Color.BLACK);
 		nameView3.setTextColor(Color.BLACK);
-		nameView4.setTextColor(Color.BLACK);
-		nameView5.setTextColor(Color.BLACK);
+		plus.setTextColor(Color.BLACK);
 		
 		l1.addView(nameView1, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		l2.addView(nameView2, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		l3.addView(nameView3, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		l4.addView(nameView4, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		l5.addView(nameView5, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		
 //		LetterSpacingTextView nameView1 = (LetterSpacingTextView)findViewById(R.id.contactname1);
 //		LetterSpacingTextView nameView2 = (LetterSpacingTextView)findViewById(R.id.contactname2);
 //		LetterSpacingTextView nameView3 = (LetterSpacingTextView)findViewById(R.id.contactname3);
 //		LetterSpacingTextView nameView4 = (LetterSpacingTextView)findViewById(R.id.contactname4);
 //		LetterSpacingTextView nameView5 = (LetterSpacingTextView)findViewById(R.id.contactname5);
-		TextView plus = (TextView)findViewById(R.id.contactnameplus);
 //		cursor = HaikuActivity.getThread(context, threadID);
 //		name = HaikuActivity.getContactName(context, cursor.getString(cursor.getColumnIndexOrThrow("address")));
-		if(!isHaikuConversation()){
-			imageLayout.setVisibility(View.GONE);
+		if(isHaikuConversation()){
+			LinearLayout l = (LinearLayout)findViewById(R.id.ContactLayout);
+			ImageView image = new ImageView(context);
+			image.setImageResource(R.drawable.haiku_contact_image);
+			image.setLayoutParams(new LayoutParams((int)HaikuActivity.convertDpToPixel(50), (int)HaikuActivity.convertDpToPixel(50)));
+			l.addView(image, 0);
 		}
 		if(names.size() == 1){
 			nameView1.setText(names.get(0));
 			
 			nameView2.setVisibility(View.GONE);
 			nameView3.setVisibility(View.GONE);
-			nameView4.setVisibility(View.GONE);
-			nameView5.setVisibility(View.GONE);
+			plus.setVisibility(View.GONE);
 		}
 		else if(names.size() == 2){
 			nameView1.setText(names.get(0));
 			nameView2.setText(names.get(1));
 			
 			nameView3.setVisibility(View.GONE);
-			nameView4.setVisibility(View.GONE);
-			nameView5.setVisibility(View.GONE);
+			plus.setVisibility(View.GONE);
 		}
 		else if(names.size() == 3){
 			nameView1.setText(names.get(0));
 			nameView2.setText(names.get(1));
 			nameView3.setText(names.get(2));
 			
-			nameView4.setVisibility(View.GONE);
-			nameView5.setVisibility(View.GONE);
-		}
-		else if(names.size() == 4){
-			nameView1.setText(names.get(0));
-			nameView2.setText(names.get(1));
-			nameView3.setText(names.get(2));
-			nameView4.setText(names.get(3));
-			
-			nameView5.setVisibility(View.GONE);
-		}
-		else if(names.size() >= 5){
-			nameView1.setText(names.get(0));
-			nameView2.setText(names.get(1));
-			nameView3.setText(names.get(2));
-			nameView4.setText(names.get(3));
-			nameView5.setText(names.get(4));
-		}
-		if(names.size() <= 5){
 			plus.setVisibility(View.GONE);
+		}
+		else if(names.size() >= 4){
+			nameView1.setText(names.get(0));
+			nameView2.setText(names.get(1));
+			nameView3.setText(names.get(2));
+			plus.setVisibility(VISIBLE);
 		}
 		// Adobe Garamond Pro looks weird for contact names.
 //        Typeface adobeGaramondProRegular = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
@@ -198,12 +159,15 @@ public class ConversationObjectView extends LinearLayout{
 		int paddingLeftAndRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, getResources().getDisplayMetrics());
 		
 		setPadding(paddingLeftAndRight, paddingTopAndBottom, paddingLeftAndRight, paddingTopAndBottom);
-		if(names.size() == 1){
-			picture = HaikuActivity.getContactPhoto(context, names.get(0)); // this method works
-		}
-		if(picture == null){
-			picture = BitmapFactory.decodeResource(context.getResources(), R.drawable.contact_bg_default);
-		}
+		// funkar
+//		if(names.size() == 1){
+//			picture = HaikuActivity.getContactPhoto(context, names.get(0)); // this method works
+//		}
+//		if(picture == null){
+//			picture = BitmapFactory.decodeResource(context.getResources(), R.drawable.contact_bg_default);
+//		}
+		// /funkar
+		
 //		picture = HaikuActivity.getImage(context, name);
 //	    InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(), ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, threadID));
 //	    if (input != null) {
@@ -281,8 +245,6 @@ public class ConversationObjectView extends LinearLayout{
 		nameView1.setLetterSpacing(spacing);
 		nameView2.setLetterSpacing(spacing);
 		nameView3.setLetterSpacing(spacing);
-		nameView4.setLetterSpacing(spacing);
-		nameView5.setLetterSpacing(spacing);
 	}
 	
 //	public Cursor getCursor(){
@@ -321,9 +283,9 @@ public class ConversationObjectView extends LinearLayout{
 		return names;
 	}
 	
-	public Bitmap getPicture(){
-		return picture;
-	}
+//	public Bitmap getPicture(){
+//		return picture;
+//	}
 	
 	public boolean isHaikuConversation(){
 		return names.size() == 1 && names.get(0).equals("Haiku");

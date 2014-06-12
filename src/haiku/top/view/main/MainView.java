@@ -46,6 +46,7 @@ import haiku.top.HaikuActivity;
 import haiku.top.R;
 import haiku.top.model.Theme;
 import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.generator.Theme_ThreadID_Tuple;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.model.smshandler.ShowSMSESThread;
 import haiku.top.model.sql.DatabaseHandler;
@@ -70,6 +71,11 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	public static final double RIGHT_VIEWS_WIDTH = 100;
 	private double rightViewsWidth;
 	
+	/**
+	 * % of the big versions width (rightsViewsWidth)
+	 */
+	private static final double THEME_SMALL_WIDTH = 25.0;
+	
 	public static final int ANIMATION_TIME_BIN = 300;
 	public static final int ANIMATION_TIME_DATE = 300;
 	public static final float OPACITY_USED = (float) 0.3;
@@ -91,6 +97,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	private ScrollView themeScroll;
 	private LinearLayout themeList;
+	private RelativeLayout themeListSmall;
+	private RelativeLayout themeListBig;
 	
 	private ScrollView contactScroll;
 	private LinearLayout contactList;
@@ -98,7 +106,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LinearLayout smslayout;
 	private LinearLayout pickedContactLayout;
 	private LinearLayout pickedContactNamesLayout;
-	private ImageView contactPic;
 	private ConversationObjectView chosenContact;
 	private ScrollView namesScroll;
 	private LinearLayout namesScrollLayout;
@@ -144,6 +151,12 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LayoutParams fillerParams;
 	private float fillerHeight;
 	
+	//TODO
+	private TranslateAnimation themeCloseAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, (float) 0.0, Animation.RELATIVE_TO_SELF, (float) (1-THEME_SMALL_WIDTH/100.0), Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
+	private TranslateAnimation themeOpenAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, (float) (1-THEME_SMALL_WIDTH/100.0), Animation.RELATIVE_TO_SELF, (float) 0.0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
+	
+	private static final int THEME_ANIMATION_LENGTH = 200;
+	
 	public MainView(Context context) {
 		super(context);
 		this.context = context;
@@ -168,6 +181,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		int themeViewHeight = (int) (HaikuActivity.getInstance().getWindowHeight()*THEME_HEIGHT/100.0);
 		int smallBinViewHeight = HaikuActivity.getInstance().getWindowHeight()-themeViewHeight;
 		
+		themeListBig = new RelativeLayout(context);
+		
 		themeScroll = new ScrollView(context);
 		themeScroll.setVerticalScrollBarEnabled(false);
 		themeScroll.setBackgroundColor(COLOR_THEME_BACKGROUND);
@@ -176,33 +191,70 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		themeParams.addRule(ALIGN_PARENT_RIGHT);
 		themeParams.addRule(ALIGN_PARENT_TOP);
 		
+		themeListSmall = new RelativeLayout(context);
+		LinearLayout themeListSmallR = new LinearLayout(context); // the rotating part
+		LinearLayout themeListSmallF = new LinearLayout(context); // the filler
+		
+//		themeListSmall.setRotation(THEME_ROTATION);
+		
+		int width = (int) (2*rightViewsWidth);
+		
+		LayoutParams themeParams1 = new RelativeLayout.LayoutParams(width, themeViewHeight);
+		themeParams1.addRule(ALIGN_PARENT_RIGHT);
+		themeParams1.addRule(ALIGN_PARENT_TOP);
+		
+		LayoutParams themeParams2 = new RelativeLayout.LayoutParams(width, themeViewHeight);
+		themeParams2.addRule(ALIGN_PARENT_RIGHT);
+		themeParams2.addRule(ALIGN_PARENT_TOP);
+		
+		LayoutParams themeParams2R = new RelativeLayout.LayoutParams((int) (rightViewsWidth*THEME_SMALL_WIDTH/100.0), themeViewHeight);
+		themeParams2R.addRule(ALIGN_PARENT_RIGHT);
+		themeParams2R.addRule(ALIGN_PARENT_TOP);
+		
+		double radiansAngle = ((double)Math.abs(THEME_ROTATION))/180.0*Math.PI; // The rotation in radians
+		
+		// the distance to the top of the screen
+        int yOffset = (int) (Math.sin(radiansAngle)*((double)width)/2); // the width of the actual themeview is width/2
+        
+        // the distance from the themeview's xpos to the xpos at the top of the screen if you follow the angle
+        int xOffset = (int) Math.sqrt(yOffset*yOffset*(1.0/(Math.cos(radiansAngle)*Math.cos(radiansAngle)) - 1));
+        
+		LayoutParams themeParams2F = new RelativeLayout.LayoutParams(width, themeViewHeight);
+		themeParams2F.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		themeParams2F.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		themeParams2F.setMargins(0, -yOffset, (int)(-width + rightViewsWidth*THEME_SMALL_WIDTH/100.0) + xOffset, 0);
+//		fillParams.setMargins(0, -yOffset, -width/2 + xOffset, 0);
+		
+		themeListSmallR.setBackgroundColor(COLOR_THEME_BACKGROUND);
+		themeListSmallF.setBackgroundColor(COLOR_THEME_BACKGROUND);
+		
+		themeListSmallF.setRotation(THEME_ROTATION);
+		themeListSmallR.setRotation(THEME_ROTATION);
+		
+		
+		themeListSmall.addView(themeListSmallR, themeParams2R);
+		themeListSmall.addView(themeListSmallF, themeParams2F);
+		
 		haikuBinViewSmall = new SmallBinView(context, (int) rightViewsWidth, smallBinViewHeight);
 		LayoutParams haikuBinViewSmallParams = new RelativeLayout.LayoutParams((int) rightViewsWidth, smallBinViewHeight);
 		haikuBinViewSmallParams.addRule(ALIGN_PARENT_RIGHT);
 		haikuBinViewSmallParams.addRule(ALIGN_PARENT_BOTTOM);
 		
-		addView(themeScroll, themeParams);
+		addView(themeListSmall, themeParams2);
+		addView(themeListBig, themeParams1);
+		
+		themeListBig.addView(themeScroll, themeParams);
 		addView(haikuBinViewSmall, haikuBinViewSmallParams);
 		
 		ImageView yellowBackground = new ImageView(context);
 		yellowBackground.setBackgroundColor(Color.rgb(251, 206, 13));
 		
-		int width = (int) (2*rightViewsWidth);
-        
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
 	    listWidth = HaikuActivity.getInstance().getWindowWidth() - Math.round(110 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));   
         
         SMSObject.setMarginSides((int) (listWidth*(SMSObject.MARGIN_SIDES/100.0)));
         SMSObject.setPaddingSides((int) (listWidth*(SMSObject.PADDING_SIDES/100.0)));
         SMSObject.calc();
-        
-        double radiansAngle = ((double)Math.abs(THEME_ROTATION))/180.0*Math.PI; // The rotation in radians
-        
-        // the distance to the top of the screen
-        int yOffset = (int) (Math.sin(radiansAngle)*((double)width)/2); // the width of the actual themeview is width/2
-        
-        // the distance from the themeview's xpos to the xpos at the top of the screen if you follow the angle
-        int xOffset = (int) Math.sqrt(yOffset*yOffset*(1.0/(Math.cos(radiansAngle)*Math.cos(radiansAngle)) - 1));
         
 		LayoutParams fillParams = new RelativeLayout.LayoutParams(width, themeViewHeight);
 		fillParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -211,7 +263,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		yellowBackground.setLayoutParams(fillParams);
 		
 		yellowBackground.setRotation(THEME_ROTATION);
-		addView(yellowBackground);
+		themeListBig.addView(yellowBackground);
 		
 		LayoutInflater layoutInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		layoutInflater.inflate(R.layout.mainview,this);
@@ -224,8 +276,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		smslayout = (LinearLayout)findViewById(R.id.smslayout);
 		pickedContactLayout = (LinearLayout)findViewById(R.id.pickedcontact_layout);
 		pickedContactNamesLayout = (LinearLayout)findViewById(R.id.pickedcontactnames_layout);
-		contactPic = (ImageView)findViewById(R.id.pickedcontactpic);
-		contactPic.setVisibility(GONE);
 		namesScroll = (ScrollView)findViewById(R.id.scrollofnames);
 		
 		smsScroll = (ScrollView)findViewById(R.id.scrollofsms);
@@ -299,6 +349,32 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		updateConversationsVisibility();
 		updateSMSView();
 		updateThemeView();
+		
+		themeListBig.setVisibility(GONE);
+		themeOpenAnimation.setDuration(THEME_ANIMATION_LENGTH);
+		themeCloseAnimation.setDuration(THEME_ANIMATION_LENGTH);
+		
+		themeCloseAnimation.setAnimationListener(new AnimationListener() {
+			public void onAnimationStart(Animation animation) {
+				themeListSmall.setVisibility(VISIBLE);
+			}
+			public void onAnimationRepeat(Animation animation) {
+			}
+			public void onAnimationEnd(Animation animation) {
+				themeListBig.setVisibility(GONE);
+			}
+		}); //TODO
+		
+		themeOpenAnimation.setAnimationListener(new AnimationListener() {
+			public void onAnimationStart(Animation animation) {
+				themeListBig.setVisibility(VISIBLE);
+			}
+			public void onAnimationRepeat(Animation animation) {
+			}
+			public void onAnimationEnd(Animation animation) {
+				themeListSmall.setVisibility(GONE);
+			}
+		});
 		
 //		contactScroll.setOnTouchListener(new OnTouchListener() {
 //			   @Override
@@ -441,6 +517,8 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		boolean haikuContactAdded = false;
 		boolean recent;
 		Cursor cursor = HaikuActivity.getThreads(context);
+		ConversationObjectView temp;
+		Log.i("TAG4", "conversations: " + cursor.getCount());
 		if (cursor.moveToFirst()) {
 			do{
 				recent = false;
@@ -449,7 +527,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 					recent = true;
 				}
 //				conversations.add(new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), cursor.getString(cursor.getColumnIndexOrThrow("address"))));
-				ConversationObjectView temp = new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), recent);
+				temp = new ConversationObjectView(context, cursor.getInt(cursor.getColumnIndexOrThrow("thread_id")), recent);
 				if(temp.isHaikuConversation()){
 					latestCounter++;
 					conversations.add(0, temp);
@@ -581,39 +659,11 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		pickedContactNamesLayout.setVisibility(View.VISIBLE);
 		namesScroll.setVisibility(View.GONE);
 		int leftMargin = (int) HaikuActivity.convertDpToPixel(10);
-		if(chosenContact.getNames().size() == 1){
-			canEnlargeNamesList = false; // can not enlarge it because there is only one
-			TextView temp = new TextView(context);
-			temp.setTypeface(getContactsTypeface(), Typeface.BOLD);
-			temp.setTextColor(Color.BLACK);
-			int layoutHeight = 50;
-			int textSize = 15;
-			LinearLayout.LayoutParams tempParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight));
-			tempParams.setMargins(leftMargin, 0, 0, 0);
-			temp.setLayoutParams(tempParams);
-			temp.setTextSize(textSize);
-			temp.setGravity(Gravity.CENTER_VERTICAL);
-			temp.setText(chosenContact.getNames().get(0));
-			pickedContactNamesLayout.addView(temp);
-		}
-		else{
-			canEnlargeNamesList = true;
+		int textSize = 15;
+		if(chosenContact.getNames().size() <= 3){
+			canEnlargeNamesList = false;
 			TextView temp;
-			TextView temp2;
 			int layoutHeight = 25;
-			int textSize = 15;
-			
-			int maxScrollListHeight = (int) HaikuActivity.convertDpToPixel(150);
-			namesScrollLayout = new LinearLayout(context);
-			int listHeight = Math.min(maxScrollListHeight, (int) HaikuActivity.convertDpToPixel(layoutHeight) * chosenContact.getNames().size());
-			namesScrollLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-			namesScrollLayout.setOrientation(LinearLayout.VERTICAL);
-			namesScrollLayout.setOnClickListener(this);
-			namesScroll.addView(namesScrollLayout);
-			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,listHeight);
-			namesScroll.setLayoutParams(params);
-			
-			
 			for(String s : chosenContact.getNames()){
 				temp = new TextView(context);
 				temp.setTypeface(getContactsTypeface(), Typeface.BOLD);
@@ -625,7 +675,50 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 				temp.setGravity(Gravity.CENTER_VERTICAL);
 				temp.setText(s);
 				pickedContactNamesLayout.addView(temp);
-				
+			}
+		}
+		else{
+			canEnlargeNamesList = true;
+			TextView temp;
+			TextView temp2;
+			int layoutHeight = 25;
+			
+			int maxScrollListHeight = (int) HaikuActivity.convertDpToPixel(150);
+			namesScrollLayout = new LinearLayout(context);
+			int listHeight = Math.min(maxScrollListHeight, (int) HaikuActivity.convertDpToPixel(layoutHeight) * chosenContact.getNames().size());
+			namesScrollLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+			namesScrollLayout.setOrientation(LinearLayout.VERTICAL);
+			namesScrollLayout.setOnClickListener(this);
+			namesScroll.addView(namesScrollLayout);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,listHeight);
+			namesScroll.setLayoutParams(params);
+			
+			for(int i = 0; i < chosenContact.getNames().size(); i++){
+				String s = chosenContact.getNames().get(i);
+				if(i < 3){
+					temp = new TextView(context);
+					temp.setTypeface(getContactsTypeface(), Typeface.BOLD);
+					temp.setTextColor(Color.BLACK);
+					LinearLayout.LayoutParams tempParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight));
+					tempParams.setMargins(leftMargin, 0, 0, 0);
+					temp.setLayoutParams(tempParams);
+					temp.setTextSize(textSize); // sp as default
+					temp.setGravity(Gravity.CENTER_VERTICAL);
+					temp.setText(s);
+					pickedContactNamesLayout.addView(temp);
+				}
+				if(i == 3){
+					temp = new TextView(context);
+					temp.setTypeface(getContactsTypeface(), Typeface.BOLD);
+					temp.setTextColor(Color.BLACK);
+					LinearLayout.LayoutParams tempParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) HaikuActivity.convertDpToPixel(layoutHeight));
+					tempParams.setMargins(leftMargin, 0, 0, 0);
+					temp.setLayoutParams(tempParams);
+					temp.setTextSize(textSize); // sp as default
+					temp.setGravity(Gravity.CENTER_VERTICAL);
+					temp.setText("...");
+					pickedContactNamesLayout.addView(temp);
+				}
 				
 				temp2 = new TextView(context);
 				temp2.setTypeface(getContactsTypeface(), Typeface.BOLD);
@@ -642,17 +735,30 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 	}
 	
+	public void closeThemeView(){ //TODO
+		themeListBig.startAnimation(themeCloseAnimation);
+//		themeListSmall.setVisibility(VISIBLE);
+//		themeListBig.setVisibility(GONE);
+	}
+	
+	public void openThemeView(){
+		updateThemeView();
+		themeListBig.startAnimation(themeOpenAnimation);
+//		themeListBig.setVisibility(VISIBLE);
+//		themeListSmall.setVisibility(GONE);
+	}
+	
 	public void setSMSView(int threadID){
 		smsListTopOffset = 0;
 		viewsOpenInOrder.add(VIEW_SHOWN_SMS);
 		contactScroll.setVisibility(GONE);
 		smslayout.setVisibility(VISIBLE);
-		if(chosenContact.getPicture() != null){
-			contactPic.setImageBitmap(chosenContact.getPicture());
-		}
-		else{
-//			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
-		}
+//		if(chosenContact.getPicture() != null){
+//			contactPic.setImageBitmap(chosenContact.getPicture());
+//		}
+//		else{
+////			contactPic.setBackgroundDrawable(R.drawable.delete_by_haiku_logo);
+//		}
 //		contactName.setText(chosenContact.getName());
 		updateContactNames(threadID);
 		if(chosenContact.getNames().get(0).equals("Haiku")){
@@ -663,6 +769,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 		workerThread = new ShowSMSESThread(threadID, lookingAtHaikus);
 		workerThread.start();
+		openThemeView();
 	}
 	
 	private int smsListTopOffset;
@@ -784,6 +891,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 	
 	public void closeSMSView(){
+		closeThemeView();
 		updateConversationsVisibility();
 		contactScroll.setVisibility(VISIBLE);
 //		smsScroll.setVisibility(GONE); //TODO
@@ -795,14 +903,25 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	}
 	
 	public void updateThemeView(){
-		for(int i = 0; i < themeObjects.size(); i++){
-			if(HaikuGenerator.getThemes().contains(themeObjects.get(i).getTheme())){
-				themeObjects.get(i).setAlpha(OPACITY_USED);
-			}
-			else{
+		if(isShowingSMS()){
+			for(int i = 0; i < themeObjects.size(); i++){
 				themeObjects.get(i).setAlpha(OPACITY_DEFAULT);
+				for(Theme_ThreadID_Tuple t : HaikuGenerator.getThemes()){
+					if(t.getThemeID() == themeObjects.get(i).getTheme().getID() && t.getThreadID() == getSelectedConvoThreadID()){
+						themeObjects.get(i).setAlpha(OPACITY_USED);
+						break;
+					}
+				}
 			}
 		}
+//		for(int i = 0; i < themeObjects.size(); i++){
+//			if(HaikuGenerator.getThemes().contains(themeObjects.get(i).getTheme())){
+//				themeObjects.get(i).setAlpha(OPACITY_USED);
+//			}
+//			else{
+//				themeObjects.get(i).setAlpha(OPACITY_DEFAULT);
+//			}
+//		}
 	}
 	
 	private boolean isBinColor = false;

@@ -7,27 +7,6 @@
     android:minHeight="20dp"
     android:layout_marginTop="5dp">
     
-    <RelativeLayout 
-        android:id="@+id/imageLayers"
-        android:layout_width="50dp"
-    	android:layout_height="50dp" >
-
-	    <ImageView
-	        android:id="@+id/contactPic"
-	        android:layout_width="50dp"
-	        android:layout_height="50dp"
-	        android:adjustViewBounds="true"
-	        android:src="@drawable/haiku_contact_image"/>
-    
-	    <ImageView
-	        android:id="@+id/contact_foreground"
-	        android:alpha="0"
-	        android:layout_width="50dp"
-	        android:layout_height="50dp"
-	        android:adjustViewBounds="true"
-	        android:src="@drawable/contact_fg"/>
-	    
-	</RelativeLayout>
 	<RelativeLayout 
 	    android:id="@+id/contactnamesspace"
 	    android:layout_width="match_parent"
@@ -67,37 +46,18 @@
 				        android:gravity="center_vertical"
 				        android:layout_marginLeft="55dp"/>
 	    	    	
-	    	    	<LinearLayout 
-	    	    	    android:id="@+id/contactname4"
+	    	    	<TextView
+	    	    	    android:id="@+id/contact_plus"
 	    	    	    android:orientation="vertical"
 	    	    	    android:layout_width="match_parent"
 				        android:layout_height="wrap_content"
 				        android:layout_weight="1"
 				        android:gravity="center_vertical"
+				        android:text="..."
 				        android:layout_marginLeft="80dp"/>
-	    	    	
-	    	    	<LinearLayout 
-	    	    	    android:id="@+id/contactname5"
-	    	    	    android:orientation="vertical"
-	    	    	    android:layout_width="match_parent"
-				        android:layout_height="wrap_content"
-				        android:layout_weight="1"
-				        android:gravity="center_vertical"
-				        android:layout_marginLeft="105dp"/>
+
 
 	    	</LinearLayout>
-	    	<TextView
-				        android:id="@+id/contactnameplus"
-				        android:text="+"
-				        android:textColor="#404040"
-				        android:layout_width="50dp"
-				        android:layout_height="50dp"
-				        android:textSize="40sp" 
-				        android:gravity="right"
-				        android:layout_marginRight="1dp"
-				        android:layout_marginBottom="1dp"
-				        android:layout_alignParentRight="true"
-				        android:layout_alignParentBottom="true"/>
 	</RelativeLayout>
     
 

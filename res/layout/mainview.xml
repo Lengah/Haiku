@@ -32,19 +32,11 @@
 		    android:layout_height="wrap_content" 
 		    android:orientation="horizontal"
 		    android:layout_marginRight="110dp">
-		
-		    <ImageView
-		        android:id="@+id/pickedcontactpic"
-		        android:layout_width="50dp"
-		        android:layout_height="50dp"
-		        android:adjustViewBounds="true"
-		        android:src="@drawable/delete_by_haiku_logo"/>
-		    
 		    
 			<LinearLayout
 			    android:id="@+id/pickedcontactnames_layout"
 			    android:layout_width="match_parent"
-		        android:layout_height="50dp"
+		        android:layout_height="wrap_content"
 		        android:orientation="vertical">
 				    
 			</LinearLayout>

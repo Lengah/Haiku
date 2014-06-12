@@ -6,9 +6,11 @@ import haiku.top.R;
 import haiku.top.model.Theme;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.smshandler.SMS;
 import haiku.top.view.ThemeObjectView;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.date.QuarterCircle;
+import haiku.top.view.date.YearMonthView;
 import haiku.top.view.main.sms.SMSObject;
 import android.content.Context;
 import android.graphics.Color;
@@ -27,6 +29,11 @@ public class HaikuBinDragListener implements OnDragListener{
 	private int notInBinColor = Color.rgb(255, 236, 142);
 	
 	private boolean isAddingDuringDeletion = false;
+	private boolean isDraggingFromSmallBin = false;
+	
+	public void draggingFromSmallBin(){
+		isDraggingFromSmallBin = true;
+	}
 	
 	public void resetDeletionAddingFlag(){
 		isAddingDuringDeletion = false;
@@ -45,7 +52,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		inBinRange = true;
 	    		view = MainView.getInstance().getDraggedView();
-	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObject || view instanceof QuarterCircle)){
+	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObject || view instanceof QuarterCircle || view instanceof ThemeObjectView)){
 	    			// Since deletion has started the user should be able to place the dragged object in the bin
 	    			isAddingDuringDeletion = true;
 	    			MainView.getInstance().getBinView().setAddingObjectDuringDeletion(view);
@@ -56,6 +63,9 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		inBinRange = false;
 	    		break;
 	    	case DragEvent.ACTION_DROP:
+	    		if(isDraggingFromSmallBin){
+	    			break;
+	    		}
 	    		inBinRange = false;
 	    		if(BinView.getInstance().isShowingHaiku()){
 	    			return true;
@@ -99,17 +109,36 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		break;
 	    	case DragEvent.ACTION_DRAG_ENDED:
 	    		view = MainView.getInstance().getDraggedView();
-	    		if(view instanceof ThemeObjectView){
-	    			MainView.getInstance().updateThemeView();
+	    		if(isDraggingFromSmallBin){
+	    			if(!inBinRange){
+	    				if(view instanceof ThemeObjectView){
+		    				HaikuGenerator.removeTheme(((ThemeObjectView) view).getTheme());
+		    				BinView.getInstance().removeTheme((ThemeObjectView) view);
+		    			}
+		    			if(view instanceof YearMonthView){
+		    				ArrayList<SMS> removedSMS = HaikuGenerator.removeDate(((YearMonthView) view).getYearMonth());
+		    				BinView.getInstance().removeDate((YearMonthView) view);
+		    				BinView.getInstance().removeSMSES(removedSMS);
+		    			}
+	    			}
+	    			else{
+	    				view.setAlpha(MainView.OPACITY_DEFAULT);
+	    			}
+	    			isDraggingFromSmallBin = false;
 	    		}
-	    		if(view instanceof ConversationObjectView){
-	    			MainView.getInstance().updateConversationsVisibility();
-	    		}
-	    		if(view instanceof SMSObject){
-	    			MainView.getInstance().updateSMSView();
-	    		}
-	    		if(view instanceof QuarterCircle){
-	    			MainView.getInstance().updateDateView();
+	    		else{
+	    			if(view instanceof ThemeObjectView){
+		    			MainView.getInstance().updateThemeView();
+		    		}
+		    		if(view instanceof ConversationObjectView){
+		    			MainView.getInstance().updateConversationsVisibility();
+		    		}
+		    		if(view instanceof SMSObject){
+		    			MainView.getInstance().updateSMSView();
+		    		}
+		    		if(view instanceof QuarterCircle){
+		    			MainView.getInstance().updateDateView();
+		    		}
 	    		}
 	    	default:
 	    		break;

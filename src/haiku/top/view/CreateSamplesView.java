@@ -144,7 +144,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 	@Override
 	public void onClick(View v) {
 		if(v.equals(loadButton)){
-			HaikuActivity.vibe.vibrate(40);
+//			HaikuActivity.vibe.vibrate(40);
 			new LoadTask(true).execute(); 		
 			samplesExist = true;
 			loadButton.setEnabled(false);
@@ -156,7 +156,7 @@ public class CreateSamplesView extends LinearLayout implements SeekBar.OnSeekBar
 		}
 		
 		if(v.equals(removeButton)) {
-			HaikuActivity.vibe.vibrate(40);
+//			HaikuActivity.vibe.vibrate(40);
 			new LoadTask(false).execute(); 			
 			samplesExist = false;
 			loadButton.setEnabled(true);

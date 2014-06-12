@@ -1,6 +1,12 @@
 package haiku.top;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -14,6 +20,7 @@ import haiku.top.model.smshandler.SMS;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.binview.BinView;
+import haiku.top.view.main.ConversationObjectView;
 import haiku.top.view.main.MainView;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,6 +44,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
@@ -62,13 +70,13 @@ import android.view.Window;
 public class HaikuActivity extends Activity {
 	private static HaikuActivity ha;
 	private View mainView;
-	private View createSamplesView;
+//	private View createSamplesView; //createSamplesView <item android:id="@+id/samplecontent" android:title="Sample content" /> i options_menu.xml i res/menu
 	private boolean inCreateSamplesView;
 	public static final String ALLBOXES = "content://sms/";
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
 
-	public static Vibrator vibe;
+//	public static Vibrator vibe;
 	
 	private SharedPreferences mPrefs;
 //	public boolean smsWordTableExist; //has SMSWORD table been loaded
@@ -85,32 +93,32 @@ public class HaikuActivity extends Activity {
         super.onCreate(savedInstanceState);
         calculateHeightAndWidth();
         ha = this;
-        createSamplesView = new CreateSamplesView(this);
+//        createSamplesView = new CreateSamplesView(this); // createSamplesView
 //        initContactsAndSMS(this);
-        vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+//        vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         
 		//import saved data
 		mPrefs = getPreferences(Context.MODE_PRIVATE);
-		((CreateSamplesView)createSamplesView).samplesExist = mPrefs.getBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session?
+//		((CreateSamplesView)createSamplesView).samplesExist = mPrefs.getBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, false); //has contacts/SMS been loaded in a previous session? //createSamplesView
 //		smsWordTableExist =  mPrefs.getBoolean(SMSWORD_EXIST_KEY, false);
 		safeMode =  mPrefs.getBoolean(SAFE_MODE_KEY, true);
 		
         //if so, load contacts
-        if (((CreateSamplesView)createSamplesView).samplesExist) {
-        	Set<String> importContact = new HashSet<String>();
-        	importContact = mPrefs.getStringSet(CreateSamplesView.EXPORT_CONTACT_KEY, null);
-
-	        ArrayList<String> contactsToArray = new ArrayList<String>(importContact);
-	        for (int i=0; i < contactsToArray.size(); i++)
-	        	((CreateSamplesView)createSamplesView).contacts.add(new CreateSamplesContact(contactsToArray.get(i).
-	        		substring(0, contactsToArray.get(i).indexOf("·*$")), contactsToArray.get(i). 
-	        		substring(contactsToArray.get(i).indexOf("·*$") + 3, contactsToArray.get(i).length())));
-	        
-	        Set<String> importSMS = new HashSet<String>();
-	        importSMS = mPrefs.getStringSet(CreateSamplesView.EXPORT_SMS_KEY, null);
-	        ((CreateSamplesView)createSamplesView).sms.addAll(importSMS);
-        }
-        ((CreateSamplesView)createSamplesView).updateAfterImport();
+//        if (((CreateSamplesView)createSamplesView).samplesExist) { // createSamplesView
+//        	Set<String> importContact = new HashSet<String>();
+//        	importContact = mPrefs.getStringSet(CreateSamplesView.EXPORT_CONTACT_KEY, null);
+//
+//	        ArrayList<String> contactsToArray = new ArrayList<String>(importContact);
+//	        for (int i=0; i < contactsToArray.size(); i++)
+//	        	((CreateSamplesView)createSamplesView).contacts.add(new CreateSamplesContact(contactsToArray.get(i).
+//	        		substring(0, contactsToArray.get(i).indexOf("·*$")), contactsToArray.get(i). 
+//	        		substring(contactsToArray.get(i).indexOf("·*$") + 3, contactsToArray.get(i).length())));
+//	        
+//	        Set<String> importSMS = new HashSet<String>();
+//	        importSMS = mPrefs.getStringSet(CreateSamplesView.EXPORT_SMS_KEY, null);
+//	        ((CreateSamplesView)createSamplesView).sms.addAll(importSMS);
+//        }
+//        ((CreateSamplesView)createSamplesView).updateAfterImport(); // createSamplesView
         
         
         //create and open deltebyhaiku_db
@@ -125,6 +133,7 @@ public class HaikuActivity extends Activity {
 		HaikuGenerator.init();
 		mainView = new MainView(this);
 		setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//		saveAllHaikuMessages();
     }
     
     @Override
@@ -136,6 +145,73 @@ public class HaikuActivity extends Activity {
         }
     }
     
+    /**
+     * Requires:
+     * <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+     */
+    private void saveAllHaikuMessages(){
+    	Log.i("TAG", "saveAllHaikuMessages");
+    	Cursor cursor = HaikuActivity.getThreads(this);
+		if (cursor.moveToFirst()) {
+			do{
+				int threadID = cursor.getInt(cursor.getColumnIndexOrThrow("thread_id"));
+				ArrayList<String> addresses = HaikuActivity.getConversationNumbers(this, threadID);
+				ArrayList<String> names = new ArrayList<String>();
+				String temp;
+				for(int i = 0; i < addresses.size(); i++){
+					temp = HaikuActivity.getContactName(this, addresses.get(i));
+					for(int a = 0; a <= names.size(); a++){
+						if(a < names.size() && names.get(a).equals(temp)){
+							break; // duplicate
+						}
+						if(a == names.size() || HaikuActivity.compareIgnoreCase(names.get(a), temp) < 0){
+							names.add(a, temp);
+							break;
+						}
+					}
+				}
+				if(names.size() == 1 && names.get(0).equals("Haiku")){
+					// is the haiku conversation
+					Log.i("TAG", "is the haiku conversation");
+					cursor = HaikuActivity.getHaikuThread(this, threadID);
+					int id;
+					String message;
+					String date;
+					String type;
+					ArrayList<SMS> haikuSMS = new ArrayList<SMS>();
+					if (cursor.moveToFirst()) {
+						do{
+							id = cursor.getInt(cursor.getColumnIndexOrThrow("_id"));
+							message = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+							date = cursor.getString(cursor.getColumnIndexOrThrow("date"));
+							type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
+							haikuSMS.add(new SMS(id, message, date, threadID, type));
+						}
+						while(cursor.moveToNext());
+					}
+					try {
+						File file = new File(Environment.getExternalStorageDirectory(), "haiku_messages.txt");
+						BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+						Log.i("TAG", "write: " + haikuSMS.size());
+						for(SMS sms : haikuSMS){
+							writer.write(sms.getFullDate());
+							writer.newLine();
+							writer.write(sms.getMessage());
+							writer.newLine();
+							writer.newLine();
+						}
+						writer.close();
+					} catch (IOException e) {
+						Log.i("TAG", "IOException");
+						e.printStackTrace();
+					}
+					return;
+				}
+			}
+			while(cursor.moveToNext());
+		}
+    }
+    
     public boolean isSafeMode(){
     	return safeMode;
     }
@@ -143,19 +219,19 @@ public class HaikuActivity extends Activity {
     protected void onPause() { //save data between sessions
         super.onPause();
         SharedPreferences.Editor ed = mPrefs.edit();
-        ed.putBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, ((CreateSamplesView)createSamplesView).samplesExist);
+//        ed.putBoolean(CreateSamplesView.SAMPLES_EXIST_KEY, ((CreateSamplesView)createSamplesView).samplesExist); //createSamplesView
 //        ed.putBoolean(SMSWORD_EXIST_KEY, smsWordTableExist);
         ed.putBoolean(SAFE_MODE_KEY, safeMode);
 
-        if (((CreateSamplesView)createSamplesView).samplesExist) { //if samples were created during session, save contacts
-	        Set<String> exportContact = new HashSet<String>();
-	        for (CreateSamplesContact contact : ((CreateSamplesView)createSamplesView).contacts)
-	        	exportContact.add(contact.name + "·*$" + contact.phoneNumber); //token separator    
-	        ed.putStringSet(CreateSamplesView.EXPORT_CONTACT_KEY, exportContact);
-	        
-	        Set<String> exportSMS = new HashSet<String>(((CreateSamplesView)createSamplesView).sms);
-	        ed.putStringSet(CreateSamplesView.EXPORT_SMS_KEY, exportSMS);
-        }
+//        if (((CreateSamplesView)createSamplesView).samplesExist) { //if samples were created during session, save contacts //createSamplesView
+//	        Set<String> exportContact = new HashSet<String>();
+//	        for (CreateSamplesContact contact : ((CreateSamplesView)createSamplesView).contacts)
+//	        	exportContact.add(contact.name + "·*$" + contact.phoneNumber); //token separator    
+//	        ed.putStringSet(CreateSamplesView.EXPORT_CONTACT_KEY, exportContact);
+//	        
+//	        Set<String> exportSMS = new HashSet<String>(((CreateSamplesView)createSamplesView).sms);
+//	        ed.putStringSet(CreateSamplesView.EXPORT_SMS_KEY, exportSMS);
+//        }
 
         ed.commit();
     }
@@ -172,10 +248,10 @@ public class HaikuActivity extends Activity {
         case android.R.id.home:
         	backPressed();
         	return true;
-        case R.id.samplecontent:
-       	 setContentView(createSamplesView);
-       	 inCreateSamplesView = true;
-        return true;
+//        case R.id.samplecontent: //createSamplesView
+//       	 setContentView(createSamplesView);
+//       	 inCreateSamplesView = true;
+//       	 return true;
         case R.id.safemode:
         
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);

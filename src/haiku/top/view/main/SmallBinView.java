@@ -6,22 +6,33 @@ import haiku.top.model.Position;
 import haiku.top.model.Theme;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.smshandler.SMS;
 import haiku.top.view.ThemeObjectView;
+import haiku.top.view.binview.BinView;
+import haiku.top.view.date.QuarterCircle;
 import haiku.top.view.date.YearMonthView;
+import haiku.top.view.main.sms.SMSObject;
 
 import java.util.ArrayList;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.DragShadowBuilder;
+import android.view.View.OnClickListener;
+import android.view.View.OnDragListener;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class SmallBinView extends RelativeLayout{
+public class SmallBinView extends RelativeLayout implements OnTouchListener{
 	private ArrayList<YearMonthView> datesView = new ArrayList<YearMonthView>();
 	private ArrayList<ThemeObjectView> themesView = new ArrayList<ThemeObjectView>();
 	
@@ -144,14 +155,15 @@ public class SmallBinView extends RelativeLayout{
 		themeViews.get(4).setLayoutParams(theme5Params);
 		themeViews.get(4).setRotation(THEME_ROTATION);
 		
+		setOnTouchListener(this);
 	}
 	
 	public void addTheme(Theme theme){
 		ThemeObjectView tob = new ThemeObjectView(context, theme, themeObjectWidth, themeObjectHeight);
 		themesView.add(tob);
-//		tob.setOnTouchListener(this);
 //		stateChanged = true;
 		updateThemeView();
+		tob.setOnTouchListener(this);
 	}
 	
 	public void removeTheme(ThemeObjectView tob){
@@ -180,7 +192,7 @@ public class SmallBinView extends RelativeLayout{
 		YearMonthView ymv = new YearMonthView(context, ym, dateWidth, dateObjectHeight);
 		datesView.add(ymv);
 		dateList.addView(ymv);
-//		ymv.setOnTouchListener(this);
+		ymv.setOnTouchListener(this);
 	}
 	
 	public void removeDate(YearMonth ym){
@@ -201,4 +213,90 @@ public class SmallBinView extends RelativeLayout{
 		}
 	}
 	
+	private boolean outside;
+	private View draggedView;
+	private View pressedDownOn;
+
+//	@Override
+//	public boolean onDrag(View v, DragEvent event) {
+//		if(draggedView == null){
+//			return false;
+//		}
+//		int action = event.getAction();
+//	    switch (action) {
+//	    	case DragEvent.ACTION_DRAG_STARTED:
+//	    		Log.i("TAG4", "ACTION_DRAG_STARTED");
+//	    		outside = false;
+//	    		break;
+//	    	case DragEvent.ACTION_DRAG_ENTERED:
+//	    		Log.i("TAG4", "ACTION_DRAG_ENTERED");
+//	    		outside = false;
+//	    		break;
+//	    	case DragEvent.ACTION_DRAG_EXITED:
+//	    		Log.i("TAG4", "ACTION_DRAG_EXITED");
+//	    		outside = true;
+//	    		break;
+//	    	case DragEvent.ACTION_DROP:
+//	    		Log.i("TAG4", "ACTION_DROP: " + outside);
+//	    		break;
+//	    	case DragEvent.ACTION_DRAG_ENDED:
+//	    		Log.i("TAG4", "ACTION_DRAG_ENDED: "  + outside);
+//	    		if(outside){
+//	    			if(draggedView instanceof ThemeObjectView){
+//	    				HaikuGenerator.removeTheme(((ThemeObjectView) draggedView).getTheme());
+//	    				BinView.getInstance().removeTheme((ThemeObjectView) draggedView);
+//	    			}
+//	    			if(draggedView instanceof YearMonthView){
+//	    				ArrayList<SMS> removedSMS = HaikuGenerator.removeDate(((YearMonthView) draggedView).getYearMonth());
+//	    				BinView.getInstance().removeDate((YearMonthView) draggedView);
+//	    				BinView.getInstance().removeSMSES(removedSMS);
+//	    			}
+//	    		}
+//	    		if(!outside){
+//	    			draggedView.setAlpha(MainView.OPACITY_DEFAULT);
+//	    		}
+//	    	default:
+//	    		break;
+//	    }
+//	    return true;
+//	}
+	
+	private float startX;
+	private float startY;
+	private double startTime;
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		if(event.getAction() == MotionEvent.ACTION_DOWN){
+			startTime = System.currentTimeMillis();
+			startX = event.getX();
+			startY = event.getY();
+			if(v != null && !(v instanceof SmallBinView)){
+				pressedDownOn = v;
+			}
+			return true;
+		}
+		else if(event.getAction() == MotionEvent.ACTION_UP){
+			if(MainView.CLICK_TIME > System.currentTimeMillis()-startTime){
+				// Click!
+				MainView.getInstance().openBinView();
+			}
+			pressedDownOn = null;
+		}
+		else if (event.getAction() == MotionEvent.ACTION_MOVE && pressedDownOn != null && !BinView.getInstance().isDeleting()) {
+			float distance = (float) Math.sqrt((startX-event.getX())*(startX-event.getX())
+					+ (startY-event.getY())*(startY-event.getY()));
+			if(distance > MainView.MOVE_TO_DRAG_RANGE){
+				// start drag
+				pressedDownOn.setAlpha(MainView.OPACITY_USED);
+//				draggedView = pressedDownOn;
+				MainView.getInstance().getHaikuDragListener().draggingFromSmallBin();
+				MainView.getInstance().setDraggedView(pressedDownOn);
+//				draggedView.setOnDragListener(this);
+				pressedDownOn.startDrag(null, new DragShadowBuilder(pressedDownOn), null, 0);
+				return true;
+			}
+		}
+		return false;
+	}
 }

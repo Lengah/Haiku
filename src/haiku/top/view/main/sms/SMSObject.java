@@ -20,10 +20,10 @@ import android.widget.RelativeLayout.LayoutParams;
 
 public class SMSObject extends RelativeLayout{
 //	public static final int COLOR_OF_SENT_SMS = Color.rgb(207, 224, 231);
-	public static final int COLOR_OF_SENT_SMS = Color.rgb(255, 255, 255);
+	public static final int COLOR_OF_SENT_SMS = Color.argb(0, 255, 255, 255);
 	
 //	public static final int COLOR_OF_RECEIVED_SMS = Color.rgb(235, 237, 190);
-	public static final int COLOR_OF_RECEIVED_SMS = Color.rgb(255, 255, 255);
+	public static final int COLOR_OF_RECEIVED_SMS = Color.argb(0, 255, 255, 255);
 	
 	/**
 	 * The padding to the right and left (depending whether it is a sent or a received message) in % of the list width.

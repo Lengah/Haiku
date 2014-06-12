@@ -365,6 +365,10 @@ public class BinCombinedSMS extends RelativeLayout{
 		return rows;
 	}
 	
+//	public void addSMSesAtLastPosition(ArrayList<SMS> smses){
+//		addSMSesAtPosition(smses, rows.size()-1, (int) rows.get(rows.size()-1).getWords().get(rows.get(rows.size()-1).getWords().size()-1).getEndPos());
+//	}
+	
 	public void addSMSesAtPosition(ArrayList<SMS> smses, int rowIndex, int xPos){
 		ArrayList<BinSMSRowWord> wordsReplaced = new ArrayList<BinSMSRowWord>();
 		int firstOffset = rows.get(rowIndex).calculateOffsetOfWords(xPos);

@@ -50,6 +50,10 @@ public class BinSMSRowWord extends TextView{
 		this.row = row;
 	}
 	
+	public float getEndPos(){
+		return startPos + length;
+	}
+	
 	/**
 	 * Updates the color and a variable
 	 */

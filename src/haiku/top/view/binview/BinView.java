@@ -80,8 +80,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private ScrollView textScroll;
 	private LinearLayout textList;
 	
-	private static final String SAVE_TEXT = "Save";
-	private static final String SHARE_TEXT = "Share";
+//	private static final String SAVE_TEXT = "Save";
+//	private static final String SHARE_TEXT = "Share";
 	
 	private Button saveButton;
 	private Button shareButton;
@@ -98,7 +98,6 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 //	private static final int DATE_WIDTH = 75; //in dp
 //	private static final int DATE_HEIGHT = 50; //in dp
-	
 	
 	// Everything in px
 	private static final int BIN_IMAGE_WIDTH = 718;
@@ -180,12 +179,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int SLIDER_DOT_DIM = 35;
 	
 	// the smses
-	private static final Position TEXT_UPPER_LEFT = new Position(240, 330);
-	private static final int TEXT_WIDTH = 470;
-	private static final int TEXT_HEIGHT = 750;
+	private static final Position TEXT_UPPER_LEFT = new Position(160, 330); // 240, 330
+	private static final int TEXT_WIDTH = 550; // 470
+	private static final int TEXT_HEIGHT = 850; // 750
 	
 	// the extra words
-	private static final Position HAIKU_REST_UPPER_LEFT = new Position(350, 230);
+	private static final Position HAIKU_REST_UPPER_LEFT = new Position(350, 230); // 350, 230
 	private static final int HAIKU_REST_WIDTH = 370;
 	private static final int HAIKU_REST_HEIGHT = 320;
 	private int haikuRestWidth;
@@ -195,9 +194,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int haikuRestMarginTop;
 	
 	// the haiku
-	private static final Position HAIKU_UPPER_LEFT = new Position(200, 570);
-	private static final int HAIKU_WIDTH = 520;
-	private static final int HAIKU_HEIGHT = 250;
+	private static final Position HAIKU_UPPER_LEFT = new Position(160, 550); // 200, 570
+	private static final int HAIKU_WIDTH = 540; // 520
+	private static final int HAIKU_HEIGHT = 250; // 250
 	private int haikuWidth; // used to calculate the text size of the rows
 	private int haikuHeight;
 	
@@ -215,11 +214,11 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private static final int SHARE_HEIGHT = SHARE_WIDTH; // the actual image file is a square
 	
 	// the date list
-	private static final Position DATE_UPPER_LEFT = new Position(70, 870);
-	private static final int DATE_WIDTH = 130;
-	private static final int DATE_HEIGHT = 280;
-	private static final int DATE_OBJECT_HEIGHT = 70; // The width is the same
-	private static final int DATE_ROTATION = -5;
+	private static final Position DATE_UPPER_LEFT = new Position(20, 400); // 70, 870
+	private static final int DATE_WIDTH = 130; // 130
+	private static final int DATE_HEIGHT = 600; // 280s
+	private static final int DATE_OBJECT_HEIGHT = 70; // 70  // The width is the same
+	private static final int DATE_ROTATION = 0; // -5
 	private int dateWidth;
 	private int dateObjectHeight;
 	
@@ -334,6 +333,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		progressBarParams.setMargins(sliderMarginLeft, sliderMarginTop, 0, 0);
 		progressBar.setLayoutParams(progressBarParams);
 		addView(progressBar);
+		progressBar.setVisibility(GONE);
 		
 		// SMSES
 		textWidth = (int)(((double)TEXT_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
@@ -346,6 +346,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		
 		LinearLayout nameAndTextLayout = new LinearLayout(context);
 		textScroll = new ScrollView(context);
+		textScroll.setScrollbarFadingEnabled(false);
 		textList = new LinearLayout(context);
 		contactName = new TextView(context);
 		
@@ -610,6 +611,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			    		twoFingers = true;
 			    		BinView.getInstance().onTouch(BinView.getInstance(), event);
 			    	}
+				   else{
+					   isDeleting = false;
+			    		twoFingers = false;
+				   }
 					if(event.getAction() == MotionEvent.ACTION_UP){
 						twoFingers = false;
 						pressedDownOn = null;
@@ -620,7 +625,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		
 		ArrayList<SMS> smsRefresh = HaikuGenerator.getAllSMS();
 		ArrayList<YearMonth> datesRefresh = HaikuGenerator.getDates();
-		ArrayList<Theme> themesRefresh = HaikuGenerator.getThemes();
+		ArrayList<Theme> themesRefresh = HaikuGenerator.getUsedThemes();
 		
 		for(int i = 0; i < smsRefresh.size(); i++){
 			addSMSBeforeDeletion(smsRefresh.get(i));
@@ -719,8 +724,16 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void removeDate(YearMonthView ymv){
-		dateList.removeView(ymv);
-		datesView.remove(ymv);
+		YearMonthView toRemove = null;
+		for(YearMonthView ym : datesView){
+			if(ym.getYearMonth().equals(ymv.getYearMonth())){
+				toRemove = ym;
+				break;
+			}
+		}
+		//should NEVER be null here
+		dateList.removeView(toRemove);
+		datesView.remove(toRemove);
 		MainView.getInstance().getSmallBinView().removeDate(ymv.getYearMonth());
 	}
 	
@@ -995,6 +1008,12 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void addTheme(Theme theme){
+		for(ThemeObjectView tv : themesView){
+			if(tv.getTheme().equals(theme)){
+				// Already in the bin, just added from another sms conversation
+				return;
+			}
+		}
 		ThemeObjectView tob = new ThemeObjectView(context, theme, true);
 		themesView.add(tob);
 		tob.setOnTouchListener(this);
@@ -1617,7 +1636,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 					return true;
 				}
 			}
-			else if(distance > MainView.MOVE_TO_DRAG_RANGE && pressedDownOn instanceof ThemeObjectView){ // Themes can still be removed even if deletion is in progress 
+			else if(!deletionInProgress && distance > MainView.MOVE_TO_DRAG_RANGE && pressedDownOn instanceof ThemeObjectView){ // Themes can still be removed even if deletion is in progress 
 				// start drag
 				pressedDownOn.setAlpha(MainView.OPACITY_USED);
 				viewBeingDragged = pressedDownOn;
@@ -1963,6 +1982,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    	    				}
 	    		    		}
 	    				}
+	    				if(addingObjectDuringDeletion instanceof ThemeObjectView){
+	    					smses = HaikuGenerator.addThemeDuringDeletion(((ThemeObjectView)addingObjectDuringDeletion).getTheme());
+	    				}
 	    				binCombinedSMSView.addSMSesAtPosition(smses, rowIndex, xIndex);
 	    				onOpen();
 	    			}
@@ -2014,6 +2036,18 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    }
 	    return true;
 	}
+	
+//	public void addSMSesAtLastPosition(final ArrayList<SMS> smses){
+//		HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+//	        @Override
+//	        public void run(){
+//	        	if(deletionInProgress){
+//	    			Log.i("TAG4", "addSMSesAtLastPosition: " + smses.size());
+//	    			binCombinedSMSView.addSMSesAtLastPosition(smses);
+//	    		}
+//			}
+//		});
+//	}
 
 //	private void setHaikuFonts() {
 //        Typeface charle = Typeface.createFromAsset(context.getAssets(), "fonts/CharlemagneStd-Bold.otf");

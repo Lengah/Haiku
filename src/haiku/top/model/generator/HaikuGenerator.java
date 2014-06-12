@@ -9,6 +9,7 @@ import haiku.top.model.date.YearMonth;
 import haiku.top.model.date.YearMonthConvo;
 import haiku.top.model.smshandler.AddSmsThread;
 import haiku.top.model.smshandler.AddSmsesThread;
+import haiku.top.model.smshandler.FindValidSMSWithTheme;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.date.DateView;
@@ -28,25 +29,30 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.AlteredCharSequence;
 import android.util.Log;
+import android.widget.Toast;
 
 public class HaikuGenerator {
-	private static ArrayList<Theme> themes = new ArrayList<Theme>();
+	public static final int THEME_WORD_MULTIPLIER = 2;
+	
+	private static ArrayList<Theme_ThreadID_Tuple> themes = new ArrayList<Theme_ThreadID_Tuple>();
+//	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
 	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
 	private static ArrayList<YearMonthConvo> datesFromThreads = new ArrayList<YearMonthConvo>();
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
-	private static Theme theAllTheme;
+//	private static Theme theAllTheme;
 //	private static ArrayList<Word> smsLogWordsWithThemes = new ArrayList<Word>();
-	private static ArrayList<Word> smsLogWordsWithTheAllTheme = new ArrayList<Word>();
+//	private static ArrayList<Word> smsLogWordsWithTheAllTheme = new ArrayList<Word>();
 	private static ArrayList<Word> allSmsLogWords = new ArrayList<Word>();
-	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
-	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
+//	private static ArrayList<Long> themeWordIDs = new ArrayList<Long>();
+//	private static ArrayList<Long> theAllThemeWordIDs = new ArrayList<Long>();
 	private static ArrayList<Haiku> haikus = new ArrayList<Haiku>();
-	private static final int NUMBER_OF_GENERATIONS = 32;
+	private static final int NUMBER_OF_GENERATIONS = 16;
 	private static int generationsCounter;
 	
-	private static ArrayList<PartOfSpeechList> allWordsUsedWithThemesOrderedByTypes = new ArrayList<PartOfSpeechList>();
+	private static ArrayList<PartOfSpeechList> allWordsOrderedByTypes = new ArrayList<PartOfSpeechList>();
+	private static ArrayList<PartOfSpeechList> allWordsOrderedByTypesUpdated = new ArrayList<PartOfSpeechList>();
 	
 	// for example [the(1)]
 //	private static ArrayList<Word> wordsDefinedInRulesTextFile = new ArrayList<Word>();
@@ -229,7 +235,7 @@ public class HaikuGenerator {
 					allSmsLogWords.remove(a);
 				}
 			}
-			for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+			for(PartOfSpeechList pl : allWordsOrderedByTypes){
 				for(int a = pl.getWords().size()-1; a >= 0; a--){
 					if(pl.getWords().get(a).getText().equalsIgnoreCase(wordsRemoved.get(i))){
 						smsLogWordsWithThemesRemoved.add(pl.getWords().get(a));
@@ -243,12 +249,12 @@ public class HaikuGenerator {
 //					smsLogWordsWithThemes.remove(a);
 //				}
 //			}
-			for(int a = smsLogWordsWithTheAllTheme.size() - 1; a >= 0; a--){
-				if(wordsRemoved.get(i).equals(smsLogWordsWithTheAllTheme.get(a).getText())){
-					smsLogWordsWithTheAllThemeRemoved.add(smsLogWordsWithTheAllTheme.get(a));
-					smsLogWordsWithTheAllTheme.remove(a);
-				}
-			}
+//			for(int a = smsLogWordsWithTheAllTheme.size() - 1; a >= 0; a--){
+//				if(wordsRemoved.get(i).equals(smsLogWordsWithTheAllTheme.get(a).getText())){
+//					smsLogWordsWithTheAllThemeRemoved.add(smsLogWordsWithTheAllTheme.get(a));
+//					smsLogWordsWithTheAllTheme.remove(a);
+//				}
+//			}
 		}
 	}
 	
@@ -266,15 +272,15 @@ public class HaikuGenerator {
 		thread_ids.clear();
 		smses.clear();
 		dates.clear();
-		smsLogWordsWithTheAllTheme.clear();
-		for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+//		smsLogWordsWithTheAllTheme.clear();
+		for(PartOfSpeechList pl : allWordsOrderedByTypes){
 			pl.getWords().clear();
 		}
 //		smsLogWordsWithThemes.clear();
 		allSmsLogWords.clear();
 		haikus.clear();
 		haikusRemovedLast.clear();
-		themeWordIDs.clear();
+//		themeWordIDs.clear();
 	}
 	
 	public static void checkIfHaikusAreValid(ArrayList<String> wordsRemoved){
@@ -308,7 +314,7 @@ public class HaikuGenerator {
 			allSmsLogWords.addAll(allSmsLogWordsRemoved);
 			addWordsWithTheme(smsLogWordsWithThemesRemoved);
 //			smsLogWordsWithThemes.addAll(smsLogWordsWithThemesRemoved);
-			smsLogWordsWithTheAllTheme.addAll(smsLogWordsWithTheAllThemeRemoved);
+//			smsLogWordsWithTheAllTheme.addAll(smsLogWordsWithTheAllThemeRemoved);
 			allSmsLogWordsRemoved.clear();
 			smsLogWordsWithThemesRemoved.clear();
 			smsLogWordsWithTheAllThemeRemoved.clear();
@@ -324,7 +330,7 @@ public class HaikuGenerator {
 	
 	private static void addWordsWithTheme(ArrayList<Word> words){
 		for(Word word : words){
-			for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+			for(PartOfSpeechList pl : allWordsOrderedByTypes){
 				if(word.getwordType().equalsIgnoreCase(pl.getPartOfSpeech().getType())){
 					pl.getWords().add(word);
 					break;
@@ -334,7 +340,7 @@ public class HaikuGenerator {
 	}
 	
 	private static void addWordWithTheme(Word word){
-		for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+		for(PartOfSpeechList pl : allWordsOrderedByTypes){
 			if(word.getwordType().equalsIgnoreCase(pl.getPartOfSpeech().getType())){
 				pl.getWords().add(word);
 				break;
@@ -344,16 +350,16 @@ public class HaikuGenerator {
 	
 	private static void removeWordsWithTheme(ArrayList<Word> words){
 		for(Word word : words){
-			for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+			for(PartOfSpeechList pl : allWordsOrderedByTypes){
 				pl.getWords().remove(word);
 			}
 		}
 	}
 	
 	public static PartOfSpeech getPartOfSpeechWithID(long id){
-		for(int i = 0; i < allWordsUsedWithThemesOrderedByTypes.size(); i++){
-			if(allWordsUsedWithThemesOrderedByTypes.get(i).getPartOfSpeech().getID() == id){
-				return allWordsUsedWithThemesOrderedByTypes.get(i).getPartOfSpeech();
+		for(int i = 0; i < allWordsOrderedByTypes.size(); i++){
+			if(allWordsOrderedByTypes.get(i).getPartOfSpeech().getID() == id){
+				return allWordsOrderedByTypes.get(i).getPartOfSpeech();
 			}
 		}
 		return null;
@@ -363,42 +369,155 @@ public class HaikuGenerator {
 	private static void initPartOfSpeech(){
 		ArrayList<PartOfSpeech> pos = HaikuActivity.databaseHandler.getAllPartOfSpeeches();
 		for(PartOfSpeech p : pos){
-			allWordsUsedWithThemesOrderedByTypes.add(new PartOfSpeechList(p));
+			allWordsOrderedByTypes.add(new PartOfSpeechList(p));
+			allWordsOrderedByTypesUpdated.add(new PartOfSpeechList(p));
 		}
+	}
+	
+	public static ArrayList<SMS> addThemeDuringDeletion(Theme theme){
+		try {
+			smsSemaphore.acquire();
+			BinView.getInstance().addTheme(theme);
+			// add all valid SMS
+			int threadID = MainView.getInstance().getSelectedConvoThreadID();
+			Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+			Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+			ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+			SMS tempSMS;
+			if (cursor.moveToFirst()) {
+				do{
+					tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+							cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+							cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+							threadID,
+							cursor.getString(cursor.getColumnIndexOrThrow("type")));
+					if(!smses.contains(tempSMS)){
+						newSMSes.add(tempSMS);
+					}
+				}
+				while(cursor.moveToNext());
+			}
+			ArrayList<SMS> smsToAdd = FindValidSMSWithTheme.calculateSMS(newSMSes, theme);
+			smsSemaphore.release();
+			for(SMS sms : smsToAdd){
+				HaikuGenerator.addThemeSMS(sms, theme);
+			}
+			smsSemaphore.acquire();
+			HaikuGenerator.updateUseWords();
+			HaikuGenerator.updateThreadIDsADD(smsToAdd);
+//			BinView.getInstance().addSMSesAtLastPosition(smsToAdd);s
+			MainView.getInstance().updateSMSView();
+			
+			themes.add(new Theme_ThreadID_Tuple(theme.getID(), threadID));
+			return smsToAdd;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
+		}
+		return null;
 	}
 	
 	public static void addTheme(Theme theme){
-		if(themes.contains(theme)){
-			// no duplicates allowed!
-			return;
-		}
-		BinView.getInstance().addTheme(theme);
 		try {
 			smsSemaphore.acquire();
+			BinView.getInstance().addTheme(theme);
+			// add all valid SMS
+			int threadID = MainView.getInstance().getSelectedConvoThreadID();
+			Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+			Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+			ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+			SMS tempSMS;
+			if (cursor.moveToFirst()) {
+				do{
+					tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+							cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+							cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+							threadID,
+							cursor.getString(cursor.getColumnIndexOrThrow("type")));
+					if(!smses.contains(tempSMS)){
+						newSMSes.add(tempSMS);
+					}
+				}
+				while(cursor.moveToNext());
+			}
+			FindValidSMSWithTheme thread = new FindValidSMSWithTheme(newSMSes, theme);
+			addThread(thread);
+			thread.start();
+			
+			themes.add(new Theme_ThreadID_Tuple(theme.getID(), threadID));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
-		themes.add(theme);
-		themeWordIDs.addAll(theme.getWordids());
-		updateUseWords();
-		smsSemaphore.release();
 	}
 	
-	public static void removeTheme(Theme theme){
+	public static void removeTheme(Theme theme){ //TODO marker
 		try {
 			smsSemaphore.acquire();
+			ArrayList<SMS> SMSToRemove = new ArrayList<SMS>();
+			boolean added;
+			for(SMS sms : smses){
+				added = false;
+				for(Word word : sms.getWords()){
+					for(long id : theme.getWordids()){
+						if(id == word.getID()){
+							SMSToRemove.add(sms);
+							added = true;
+							break;
+						}
+					}
+					if(added){
+						break;
+					}
+				}
+			}
+			for(SMS sms : SMSToRemove){
+				removeSMSWithoutUpdateHoldingTheSem(sms);
+			}
+			BinView.getInstance().removeSMSES(SMSToRemove);
+			MainView.getInstance().updateSMSView();
+			for(int i = themes.size()-1; i >= 0; i--){
+				if(themes.get(i).getThemeID() == theme.getID()){
+					themes.remove(i);
+				}
+			}
+			MainView.getInstance().updateThemeView();
+//			themeWordIDs.removeAll(theme.getWordids());
+			updateUseWords();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
-		themes.remove(theme);
-		MainView.getInstance().updateThemeView();
-		themeWordIDs.removeAll(theme.getWordids());
-		updateUseWords();
-		smsSemaphore.release();
 	}
 	
-	public static ArrayList<Theme> getThemes(){
+	public static ArrayList<Theme_ThreadID_Tuple> getThemes(){
 		return themes;
+	}
+	
+	public static ArrayList<Theme> getUsedThemes(){
+		ArrayList<Theme> usedThemes = new ArrayList<Theme>();
+		boolean exists;
+		for(Theme_ThreadID_Tuple ttt : themes){
+			exists = false;
+			for(Theme t : usedThemes){
+				if(t.getID() == ttt.getThemeID()){
+					exists = true;
+					break;
+				}
+			}
+			if(exists){
+				for(Theme t : allThemes){
+					if(ttt.getThemeID() == t.getID()){
+						usedThemes.add(t);
+						break;
+					}
+				}
+			}
+		}
+		return usedThemes;
 	}
 	
 	/**
@@ -525,6 +644,21 @@ public class HaikuGenerator {
 		}
 	}
 	
+//	/**
+//	 * Just adds the SMS to the smses list. Does NOTHING else.
+//	 * @param sms
+//	 */
+//	public static void addSMSToSMSList(SMS sms){
+//		try {
+//			smsSemaphore.acquire();
+//			smses.add(sms);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		} finally{
+//			smsSemaphore.release();
+//		}
+//	}
+	
 	/**
 	 * This method adds the words in the sms to the right ArrayLists. The sms itself should already be in the sms ArrayList
 	 * @param sms
@@ -533,26 +667,75 @@ public class HaikuGenerator {
 		try {
 			smsSemaphore.acquire();
 			allSmsLogWords.addAll(sms.getWords());
-			if(themes.isEmpty()){
+//			if(themes.isEmpty()){
 				addWordsWithTheme(sms.getWords());
 //				smsLogWordsWithThemes.addAll(sms.getWords());
-			}
-			else{
-				for(int i = 0; i < sms.getWords().size(); i++){
-					if(themeWordIDs.contains(sms.getWords().get(i).getID())){
-//						smsLogWordsWithThemes.add(sms.getWords().get(i));
-						addWordWithTheme(sms.getWords().get(i));
-					}
-				}
-			}
-			for(int i = 0; i < sms.getWords().size(); i++){
-				if(theAllThemeWordIDs.contains(sms.getWords().get(i).getID())){
-					smsLogWordsWithTheAllTheme.add(sms.getWords().get(i));
-				}
-			}
+//			}
+//			else{
+//				for(int i = 0; i < sms.getWords().size(); i++){
+//					if(themeWordIDs.contains(sms.getWords().get(i).getID())){
+////						smsLogWordsWithThemes.add(sms.getWords().get(i));
+//						addWordWithTheme(sms.getWords().get(i));
+//					}
+//				}
+//			}
+//			for(int i = 0; i < sms.getWords().size(); i++){
+//				if(theAllThemeWordIDs.contains(sms.getWords().get(i).getID())){
+//					smsLogWordsWithTheAllTheme.add(sms.getWords().get(i));
+//				}
+//			}
 			smsSemaphore.release();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void addThemeSMS(final SMS sms, Theme theme){
+		try {
+			smsSemaphore.acquire();
+			smses.add(sms);
+			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+		        @Override
+		        public void run(){
+		        	if(!MainView.getInstance().getBinView().isDeleting()){
+						BinView.getInstance().addSMSBeforeDeletion(sms);
+					}
+					else{
+						BinView.getInstance().addSMSDuringDeletion(sms);
+					}
+				}
+			});
+			// If this is done here then not all words are removed when the user removes an SMS
+//			ArrayList<Word> themeWords = new ArrayList<Word>();
+//			ArrayList<Word> notThemeWords = new ArrayList<Word>();
+//			boolean isThemeWord;
+//			for(Word word : sms.getWords()){
+//				isThemeWord = false;
+//				for(long id : theme.getWordids()){
+//					if(word.getID() == id){
+//						isThemeWord = true;
+//						break;
+//					}
+//				}
+//				if(isThemeWord){
+//					themeWords.add(word);
+//				}
+//				else{
+//					notThemeWords.add(word);
+//				}
+//			}
+//			allSmsLogWords.addAll(notThemeWords);
+//			addWordsWithTheme(notThemeWords);
+//			for(int i = 0; i < THEME_WORD_MULTIPLIER; i++){
+//				allSmsLogWords.addAll(themeWords);
+//				addWordsWithTheme(themeWords);
+//			}
+			allSmsLogWords.addAll(sms.getWords());
+			addWordsWithTheme(sms.getWords());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
 	}
 	
@@ -568,23 +751,32 @@ public class HaikuGenerator {
 		allSmsLogWords.removeAll(sms.getWords());
 //		smsLogWordsWithThemes.removeAll(sms.getWords());
 		removeWordsWithTheme(sms.getWords());
-		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
+//		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		smsSemaphore.release();
 	}
 	
 	private static void removeSMSWithoutUpdate(SMS sms){
-		smses.remove(sms);
-		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
 		try {
 			smsSemaphore.acquire();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		smses.remove(sms);
+		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
 		allSmsLogWords.removeAll(sms.getWords());
 //		smsLogWordsWithThemes.removeAll(sms.getWords());
 		removeWordsWithTheme(sms.getWords());
-		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
+//		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		smsSemaphore.release();
+	}
+	
+	private static void removeSMSWithoutUpdateHoldingTheSem(SMS sms){
+		smses.remove(sms);
+		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
+		allSmsLogWords.removeAll(sms.getWords());
+//		smsLogWordsWithThemes.removeAll(sms.getWords());
+		removeWordsWithTheme(sms.getWords());
+//		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 	}
 	
 	public static ArrayList<SMS> getAllAddedSMS(){
@@ -701,8 +893,8 @@ public class HaikuGenerator {
 			}
 			while(cursor.moveToNext());
 		}
-		calculateSMSes(newSMSes);
-		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+		calculateSMSes(newSMSes); //TODO
+		updateThreadIDsADD(newSMSes); // must be done after the SMS list has been updated (done in the calculateSMSes() method)
 		MainView.getInstance().updateSMSView();
 		return orderSMSByDate(newSMSes);
 	}
@@ -746,7 +938,7 @@ public class HaikuGenerator {
 			if(smses.get(i).getYearMonth().equals(date)){
 				removedSMS.add(smses.get(i));
 //				smses.remove(i); // old
-				removeSMSWithoutUpdate(smses.get(i)); // new
+				removeSMSWithoutUpdate(smses.get(i));
 			}
 		}
 		MainView.getInstance().updateSMSView();
@@ -754,7 +946,7 @@ public class HaikuGenerator {
 	}
 	
 	public static void updateThreadIDsADD(ArrayList<SMS> smsesAdded){
-		double startTime = System.currentTimeMillis();
+//		double startTime = System.currentTimeMillis();
 		ArrayList<Integer> threadIDs = new ArrayList<Integer>();
 		Integer thread_id;
 		for(int i = 0; i < smsesAdded.size(); i++){
@@ -799,7 +991,12 @@ public class HaikuGenerator {
 			}
 		}
 		if(update){
-			MainView.getInstance().updateConversationsVisibility();
+			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+		        @Override
+		        public void run(){
+		        	MainView.getInstance().updateConversationsVisibility();
+				}
+			});
 		}
 //		//Log.i("TAG", "Time to check if whole conversations were added: " + (System.currentTimeMillis() - startTime) + " ms");
 	}
@@ -818,14 +1015,39 @@ public class HaikuGenerator {
 	
 	private static void initThemes(){
 		allThemes.addAll(HaikuActivity.databaseHandler.getAllThemes());
-		theAllTheme = HaikuActivity.databaseHandler.getTheAllTheme();
-		theAllThemeWordIDs.addAll(theAllTheme.getWordids()); // Will always be there
+//		theAllTheme = HaikuActivity.databaseHandler.getTheAllTheme();
+//		theAllThemeWordIDs.addAll(theAllTheme.getWordids()); // Will always be there
+	}
+	
+	public static void updateThemeWordsInList(){
+		for(PartOfSpeechList pl : allWordsOrderedByTypesUpdated){
+			pl.getWords().clear();
+		}
+		boolean themeWord;
+		for(int a = 0; a < allWordsOrderedByTypes.size(); a++){
+			for(Word word : allWordsOrderedByTypes.get(a).getWords()){
+				themeWord = false;
+				for(Theme_ThreadID_Tuple theme : themes){
+					if(theme.getThemeID() == word.getID()){
+						themeWord = true;
+						break;
+					}
+				}
+				if(themeWord){
+					for(int i = 0; i < THEME_WORD_MULTIPLIER-1; i++){
+						allWordsOrderedByTypesUpdated.get(a).getWords().add(word);
+					}
+				}
+				allWordsOrderedByTypesUpdated.get(a).getWords().add(word);
+			}
+		}
 	}
 	
 	public static double testStartTime;
 	private static int createdHaikusCounter;
 	
 	public static synchronized void createHaikus(){ //TODO
+		updateThemeWordsInList();
 		nullHaikuGenerated = false;
 		allGenerated = false;
 		testStartTime = System.currentTimeMillis();
@@ -844,6 +1066,14 @@ public class HaikuGenerator {
 	private static boolean allGenerated = false;
 	
 	public static synchronized void nullHaikuGenerated(){
+		if(!nullHaikuGenerated){
+			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+		        @Override
+		        public void run(){
+		        	Toast.makeText(HaikuActivity.getInstance().getApplicationContext(), "Cannot create Haiku!",Toast.LENGTH_LONG).show();
+				}
+			});
+		}
 		nullHaikuGenerated = true;
 	}
 	
@@ -894,39 +1124,29 @@ public class HaikuGenerator {
 	 * 
 	 * @IMPORTANT The thread that calls this method MUST have the smsSemaphore!
 	 */
-	private static void updateUseWords(){
-		for(PartOfSpeechList pl : allWordsUsedWithThemesOrderedByTypes){
+	public static void updateUseWords(){
+		for(PartOfSpeechList pl : allWordsOrderedByTypes){
 			pl.getWords().clear();
 		}
-		if(themes.isEmpty()){
+//		if(themes.isEmpty()){
 			// no theme(s) -> use all words
 			addWordsWithTheme(allSmsLogWords);
-			return;
-		}
-		for(int i = 0; i < allSmsLogWords.size(); i++){
-			if(themeWordIDs.contains(allSmsLogWords.get(i).getID())){
-				addWordWithTheme(allSmsLogWords.get(i));
-			}
-		}
-//		smsLogWordsWithThemes.clear();
-//		if(themes.isEmpty()){
-//			smsLogWordsWithThemes.addAll(allSmsLogWords); // no theme(s) -> use all words
 //			return;
 //		}
 //		for(int i = 0; i < allSmsLogWords.size(); i++){
 //			if(themeWordIDs.contains(allSmsLogWords.get(i).getID())){
-//				smsLogWordsWithThemes.add(allSmsLogWords.get(i));
+//				addWordWithTheme(allSmsLogWords.get(i));
 //			}
 //		}
 	}
 	
 	public static ArrayList<PartOfSpeechList> getWordsUsed(){
-		return allWordsUsedWithThemesOrderedByTypes;
+		return allWordsOrderedByTypesUpdated;
 	}
 	
-	public static ArrayList<Word> getWordsUsedWithTheAllTheme(){
-		return smsLogWordsWithTheAllTheme;
-	}
+//	public static ArrayList<Word> getWordsUsedWithTheAllTheme(){
+//		return smsLogWordsWithTheAllTheme;
+//	}
 	
 //	public static void printAllUsableWords(){
 //		for(int i = 0; i < smsLogWordsWithThemes.size(); i++){

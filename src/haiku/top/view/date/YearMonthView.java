@@ -113,5 +113,10 @@ public class YearMonthView extends View{
 	    } while(yearPaint.measureText(text) < width*(1 - SIZE_OF_YEAR_TEXT_PADDING_RIGHT)
 	    		&& yearRect.height() <= height*(1-PROPORTIONAL_HEIGHT_OF_MONTH_TEXT - SIZE_OF_TEXT_PADDING_TOP - SIZE_OF_TEXT_PADDING_BETWEEN));
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		return o instanceof YearMonthView && ((YearMonthView)o).getYearMonth().equals(yearMonth);
+	}
 
 }

@@ -19,7 +19,7 @@ public class AddSmsesThread extends Thread{
 	}
 	
 	public void run(){
-		double startTime = System.currentTimeMillis();
+//		double startTime = System.currentTimeMillis();
 		// Since this thread will probably use the database under a long period of time it need its own version of the database
 //		DatabaseHandler databaseHandler = new DatabaseHandler(MainView.getInstance().getContext());
 //        try {
