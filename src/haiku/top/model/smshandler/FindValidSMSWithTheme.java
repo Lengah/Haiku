@@ -16,10 +16,12 @@ import android.util.Log;
 public class FindValidSMSWithTheme extends Thread{
 	private ArrayList<SMS> smses;
 	private Theme theme;
+	private long threadID;
 	
-	public FindValidSMSWithTheme(ArrayList<SMS> smses, Theme theme){
+	public FindValidSMSWithTheme(ArrayList<SMS> smses, Theme theme, long threadID){
 		this.smses = smses;
 		this.theme = theme;
+		this.threadID = threadID;
 	}
 	
 	public void run(){
@@ -44,9 +46,10 @@ public class FindValidSMSWithTheme extends Thread{
 //				HaikuGenerator.addThemeSMS(sms, theme);
 //			}
 //		}
+		DatabaseHandler.getInstance().initSMSES(smses);
 		ArrayList<SMS> addedSMS = calculateSMS(smses, theme);
 		for(SMS sms : addedSMS){
-			HaikuGenerator.addThemeSMS(sms, theme);
+			HaikuGenerator.addThemeSMS(sms, theme, threadID);
 		}
 		HaikuGenerator.updateUseWords();
 		HaikuGenerator.updateThreadIDsADD(addedSMS);
@@ -60,8 +63,13 @@ public class FindValidSMSWithTheme extends Thread{
 		HaikuGenerator.removeThread(this);
 	}
 	
+	/**
+	 * Filters the entered SMS list and returns those SMS which fit the entered theme
+	 * @param smses
+	 * @param theme
+	 * @return
+	 */
 	public static ArrayList<SMS> calculateSMS(ArrayList<SMS> smses, Theme theme){
-		DatabaseHandler.getInstance().initSMSES(smses);
 		boolean shouldAdd;
 		ArrayList<SMS> smsToAdd = new ArrayList<SMS>();
 		for(SMS sms : smses){
@@ -82,5 +90,42 @@ public class FindValidSMSWithTheme extends Thread{
 			}
 		}
 		return smsToAdd;
+	}
+	
+	/**
+	 * Filters the entered SMS list and returns those SMS which fit the entered themes
+	 * @param smses
+	 * @param themes
+	 * @return
+	 */
+	public static ArrayList<SMS> calculateSMS(ArrayList<SMS> smses, ArrayList<Theme> themes){
+		boolean shouldAdd;
+		ArrayList<Long> themeWordIDs = new ArrayList<Long>();
+		for(Theme theme : themes){
+			themeWordIDs.addAll(theme.getWordids());
+		}
+		ArrayList<SMS> smsToAdd = new ArrayList<SMS>();
+		for(SMS sms : smses){
+			shouldAdd = false;
+			for(Word word : sms.getWords()){
+				for(Long wordID : themeWordIDs){
+					if(word.getID() == wordID){
+						shouldAdd = true;
+						break;
+					}
+				}
+				if(shouldAdd){
+					break;
+				}
+			}
+			if(shouldAdd){
+				smsToAdd.add(sms);
+			}
+		}
+		return smsToAdd;
+	}
+	
+	public long getThreadID(){
+		return threadID;
 	}
 }

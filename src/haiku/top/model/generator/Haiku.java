@@ -16,13 +16,11 @@ public class Haiku {
 	private ArrayList<Text> row3;
 	private boolean haikuFinished = false;
 	private double startTime = System.currentTimeMillis();
-	private boolean themes;
 	private ArrayList<String> wordsUsed = new ArrayList<String>();
 	private ArrayList<Long> cueWords = new ArrayList<Long>();
 	private ArrayList<Word> usedWords = new ArrayList<Word>();
 	
-	public Haiku(boolean themes){
-		this.themes = themes;
+	public Haiku(){
 		generate(1);
 	}
 	
@@ -78,10 +76,6 @@ public class Haiku {
 				return;
 			}
 		}
-	}
-	
-	public boolean containsThemes(){
-		return themes;
 	}
 	
 	public String getHaikuPoem(){

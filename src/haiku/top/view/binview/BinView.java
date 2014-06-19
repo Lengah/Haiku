@@ -1964,27 +1964,27 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    					smses.add(((SMSObject)addingObjectDuringDeletion).getSMS());
 	    					HaikuGenerator.calculateSMS(((SMSObject)addingObjectDuringDeletion).getSMS());
 	    				}
-	    				if(addingObjectDuringDeletion instanceof QuarterCircle){
-	    					if(((QuarterCircle) addingObjectDuringDeletion).isYearView()){
-	    	    				if(MainView.getInstance().isShowingSMS()){
-	    	    					smses = HaikuGenerator.addYearFromSMSes(MainView.getInstance().getSelectedYear(), MainView.getInstance().getSelectedConvoThreadID());
-	    	    				}
-	    	    				else{
-	    	    					smses = HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
-	    	    				}
-	    	    			}
-	    	    			else{
-	    	    				if(MainView.getInstance().isShowingSMS()){
-	    	    					smses = HaikuGenerator.addDateFromSMSes(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)addingObjectDuringDeletion).getMonth()), MainView.getInstance().getSelectedConvoThreadID());
-	    	    				}
-	    	    				else{
-	    	    					smses = HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)addingObjectDuringDeletion).getMonth()));
-	    	    				}
-	    		    		}
-	    				}
-	    				if(addingObjectDuringDeletion instanceof ThemeObjectView){
-	    					smses = HaikuGenerator.addThemeDuringDeletion(((ThemeObjectView)addingObjectDuringDeletion).getTheme());
-	    				}
+//	    				if(addingObjectDuringDeletion instanceof QuarterCircle){
+//	    					if(((QuarterCircle) addingObjectDuringDeletion).isYearView()){
+//	    	    				if(MainView.getInstance().isShowingSMS()){
+//	    	    					smses = HaikuGenerator.addYearFromSMSes(MainView.getInstance().getSelectedYear(), MainView.getInstance().getSelectedConvoThreadID());
+//	    	    				}
+//	    	    				else{
+//	    	    					smses = HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
+//	    	    				}
+//	    	    			}
+//	    	    			else{
+//	    	    				if(MainView.getInstance().isShowingSMS()){
+//	    	    					smses = HaikuGenerator.addDateFromSMSes(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)addingObjectDuringDeletion).getMonth()), MainView.getInstance().getSelectedConvoThreadID());
+//	    	    				}
+//	    	    				else{
+//	    	    					smses = HaikuGenerator.addDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)addingObjectDuringDeletion).getMonth()));
+//	    	    				}
+//	    		    		}
+//	    				}
+//	    				if(addingObjectDuringDeletion instanceof ThemeObjectView){
+//	    					smses = HaikuGenerator.addThemeDuringDeletion(((ThemeObjectView)addingObjectDuringDeletion).getTheme());
+//	    				}
 	    				binCombinedSMSView.addSMSesAtPosition(smses, rowIndex, xIndex);
 	    				onOpen();
 	    			}

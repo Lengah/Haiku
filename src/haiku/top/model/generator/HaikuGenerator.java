@@ -5,12 +5,14 @@ import haiku.top.model.PartOfSpeech;
 import haiku.top.model.Theme;
 import haiku.top.model.Word;
 import haiku.top.model.WordAndNumber;
+import haiku.top.model.date.Month;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.date.YearMonthConvo;
 import haiku.top.model.smshandler.AddSmsThread;
 import haiku.top.model.smshandler.AddSmsesThread;
 import haiku.top.model.smshandler.FindValidSMSWithTheme;
 import haiku.top.model.smshandler.SMS;
+import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.date.DateView;
 import haiku.top.view.main.ConversationObjectView;
@@ -33,13 +35,14 @@ import android.widget.Toast;
 
 public class HaikuGenerator {
 	public static final int THEME_WORD_MULTIPLIER = 2;
+	public static final int MAX_SMS_IN_BIN = 60;
 	
-	private static ArrayList<Theme_ThreadID_Tuple> themes = new ArrayList<Theme_ThreadID_Tuple>();
+//	private static ArrayList<Theme_ThreadID_Tuple> themes = new ArrayList<Theme_ThreadID_Tuple>();
 //	private static ArrayList<Theme> themes = new ArrayList<Theme>();
 	private static ArrayList<Integer> thread_ids = new ArrayList<Integer>(); // All complete conversations added
 	private static ArrayList<SMS> smses = new ArrayList<SMS>();
-	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
-	private static ArrayList<YearMonthConvo> datesFromThreads = new ArrayList<YearMonthConvo>();
+//	private static ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
+//	private static ArrayList<YearMonthConvo> datesFromThreads = new ArrayList<YearMonthConvo>();
 	private static ArrayList<Theme> allThemes = new ArrayList<Theme>();
 //	private static Theme theAllTheme;
 //	private static ArrayList<Word> smsLogWordsWithThemes = new ArrayList<Word>();
@@ -53,6 +56,10 @@ public class HaikuGenerator {
 	
 	private static ArrayList<PartOfSpeechList> allWordsOrderedByTypes = new ArrayList<PartOfSpeechList>();
 	private static ArrayList<PartOfSpeechList> allWordsOrderedByTypesUpdated = new ArrayList<PartOfSpeechList>();
+	
+	
+	private static ArrayList<ThemeSMS> smsAddedByTheme = new ArrayList<ThemeSMS>();
+	private static ArrayList<DateSMS> smsAddedByDate = new ArrayList<DateSMS>();
 	
 	// for example [the(1)]
 //	private static ArrayList<Word> wordsDefinedInRulesTextFile = new ArrayList<Word>();
@@ -268,10 +275,12 @@ public class HaikuGenerator {
 	}
 
 	public static void reset() {
-		themes.clear();
+//		themes.clear();
 		thread_ids.clear();
 		smses.clear();
-		dates.clear();
+		smsAddedByDate.clear();
+		smsAddedByTheme.clear();
+//		dates.clear();
 //		smsLogWordsWithTheAllTheme.clear();
 		for(PartOfSpeechList pl : allWordsOrderedByTypes){
 			pl.getWords().clear();
@@ -339,14 +348,14 @@ public class HaikuGenerator {
 		}
 	}
 	
-	private static void addWordWithTheme(Word word){
-		for(PartOfSpeechList pl : allWordsOrderedByTypes){
-			if(word.getwordType().equalsIgnoreCase(pl.getPartOfSpeech().getType())){
-				pl.getWords().add(word);
-				break;
-			}
-		}
-	}
+//	private static void addWordWithTheme(Word word){
+//		for(PartOfSpeechList pl : allWordsOrderedByTypes){
+//			if(word.getwordType().equalsIgnoreCase(pl.getPartOfSpeech().getType())){
+//				pl.getWords().add(word);
+//				break;
+//			}
+//		}
+//	}
 	
 	private static void removeWordsWithTheme(ArrayList<Word> words){
 		for(Word word : words){
@@ -374,78 +383,161 @@ public class HaikuGenerator {
 		}
 	}
 	
-	public static ArrayList<SMS> addThemeDuringDeletion(Theme theme){
-		try {
-			smsSemaphore.acquire();
-			BinView.getInstance().addTheme(theme);
-			// add all valid SMS
-			int threadID = MainView.getInstance().getSelectedConvoThreadID();
-			Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-			Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
-			ArrayList<SMS> newSMSes = new ArrayList<SMS>();
-			SMS tempSMS;
-			if (cursor.moveToFirst()) {
-				do{
-					tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
-							cursor.getString(cursor.getColumnIndexOrThrow("body")), 
-							cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-							threadID,
-							cursor.getString(cursor.getColumnIndexOrThrow("type")));
-					if(!smses.contains(tempSMS)){
-						newSMSes.add(tempSMS);
-					}
-				}
-				while(cursor.moveToNext());
-			}
-			ArrayList<SMS> smsToAdd = FindValidSMSWithTheme.calculateSMS(newSMSes, theme);
-			smsSemaphore.release();
-			for(SMS sms : smsToAdd){
-				HaikuGenerator.addThemeSMS(sms, theme);
-			}
-			smsSemaphore.acquire();
-			HaikuGenerator.updateUseWords();
-			HaikuGenerator.updateThreadIDsADD(smsToAdd);
-//			BinView.getInstance().addSMSesAtLastPosition(smsToAdd);s
-			MainView.getInstance().updateSMSView();
-			
-			themes.add(new Theme_ThreadID_Tuple(theme.getID(), threadID));
-			return smsToAdd;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally{
-			smsSemaphore.release();
-		}
-		return null;
-	}
+//	public static ArrayList<SMS> addThemeDuringDeletion(Theme theme){
+//		try {
+//			smsSemaphore.acquire();
+//			BinView.getInstance().addTheme(theme);
+//			// add all valid SMS
+//			int threadID = MainView.getInstance().getSelectedConvoThreadID();
+//			Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+//			Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+//			ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+//			SMS tempSMS;
+//			if (cursor.moveToFirst()) {
+//				do{
+//					tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+//							cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+//							cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+//							threadID,
+//							cursor.getString(cursor.getColumnIndexOrThrow("type")));
+//					if(!smses.contains(tempSMS)){
+//						newSMSes.add(tempSMS);
+//					}
+//				}
+//				while(cursor.moveToNext());
+//			}
+//			ArrayList<SMS> smsToAdd = FindValidSMSWithTheme.calculateSMS(newSMSes, theme);
+//			smsSemaphore.release();
+//			for(SMS sms : smsToAdd){
+//				HaikuGenerator.addThemeSMS(sms, theme);
+//			}
+//			smsSemaphore.acquire();
+//			HaikuGenerator.updateUseWords();
+//			HaikuGenerator.updateThreadIDsADD(smsToAdd);
+////			BinView.getInstance().addSMSesAtLastPosition(smsToAdd);s
+//			MainView.getInstance().updateSMSView();
+//			
+//			themes.add(new Theme_ThreadID_Tuple(theme.getID(), threadID));
+//			return smsToAdd;
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		} finally{
+//			smsSemaphore.release();
+//		}
+//		return null;
+//	}
 	
 	public static void addTheme(Theme theme){
 		try {
 			smsSemaphore.acquire();
-			BinView.getInstance().addTheme(theme);
-			// add all valid SMS
 			int threadID = MainView.getInstance().getSelectedConvoThreadID();
-			Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-			Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
-			ArrayList<SMS> newSMSes = new ArrayList<SMS>();
-			SMS tempSMS;
-			if (cursor.moveToFirst()) {
-				do{
-					tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
-							cursor.getString(cursor.getColumnIndexOrThrow("body")), 
-							cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-							threadID,
-							cursor.getString(cursor.getColumnIndexOrThrow("type")));
-					if(!smses.contains(tempSMS)){
-						newSMSes.add(tempSMS);
-					}
+			ArrayList<YearMonth> binDates = new ArrayList<YearMonth>();
+			for(DateSMS ds : smsAddedByDate){
+				if(ds.getConversationID() == threadID || ds.getConversationID() == DateSMS.ALL_CONVERSATIONS_ID){
+					binDates.add(ds.getYearMonth());
 				}
-				while(cursor.moveToNext());
 			}
-			FindValidSMSWithTheme thread = new FindValidSMSWithTheme(newSMSes, theme);
-			addThread(thread);
-			thread.start();
+			BinView.getInstance().addTheme(theme);
+			if(binDates.isEmpty()){
+				// add all valid SMS
+				Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+				Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+				ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+				SMS tempSMS;
+				if (cursor.moveToFirst()) {
+					do{
+						tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+								cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+								cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+								threadID,
+								cursor.getString(cursor.getColumnIndexOrThrow("type")));
+						if(!smses.contains(tempSMS)){
+							newSMSes.add(tempSMS);
+						}
+					}
+					while(cursor.moveToNext());
+				}
+				FindValidSMSWithTheme thread = new FindValidSMSWithTheme(newSMSes, theme, threadID);
+				addThread(thread);
+				thread.start();
+			}
+			else{
+				ArrayList<Theme> validThemes = getAllAddedThemesWithConversationID(threadID);
+				if(validThemes.isEmpty()){
+					// There are dates in the bin and no themes -> filter the added sms
+					ArrayList<SMS> smsToFilter = new ArrayList<SMS>();
+					ArrayList<Long> smsIDs = new ArrayList<Long>();
+					for(DateSMS ds : smsAddedByDate){
+						if(ds.getConversationID() == threadID){
+							smsIDs.addAll(ds.getSMSIDs());
+						}
+					}
+					for(int i = smses.size()-1; i >= 0; i--){
+						for(int a = 0; a < smsIDs.size(); a++){
+							if(smses.get(i).getID() == smsIDs.get(a)){
+								smsToFilter.add(smses.get(i));
+								smsIDs.remove(a);
+								break;
+							}
+						}
+					}
+					smsAddedByTheme.add(new ThemeSMS(theme.getID(), threadID)); // Still need to add for the theme view to update properly even though no SMS were added
+					ArrayList<SMS> validSMS = FindValidSMSWithTheme.calculateSMS(smsToFilter, getAllAddedThemesWithConversationID(threadID));
+					boolean exists;
+					for(int i = smsToFilter.size()-1; i >= 0; i--){
+						exists = false;
+						for(int a = 0; a < validSMS.size(); a++){
+							if(smsToFilter.get(i).equals(validSMS.get(a))){
+								exists = true;
+								break;
+							}
+						}
+						if(exists){
+							smsToFilter.remove(i);
+						}
+					}
+					for(SMS sms : smsToFilter){
+						removeSMSWithoutUpdateHoldingTheSem(sms);
+					}
+					BinView.getInstance().removeSMSES(smsToFilter);
+					MainView.getInstance().updateSMSView();
+					MainView.getInstance().updateThemeView();
+				}
+				else{
+					// There are themes and dates in the bin -> add
+					Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+					Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+					ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+					SMS tempSMS;
+					if (cursor.moveToFirst()) {
+						boolean add;
+						do{
+							add = false;
+							tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+									cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+									cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+									threadID,
+									cursor.getString(cursor.getColumnIndexOrThrow("type")));
+							if(!smses.contains(tempSMS)){
+								for(YearMonth ds : binDates){
+									if(ds.equals(tempSMS.getYearMonth())){
+										add = true;
+										break;
+									}
+								}
+								if(add){
+									newSMSes.add(tempSMS);
+								}
+							}
+						}
+						while(cursor.moveToNext());
+					}
+					FindValidSMSWithTheme thread = new FindValidSMSWithTheme(newSMSes, theme, threadID);
+					addThread(thread);
+					thread.start();
+				}
+			}
 			
-			themes.add(new Theme_ThreadID_Tuple(theme.getID(), threadID));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally{
@@ -453,36 +545,67 @@ public class HaikuGenerator {
 		}
 	}
 	
-	public static void removeTheme(Theme theme){ //TODO marker
+	public static ArrayList<Theme> getAllAddedThemes(){
+		ArrayList<Theme> allAddedThemes = new ArrayList<Theme>();
+		Theme temp = null;
+		for(ThemeSMS ts : smsAddedByTheme){
+			for(Theme theme : allThemes){
+				if(ts.getThemeID() == theme.getID()){
+					temp = theme;
+					break;
+				}
+			}
+			if(!allAddedThemes.contains(temp)){
+				allAddedThemes.add(temp);
+			}
+		}
+		return allAddedThemes;
+	}
+	
+	public static ArrayList<Theme> getAllAddedThemesWithConversationID(long threadID){
+		ArrayList<Theme> allAddedThemes = new ArrayList<Theme>();
+		Theme temp = null;
+		for(ThemeSMS ts : smsAddedByTheme){
+			if(ts.getConversationID() == threadID){
+				for(Theme theme : allThemes){
+					if(ts.getThemeID() == theme.getID()){
+						temp = theme;
+						break;
+					}
+				}
+				if(!allAddedThemes.contains(temp)){
+					allAddedThemes.add(temp);
+				}
+			}
+		}
+		return allAddedThemes;
+	}
+	
+	public static void removeTheme(Theme theme){
 		try {
 			smsSemaphore.acquire();
-			ArrayList<SMS> SMSToRemove = new ArrayList<SMS>();
-			boolean added;
-			for(SMS sms : smses){
-				added = false;
-				for(Word word : sms.getWords()){
-					for(long id : theme.getWordids()){
-						if(id == word.getID()){
-							SMSToRemove.add(sms);
-							added = true;
-							break;
-						}
-					}
-					if(added){
+			ArrayList<SMS> smsToRemove = new ArrayList<SMS>();
+			ArrayList<Long> smsIDs = new ArrayList<Long>();
+			for(int i = smsAddedByTheme.size() - 1; i >= 0; i--){
+				if(smsAddedByTheme.get(i).getThemeID() == theme.getID()){
+					smsIDs.addAll(smsAddedByTheme.get(i).getSMSIDs());
+					smsAddedByTheme.remove(i);
+				}
+			}
+			for(int i = smses.size()-1; i >= 0; i--){
+				for(int a = 0; a < smsIDs.size(); a++){
+					if(smses.get(i).getID() == smsIDs.get(a)){
+						smsToRemove.add(smses.get(i));
+						smsIDs.remove(a);
 						break;
 					}
 				}
 			}
-			for(SMS sms : SMSToRemove){
+			for(SMS sms : smsToRemove){
 				removeSMSWithoutUpdateHoldingTheSem(sms);
 			}
-			BinView.getInstance().removeSMSES(SMSToRemove);
+			BinView.getInstance().removeSMSES(smsToRemove);
 			MainView.getInstance().updateSMSView();
-			for(int i = themes.size()-1; i >= 0; i--){
-				if(themes.get(i).getThemeID() == theme.getID()){
-					themes.remove(i);
-				}
-			}
 			MainView.getInstance().updateThemeView();
 //			themeWordIDs.removeAll(theme.getWordids());
 			updateUseWords();
@@ -493,30 +616,47 @@ public class HaikuGenerator {
 		}
 	}
 	
-	public static ArrayList<Theme_ThreadID_Tuple> getThemes(){
-		return themes;
-	}
-	
+//	public static ArrayList<Theme_ThreadID_Tuple> getThemes(){
+//		return themes;
+//	}
+
 	public static ArrayList<Theme> getUsedThemes(){
 		ArrayList<Theme> usedThemes = new ArrayList<Theme>();
 		boolean exists;
-		for(Theme_ThreadID_Tuple ttt : themes){
+		for(ThemeSMS ts : smsAddedByTheme){
 			exists = false;
 			for(Theme t : usedThemes){
-				if(t.getID() == ttt.getThemeID()){
+				if(t.getID() == ts.getThemeID()){
 					exists = true;
 					break;
 				}
 			}
 			if(exists){
 				for(Theme t : allThemes){
-					if(ttt.getThemeID() == t.getID()){
+					if(ts.getThemeID() == t.getID()){
 						usedThemes.add(t);
 						break;
 					}
 				}
 			}
 		}
+//		for(Theme_ThreadID_Tuple ttt : themes){
+//			exists = false;
+//			for(Theme t : usedThemes){
+//				if(t.getID() == ttt.getThemeID()){
+//					exists = true;
+//					break;
+//				}
+//			}
+//			if(exists){
+//				for(Theme t : allThemes){
+//					if(ttt.getThemeID() == t.getID()){
+//						usedThemes.add(t);
+//						break;
+//					}
+//				}
+//			}
+//		}
 		return usedThemes;
 	}
 	
@@ -526,6 +666,11 @@ public class HaikuGenerator {
 	 * @return The SMSes that are added
 	 */
 	public static ArrayList<SMS> addThread(int threadID){
+		try {
+			smsSemaphore.acquire();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		thread_ids.add(threadID);
 		Cursor cursor = HaikuActivity.getThread(MainView.getInstance().getContext(), threadID);
 		ArrayList<SMS> threadSMS = new ArrayList<SMS>();
@@ -541,6 +686,7 @@ public class HaikuGenerator {
 			}
 		}
 		calculateSMSes(threadSMS);
+		smsSemaphore.release();
 		return threadSMS;
 	}
 	
@@ -560,20 +706,30 @@ public class HaikuGenerator {
 	}
 	
 	/**
-	 * Starts a worker thread that will find the smses words and add them to the word list
+	 * Starts a worker thread that will find the smses words and add them to the word list or return immediatly if the bin is full
 	 * @param sms
 	 */
 	public static void calculateSMS(SMS sms){
-		smses.add(sms);
-		if(!MainView.getInstance().getBinView().isDeleting()){
-			BinView.getInstance().addSMSBeforeDeletion(sms);
+		try {
+			smsSemaphore.acquire();
+			if(!addSMSToSMSList(sms)){
+				return;
+			}
+//			smses.add(sms);
+			if(!MainView.getInstance().getBinView().isDeleting()){
+				BinView.getInstance().addSMSBeforeDeletion(sms);
+			}
+			else{
+				BinView.getInstance().addSMSDuringDeletion(sms);
+			}
+			AddSmsThread thread = new AddSmsThread(sms);
+			addThread(thread);
+			thread.start();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
-		else{
-			BinView.getInstance().addSMSDuringDeletion(sms);
-		}
-		AddSmsThread thread = new AddSmsThread(sms);
-		addThread(thread);
-		thread.start();
 	}
 	
 	public static void calculateSMSes(ArrayList<SMS> smses){
@@ -595,7 +751,8 @@ public class HaikuGenerator {
 				sms2.add(smses.get(i));
 //			}
 		}
-		HaikuGenerator.smses.addAll(sms2);
+		sms2 = addSMStoSMSList(sms2);
+//		HaikuGenerator.smses.addAll(sms2);
 		for(int i = 0; i < sms2.size(); i++){
 			if(!MainView.getInstance().getBinView().isDeleting()){
 				BinView.getInstance().addSMSBeforeDeletion(sms2.get(i));
@@ -644,20 +801,37 @@ public class HaikuGenerator {
 		}
 	}
 	
-//	/**
-//	 * Just adds the SMS to the smses list. Does NOTHING else.
-//	 * @param sms
-//	 */
-//	public static void addSMSToSMSList(SMS sms){
-//		try {
-//			smsSemaphore.acquire();
-//			smses.add(sms);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		} finally{
-//			smsSemaphore.release();
-//		}
-//	}
+	/**
+	 * Just adds the SMS to the smses list if the bin isn't ful. Does NOTHING else.
+	 * Returns true if the SMS was added, false otherwise
+	 * @param sms
+	 */
+	public static boolean addSMSToSMSList(SMS sms){
+		if(smses.size() < MAX_SMS_IN_BIN){
+			smses.add(sms);
+			return true;
+		}
+		HaikuActivity.getInstance().showMaxSMSView();
+		return false;
+	}
+	
+	/**
+	 * Tries to add the inputed SMS into the list. The successfully added SMS are returned
+	 * @param sms
+	 * @return
+	 */
+	public static ArrayList<SMS> addSMStoSMSList(ArrayList<SMS> sms){
+		ArrayList<SMS> rSMS = new ArrayList<SMS>();
+		for(SMS s : sms){
+			if(addSMSToSMSList(s)){
+				rSMS.add(s);
+			}
+			else{
+				break;
+			}
+		}
+		return rSMS;
+	}
 	
 	/**
 	 * This method adds the words in the sms to the right ArrayLists. The sms itself should already be in the sms ArrayList
@@ -684,52 +858,50 @@ public class HaikuGenerator {
 //					smsLogWordsWithTheAllTheme.add(sms.getWords().get(i));
 //				}
 //			}
-			smsSemaphore.release();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
 	}
 	
-	public static void addThemeSMS(final SMS sms, Theme theme){
+	public static void addThemeSMS(final SMS sms, Theme theme, long threadID){
 		try {
 			smsSemaphore.acquire();
-			smses.add(sms);
+			boolean exists = false;
+			ThemeSMS themeSMS = null;
+			for(ThemeSMS ts : smsAddedByTheme){
+				if(ts.getThemeID() == theme.getID() && ts.getConversationID() == threadID){
+//					ts.addSMSID(sms.getID());
+					themeSMS = ts;
+					exists = true;
+					break;
+				}
+			}
+			if(!exists || themeSMS == null){
+				themeSMS = new ThemeSMS(theme.getID(), threadID);
+//				ts.addSMSID(sms.getID());
+//				smsAddedByTheme.add(ts);
+			}
+//			smses.add(sms);
+			if(addSMSToSMSList(sms)){
+				themeSMS.addSMSID(sms.getID());
+				smsAddedByTheme.add(themeSMS);
+			}
+			else{
+				return;
+			}
 			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
 		        @Override
 		        public void run(){
-		        	if(!MainView.getInstance().getBinView().isDeleting()){
+//		        	if(!MainView.getInstance().getBinView().isDeleting()){
 						BinView.getInstance().addSMSBeforeDeletion(sms);
-					}
-					else{
-						BinView.getInstance().addSMSDuringDeletion(sms);
-					}
+//					}
+//					else{
+//						BinView.getInstance().addSMSDuringDeletion(sms);
+//					}
 				}
 			});
-			// If this is done here then not all words are removed when the user removes an SMS
-//			ArrayList<Word> themeWords = new ArrayList<Word>();
-//			ArrayList<Word> notThemeWords = new ArrayList<Word>();
-//			boolean isThemeWord;
-//			for(Word word : sms.getWords()){
-//				isThemeWord = false;
-//				for(long id : theme.getWordids()){
-//					if(word.getID() == id){
-//						isThemeWord = true;
-//						break;
-//					}
-//				}
-//				if(isThemeWord){
-//					themeWords.add(word);
-//				}
-//				else{
-//					notThemeWords.add(word);
-//				}
-//			}
-//			allSmsLogWords.addAll(notThemeWords);
-//			addWordsWithTheme(notThemeWords);
-//			for(int i = 0; i < THEME_WORD_MULTIPLIER; i++){
-//				allSmsLogWords.addAll(themeWords);
-//				addWordsWithTheme(themeWords);
-//			}
 			allSmsLogWords.addAll(sms.getWords());
 			addWordsWithTheme(sms.getWords());
 		} catch (InterruptedException e) {
@@ -740,34 +912,36 @@ public class HaikuGenerator {
 	}
 	
 	public static void removeSMS(SMS sms){
-		smses.remove(sms);
-		MainView.getInstance().updateSMSView();
-		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
 		try {
 			smsSemaphore.acquire();
+			smses.remove(sms);
+			MainView.getInstance().updateSMSView();
+			removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
+			allSmsLogWords.removeAll(sms.getWords());
+	//		smsLogWordsWithThemes.removeAll(sms.getWords());
+			removeWordsWithTheme(sms.getWords());
+	//		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
-		allSmsLogWords.removeAll(sms.getWords());
-//		smsLogWordsWithThemes.removeAll(sms.getWords());
-		removeWordsWithTheme(sms.getWords());
-//		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
-		smsSemaphore.release();
 	}
 	
 	private static void removeSMSWithoutUpdate(SMS sms){
 		try {
 			smsSemaphore.acquire();
+			smses.remove(sms);
+			removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
+			allSmsLogWords.removeAll(sms.getWords());
+//			smsLogWordsWithThemes.removeAll(sms.getWords());
+			removeWordsWithTheme(sms.getWords());
+//			smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
-		smses.remove(sms);
-		removeThread((int)sms.getContactID()); //the contact is only saved if ALL smses of that contact is added. So if one is taken away, so is the contact.
-		allSmsLogWords.removeAll(sms.getWords());
-//		smsLogWordsWithThemes.removeAll(sms.getWords());
-		removeWordsWithTheme(sms.getWords());
-//		smsLogWordsWithTheAllTheme.removeAll(sms.getWords());
-		smsSemaphore.release();
 	}
 	
 	private static void removeSMSWithoutUpdateHoldingTheSem(SMS sms){
@@ -783,120 +957,241 @@ public class HaikuGenerator {
 		return smses;
 	}
 	
-	public static ArrayList<SMS> addYear(int year){
+	public static void addYear(int year){
+//		YearMonth ym;
+//		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+//			ym = new YearMonth(year, DateView.MONTHS_NAME[i]);
+//			if(!dates.contains(ym)){
+//				dates.add(ym);
+//				BinView.getInstance().addDate(ym);
+//			}
+//		}
+//		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+//		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
+//		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+//		SMS tempSMS;
+//		if (cursor.moveToFirst()) {
+//			do{
+//				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+//						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+//						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+//						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")),
+//						cursor.getString(cursor.getColumnIndexOrThrow("type")));
+//				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
+//					newSMSes.add(tempSMS);
+//				}
+//			}
+//			while(cursor.moveToNext());
+//		}
+//		calculateSMSes(newSMSes);
+//		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+//		MainView.getInstance().updateConversationsVisibility();
+//		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
 		YearMonth ym;
 		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
 			ym = new YearMonth(year, DateView.MONTHS_NAME[i]);
-			if(!dates.contains(ym)){
-				dates.add(ym);
-				BinView.getInstance().addDate(ym);
+			if(!HaikuActivity.getInstance().isFutureDate(ym)){
+//				newSMSes.addAll(addDate(ym));
+				addDate(ym);
 			}
 		}
-		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
-		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
-		SMS tempSMS;
-		if (cursor.moveToFirst()) {
-			do{
-				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")),
-						cursor.getString(cursor.getColumnIndexOrThrow("type")));
-				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
-					newSMSes.add(tempSMS);
-				}
-			}
-			while(cursor.moveToNext());
-		}
-		calculateSMSes(newSMSes);
-		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
-		MainView.getInstance().updateConversationsVisibility();
-		return orderSMSByDate(newSMSes);
+//		return orderSMSByDate(newSMSes);
 	}
 	
-	public static ArrayList<SMS> addYearFromSMSes(int year, int threadID){
-		YearMonthConvo ym;
+	public static void addYearFromSMSes(int year, int threadID){
+//		YearMonthConvo ym;
+//		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+//			ym = new YearMonthConvo(new YearMonth(year, DateView.MONTHS_NAME[i]), threadID);
+//			if(!datesFromThreads.contains(ym)){
+//				datesFromThreads.add(ym);
+//				BinView.getInstance().addDate(ym.getYearMonth());
+//			}
+//		}
+//		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+//		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+//		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+//		SMS tempSMS;
+//		if (cursor.moveToFirst()) {
+//			do{
+//				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+//						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+//						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+//						threadID,
+//						cursor.getString(cursor.getColumnIndexOrThrow("type")));
+//				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
+//					newSMSes.add(tempSMS);
+//				}
+//			}
+//			while(cursor.moveToNext());
+//		}
+////		ArrayList<Month> monthsAdded = new ArrayList<Month>();
+////		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+////			monthsAdded.add(DateView.MONTHS_NAME[i]);
+////		}
+////		for(DateSMS ds : smsAddedByDate){
+////			if(ds.getYearMonth().getYear() == year){
+////				for(Month m : monthsAdded){
+////					if(ds.getYearMonth().getMonth().equals(m)){
+////						// mer här
+////					}
+////				}
+////			}
+////		}
+//		calculateSMSes(newSMSes);
+//		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+//		MainView.getInstance().updateSMSView();
+//		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+		YearMonth ym;
 		for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
-			ym = new YearMonthConvo(new YearMonth(year, DateView.MONTHS_NAME[i]), threadID);
-			if(!datesFromThreads.contains(ym)){
-				datesFromThreads.add(ym);
-				BinView.getInstance().addDate(ym.getYearMonth());
+			ym = new YearMonth(year, DateView.MONTHS_NAME[i]);
+			if(!HaikuActivity.getInstance().isFutureDate(ym)){
+//				newSMSes.addAll(addDateFromSMSes(ym, threadID));
+				addDateFromSMSes(ym, threadID);
 			}
 		}
-		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
-		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
-		SMS tempSMS;
-		if (cursor.moveToFirst()) {
-			do{
-				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						threadID,
-						cursor.getString(cursor.getColumnIndexOrThrow("type")));
-				if(!smses.contains(tempSMS) && tempSMS.getYear() == year){
-					newSMSes.add(tempSMS);
-				}
-			}
-			while(cursor.moveToNext());
-		}
-		calculateSMSes(newSMSes);
-		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
-		MainView.getInstance().updateSMSView();
-		return orderSMSByDate(newSMSes);
+//		return orderSMSByDate(newSMSes);
 	}
 	
-	public static ArrayList<SMS> addDate(YearMonth date){
-		dates.add(date);
-		BinView.getInstance().addDate(date);
-		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
-		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
-		SMS tempSMS;
-		if (cursor.moveToFirst()) {
-			do{
-				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")),
-						cursor.getString(cursor.getColumnIndexOrThrow("type")));
-				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
-					newSMSes.add(tempSMS);
-				}
-			}
-			while(cursor.moveToNext());
+	public static void addDate(YearMonth date){
+//		BinView.getInstance().addDate(date);
+//		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+//		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, null, null, null);
+//		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+//		SMS tempSMS;
+//		if (cursor.moveToFirst()) {
+//			do{
+//				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+//						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+//						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+//						cursor.getLong(cursor.getColumnIndexOrThrow("thread_id")),
+//						cursor.getString(cursor.getColumnIndexOrThrow("type")));
+//				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
+//					newSMSes.add(tempSMS);
+//				}
+//			}
+//			while(cursor.moveToNext());
+//		}
+//		smsAddedByDate.add(new DateSMS(date, DateSMS.ALL_CONVERSATIONS_ID));
+//		calculateSMSes(newSMSes);
+//		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
+//		MainView.getInstance().updateConversationsVisibility();
+//		return orderSMSByDate(newSMSes);
+		
+		for(ConversationObjectView conversation : MainView.getInstance().getConversations()){
+			addDateFromSMSes(date, conversation.getThreadID());
 		}
-		calculateSMSes(newSMSes);
-		updateThreadIDsADD(newSMSes); // must be done after smses list has been updated (done int calculateSMSes() method)
-		MainView.getInstance().updateConversationsVisibility();
-		return orderSMSByDate(newSMSes);
 	}
 	
-	public static ArrayList<SMS> addDateFromSMSes(YearMonth date, int threadID){
-		datesFromThreads.add(new YearMonthConvo(date, threadID));
-		BinView.getInstance().addDate(date);
-		Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
-		Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
-		ArrayList<SMS> newSMSes = new ArrayList<SMS>();
-		SMS tempSMS;
-		if (cursor.moveToFirst()) {
-			do{
-				tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("body")), 
-						cursor.getString(cursor.getColumnIndexOrThrow("date")), 
-						threadID,
-						cursor.getString(cursor.getColumnIndexOrThrow("type")));
-				if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
-					newSMSes.add(tempSMS);
+	public static void addDateFromSMSes(YearMonth date, int threadID){
+		try {
+			smsSemaphore.acquire();
+			ArrayList<ThemeSMS> binThemes = new ArrayList<ThemeSMS>();
+			for(ThemeSMS ts : smsAddedByTheme){
+				if(ts.getConversationID() == threadID){
+					binThemes.add(ts);
 				}
 			}
-			while(cursor.moveToNext());
+			BinView.getInstance().addDate(date);
+			if(binThemes.isEmpty()){
+				// Add new SMS
+				Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+				Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+				ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+				SMS tempSMS;
+				if (cursor.moveToFirst()) {
+					do{
+						tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+								cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+								cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+								threadID,
+								cursor.getString(cursor.getColumnIndexOrThrow("type")));
+						if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
+							newSMSes.add(tempSMS);
+						}
+					}
+					while(cursor.moveToNext());
+				}
+				smsAddedByDate.add(new DateSMS(date, newSMSes, threadID));
+				calculateSMSes(newSMSes);
+				updateThreadIDsADD(newSMSes); // must be done after the SMS list has been updated (done in the calculateSMSes() method)
+				MainView.getInstance().updateSMSView();
+			}
+			else{
+				ArrayList<YearMonth> validDates = new ArrayList<YearMonth>();
+				for(DateSMS ds : smsAddedByDate){
+					if((ds.getConversationID() == threadID || ds.getConversationID() == DateSMS.ALL_CONVERSATIONS_ID)
+							&& !validDates.contains(ds.getYearMonth())){
+						validDates.add(ds.getYearMonth());
+					}
+				}
+				if(validDates.isEmpty()){
+					// There are themes in the bin and no dates. Filter the SMS in the bin
+					DateSMS ds = new DateSMS(date, threadID);
+					smsAddedByDate.add(ds); // Still has to add so that the date view updates correctly even though no sms were added
+					ArrayList<SMS> smsToFilter = new ArrayList<SMS>();
+					ArrayList<Long> smsIDs = new ArrayList<Long>();
+					
+					for(ThemeSMS ts : binThemes){
+						smsIDs.addAll(ts.getSMSIDs());
+					}
+					for(int i = smses.size()-1; i >= 0; i--){
+						for(int a = 0; a < smsIDs.size(); a++){
+							if(smses.get(i).getID() == smsIDs.get(a)){
+								smsToFilter.add(smses.get(i));
+								smsIDs.remove(a);
+								break;
+							}
+						}
+					}
+					
+					validDates.add(ds.getYearMonth());
+					
+					for(int i = smsToFilter.size()-1; i >= 0; i--){
+						if(validDates.contains(smsToFilter.get(i).getYearMonth())){
+							smsToFilter.remove(i);
+						}
+					}
+					
+					for(SMS sms : smsToFilter){
+						removeSMSWithoutUpdateHoldingTheSem(sms);
+					}
+					BinView.getInstance().removeSMSES(smsToFilter);
+					MainView.getInstance().updateSMSView();
+					MainView.getInstance().updateDateView();
+				}
+				else{
+					// There are themes and dates in the bin. All SMS in the bin will be filtered for both of those. Add SMS which fit the added date and the inputed themes
+					Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
+					Cursor cursor = MainView.getInstance().getContext().getContentResolver().query(uri, null, "thread_id = '" + threadID + "'", null, null);
+					ArrayList<SMS> newSMSes = new ArrayList<SMS>();
+					SMS tempSMS;
+					if (cursor.moveToFirst()) {
+						do{
+							tempSMS = new SMS(cursor.getInt(cursor.getColumnIndexOrThrow("_id")), 
+									cursor.getString(cursor.getColumnIndexOrThrow("body")), 
+									cursor.getString(cursor.getColumnIndexOrThrow("date")), 
+									threadID,
+									cursor.getString(cursor.getColumnIndexOrThrow("type")));
+							if(!smses.contains(tempSMS) && tempSMS.getYearMonth().equals(date)){
+								newSMSes.add(tempSMS);
+							}
+						}
+						while(cursor.moveToNext());
+					}
+					DatabaseHandler.getInstance().initSMSES(newSMSes);
+					newSMSes = FindValidSMSWithTheme.calculateSMS(newSMSes, getAllAddedThemesWithConversationID(threadID));
+					smsAddedByDate.add(new DateSMS(date, newSMSes, threadID));
+					calculateSMSes(newSMSes);
+					updateThreadIDsADD(newSMSes); // must be done after the SMS list has been updated (done in the calculateSMSes() method)
+					MainView.getInstance().updateSMSView();
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally{
+			smsSemaphore.release();
 		}
-		calculateSMSes(newSMSes); //TODO
-		updateThreadIDsADD(newSMSes); // must be done after the SMS list has been updated (done in the calculateSMSes() method)
-		MainView.getInstance().updateSMSView();
-		return orderSMSByDate(newSMSes);
+//		return orderSMSByDate(newSMSes);
 	}
 	
 	public static ArrayList<SMS> orderSMSByDate(ArrayList<SMS> sms){
@@ -928,19 +1223,37 @@ public class HaikuGenerator {
 	
 	public static ArrayList<SMS> removeDate(YearMonth date){
 		ArrayList<SMS> removedSMS = new ArrayList<SMS>();
-		dates.remove(date);
-		for(int i = datesFromThreads.size()-1; i >= 0; i--){
-			if(datesFromThreads.get(i).getYearMonth().equals(date)){
-				datesFromThreads.remove(i);
+		ArrayList<Long> smsIDs = new ArrayList<Long>();
+		for(int i = smsAddedByDate.size()-1; i >= 0; i--){
+			if(date.equals(smsAddedByDate.get(i).getYearMonth())){
+				smsIDs.addAll(smsAddedByDate.get(i).getSMSIDs());
+				smsAddedByDate.remove(i);
 			}
 		}
 		for(int i = smses.size()-1; i >= 0; i--){
-			if(smses.get(i).getYearMonth().equals(date)){
-				removedSMS.add(smses.get(i));
-//				smses.remove(i); // old
-				removeSMSWithoutUpdate(smses.get(i));
+			for(int a = 0; a < smsIDs.size(); a++){
+				if(smses.get(i).getID() == smsIDs.get(a)){
+					removedSMS.add(smses.get(i));
+					removeSMSWithoutUpdate(smses.get(i));
+					smsIDs.remove(a);
+					break;
+				}
 			}
 		}
+		
+//		dates.remove(date);
+//		for(int i = datesFromThreads.size()-1; i >= 0; i--){
+//			if(datesFromThreads.get(i).getYearMonth().equals(date)){
+//				datesFromThreads.remove(i);
+//			}
+//		}
+//		for(int i = smses.size()-1; i >= 0; i--){
+//			if(smses.get(i).getYearMonth().equals(date)){
+//				removedSMS.add(smses.get(i));
+////				smses.remove(i); // old
+//				removeSMSWithoutUpdate(smses.get(i));
+//			}
+//		}
 		MainView.getInstance().updateSMSView();
 		return removedSMS;
 	}
@@ -1002,11 +1315,23 @@ public class HaikuGenerator {
 	}
 	
 	public static ArrayList<YearMonth> getDates(){
+		ArrayList<YearMonth> dates = new ArrayList<YearMonth>();
+		for(DateSMS ds : smsAddedByDate){
+			dates.add(ds.getYearMonth());
+		}
 		return dates;
 	}
 	
-	public static ArrayList<YearMonthConvo> getDateConvos(){
-		return datesFromThreads;
+//	public static ArrayList<YearMonthConvo> getDateConvos(){
+//		return datesFromThreads;
+//	}
+	
+	public static ArrayList<DateSMS> getDatesAdded(){
+		return smsAddedByDate;
+	}
+	
+	public static ArrayList<ThemeSMS> getThemesAdded(){
+		return smsAddedByTheme;
 	}
 	
 	public static ArrayList<Theme> getAllThemes(){
@@ -1023,12 +1348,20 @@ public class HaikuGenerator {
 		for(PartOfSpeechList pl : allWordsOrderedByTypesUpdated){
 			pl.getWords().clear();
 		}
+		ArrayList<Theme> themesInBin = new ArrayList<Theme>();
+		for(ThemeSMS themeSMS : smsAddedByTheme){
+			for(Theme theme : allThemes){
+				if(theme.getID() == themeSMS.getThemeID() && !themesInBin.contains(theme)){
+					themesInBin.add(theme);
+				}
+			}
+		}
 		boolean themeWord;
 		for(int a = 0; a < allWordsOrderedByTypes.size(); a++){
 			for(Word word : allWordsOrderedByTypes.get(a).getWords()){
 				themeWord = false;
-				for(Theme_ThreadID_Tuple theme : themes){
-					if(theme.getThemeID() == word.getID()){
+				for(Theme theme : themesInBin){
+					if(theme.getWordids().contains(word.getID())){
 						themeWord = true;
 						break;
 					}
@@ -1055,10 +1388,10 @@ public class HaikuGenerator {
 		generationsCounter = 4;
 		createdHaikusCounter = 0;
 //		printAllUsableWords();
-		haikus.add(new Haiku(!themes.isEmpty()));
-		haikus.add(new Haiku(!themes.isEmpty()));
-		haikus.add(new Haiku(!themes.isEmpty()));
-		haikus.add(new Haiku(!themes.isEmpty()));
+		haikus.add(new Haiku());
+		haikus.add(new Haiku());
+		haikus.add(new Haiku());
+		haikus.add(new Haiku());
 		
 	}
 	
@@ -1070,7 +1403,7 @@ public class HaikuGenerator {
 			HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
 		        @Override
 		        public void run(){
-		        	Toast.makeText(HaikuActivity.getInstance().getApplicationContext(), "Cannot create Haiku!",Toast.LENGTH_LONG).show();
+		        	Toast.makeText(HaikuActivity.getInstance().getApplicationContext(), "A Haiku cannot be created with the current sms input (add more!)",Toast.LENGTH_LONG).show();
 				}
 			});
 		}
@@ -1089,7 +1422,7 @@ public class HaikuGenerator {
 		if(generationsCounter < NUMBER_OF_GENERATIONS && !BinView.getInstance().isShowingHaiku()){
 			updateWordsUsed();
 			generationsCounter++;
-			haikus.add(new Haiku(!themes.isEmpty()));
+			haikus.add(new Haiku());
 		}
 		else if(createdHaikusCounter >= NUMBER_OF_GENERATIONS){
 //			Log.i("TAG", "Time to generate all haikus: " + (System.currentTimeMillis()-testStartTime) + " ms");

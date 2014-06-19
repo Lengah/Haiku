@@ -15,7 +15,6 @@ public class FindSentenceThread extends Thread{
 	private Random randomGenerator = new Random();
 	private Haiku haiku;
 	private int row;
-	private boolean themes;
 	
 	public static final String START_OBJECT = "<sentence>";
 	public static final double CHANCE_TO_START_WITH_THEME_LIST = 70; // in %
@@ -28,7 +27,6 @@ public class FindSentenceThread extends Thread{
 		this.row = row;
 		wordsUsed = new ArrayList<PartOfSpeechList>(HaikuGenerator.getWordsUsed());
 //		backupWords = new ArrayList<Word>(HaikuGenerator.getWordsUsedWithTheAllTheme());
-		themes = haiku.containsThemes();
 //		Log.i("TAG4", "findsentence row: " + row);
 	}
 	

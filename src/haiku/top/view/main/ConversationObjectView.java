@@ -26,7 +26,7 @@ public class ConversationObjectView extends LinearLayout{
 
 	private int threadID;
 //	private Bitmap picture;
-	private ArrayList<String> names;
+	private ArrayList<String> names = new ArrayList<String>();
 	private ArrayList<String> addresses;
 	
 	private LetterSpacingTextView nameView1;
@@ -40,7 +40,6 @@ public class ConversationObjectView extends LinearLayout{
 		super(context);
 		this.threadID = threadID;
 		addresses = HaikuActivity.getConversationNumbers(context, threadID);
-		names = new ArrayList<String>();
 		String temp;
 		for(int i = 0; i < addresses.size(); i++){
 			temp = HaikuActivity.getContactName(context, addresses.get(i));

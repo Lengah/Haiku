@@ -2,6 +2,7 @@ package haiku.top.view.main;
 
 import java.util.ArrayList;
 
+import haiku.top.HaikuActivity;
 import haiku.top.R;
 import haiku.top.model.Theme;
 import haiku.top.model.date.YearMonth;
@@ -52,7 +53,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    	case DragEvent.ACTION_DRAG_ENTERED:
 	    		inBinRange = true;
 	    		view = MainView.getInstance().getDraggedView();
-	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObject || view instanceof QuarterCircle || view instanceof ThemeObjectView)){
+	    		if(MainView.getInstance().getBinView().isDeleting() && (view instanceof ConversationObjectView || view instanceof SMSObject)){// || view instanceof QuarterCircle || view instanceof ThemeObjectView)){
 	    			// Since deletion has started the user should be able to place the dragged object in the bin
 	    			isAddingDuringDeletion = true;
 	    			MainView.getInstance().getBinView().setAddingObjectDuringDeletion(view);
@@ -71,7 +72,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    			return true;
 	    		}
 	    		view = MainView.getInstance().getDraggedView();
-	    		if(view instanceof ThemeObjectView){
+	    		if(!MainView.getInstance().getBinView().isDeleting() && view instanceof ThemeObjectView){
 	    			HaikuGenerator.addTheme(((ThemeObjectView)view).getTheme());
 	    		}
 	    		if(view instanceof ConversationObjectView){
@@ -80,7 +81,7 @@ public class HaikuBinDragListener implements OnDragListener{
 	    		if(view instanceof SMSObject){
 	    			HaikuGenerator.calculateSMS(((SMSObject)view).getSMS());
 	    		}
-	    		if(view instanceof QuarterCircle){
+	    		if(!MainView.getInstance().getBinView().isDeleting() && view instanceof QuarterCircle){
 	    			if(((QuarterCircle) view).isYearView()){
 //	    				ArrayList<YearMonth> yearMonths = HaikuGenerator.getDates();
 //	    				YearMonth yearMonth;
@@ -90,14 +91,16 @@ public class HaikuBinDragListener implements OnDragListener{
 //	    						HaikuGenerator.addDate(yearMonth);
 //	    					}
 //	    				}
-	    				if(MainView.getInstance().isShowingSMS()){
-	    					HaikuGenerator.addYearFromSMSes(MainView.getInstance().getSelectedYear(), MainView.getInstance().getSelectedConvoThreadID());
-	    				}
-	    				else{
-	    					HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
+	    				if(!HaikuActivity.getInstance().isFutureYear(MainView.getInstance().getSelectedYear())){
+	    					if(MainView.getInstance().isShowingSMS()){
+		    					HaikuGenerator.addYearFromSMSes(MainView.getInstance().getSelectedYear(), MainView.getInstance().getSelectedConvoThreadID());
+		    				}
+		    				else{
+		    					HaikuGenerator.addYear(MainView.getInstance().getSelectedYear());
+		    				}
 	    				}
 	    			}
-	    			else{
+	    			else if(!HaikuActivity.getInstance().isFutureDate(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()))){
 	    				if(MainView.getInstance().isShowingSMS()){
 	    					HaikuGenerator.addDateFromSMSes(new YearMonth(MainView.getInstance().getSelectedYear(), ((QuarterCircle)view).getMonth()), MainView.getInstance().getSelectedConvoThreadID());
 	    				}

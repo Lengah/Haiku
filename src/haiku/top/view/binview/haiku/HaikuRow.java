@@ -86,7 +86,7 @@ public class HaikuRow extends Row{
 	}
 	
 	public void addWord(HaikuRowWord word){
-		words.add(currentIndex, word);
+		words.add(Math.min(words.size(), currentIndex), word);
 		word.setRow(this);
 		currentIndex = -1;
 		redraw(true);

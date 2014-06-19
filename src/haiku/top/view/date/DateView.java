@@ -5,6 +5,7 @@ package haiku.top.view.date;
 import haiku.top.model.date.Month;
 import haiku.top.model.date.YearMonth;
 import haiku.top.model.date.YearMonthConvo;
+import haiku.top.model.generator.DateSMS;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.view.main.MainView;
 
@@ -115,33 +116,47 @@ public class DateView extends RelativeLayout implements OnTouchListener, OnClick
 	}
 	
 	public void updateMonthWithIndex(int index){
-		if(HaikuGenerator.getDates().contains(new YearMonth(yearSelected, months.get(index).getMonth()))
-				|| (MainView.getInstance().isShowingSMS() 
-						&& HaikuGenerator.getDateConvos().contains(new YearMonthConvo(new YearMonth(yearSelected, months.get(index).getMonth()), MainView.getInstance().getSelectedConvoThreadID())))){
-			months.get(index).setAlpha(MainView.OPACITY_USED_DATE);
+		YearMonth ym = new YearMonth(yearSelected, months.get(index).getMonth());
+		months.get(index).setAlpha(MainView.OPACITY_FULL);
+		long threadID = DateSMS.ALL_CONVERSATIONS_ID;
+		if(MainView.getInstance().isShowingSMS()){
+			threadID = MainView.getInstance().getSelectedConvoThreadID();
 		}
-		else{
-			months.get(index).setAlpha(MainView.OPACITY_FULL);
+		for(DateSMS ds : HaikuGenerator.getDatesAdded()){
+			if(ds.getConversationID() == threadID && ds.getYearMonth().equals(ym)){
+				months.get(index).setAlpha(MainView.OPACITY_USED_DATE);
+				return;
+			}
 		}
+//		if(HaikuGenerator.getDates().contains(ym)
+//				|| (MainView.getInstance().isShowingSMS() 
+//						&& HaikuGenerator.getDateConvos().contains(new YearMonthConvo(ym), MainView.getInstance().getSelectedConvoThreadID())))){
+//			months.get(index).setAlpha(MainView.OPACITY_USED_DATE);
+//		}
+//		else{
+//			months.get(index).setAlpha(MainView.OPACITY_FULL);
+//		}
 	}
 	
 	public void update(){
-//		for(int a = 0; a < months.size(); a++){
-//			months.get(a).setAlpha(MainView.OPACITY_FULL);
-//		}
-		ArrayList<YearMonth> dates = HaikuGenerator.getDates();
-		YearMonth ym;
 		for(int i = 0; i < months.size(); i++){
-			ym = new YearMonth(yearSelected, months.get(i).getMonth());
-			if(dates.contains(ym)
-					|| (MainView.getInstance().isShowingSMS() 
-							&& HaikuGenerator.getDateConvos().contains(new YearMonthConvo(ym, MainView.getInstance().getSelectedConvoThreadID())))){
-				months.get(i).setAlpha(MainView.OPACITY_USED_DATE);
-			}
-			else{
-				months.get(i).setAlpha(MainView.OPACITY_FULL);
-			}
+			updateMonthWithIndex(i);
 		}
+//		ArrayList<YearMonth> dates = HaikuGenerator.getDates();
+//		YearMonth ym;
+//		for(int i = 0; i < months.size(); i++){
+//			ym = new YearMonth(yearSelected, months.get(i).getMonth());
+//			if(dates.contains(ym)
+//					|| (MainView.getInstance().isShowingSMS() 
+//							&& HaikuGenerator.getDateConvos().contains(new YearMonthConvo(ym, MainView.getInstance().getSelectedConvoThreadID())))){
+//				months.get(i).setAlpha(MainView.OPACITY_USED_DATE);
+//			}
+//			else{
+//				months.get(i).setAlpha(MainView.OPACITY_FULL);
+//			}
+//		}
+		
+		
 //		int counter = 0;
 //		for(int i = 0; i < dates.size(); i++){
 //			if(dates.get(i).getYear() == yearSelected){

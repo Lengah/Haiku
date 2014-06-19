@@ -46,6 +46,7 @@ import haiku.top.HaikuActivity;
 import haiku.top.R;
 import haiku.top.model.Theme;
 import haiku.top.model.generator.HaikuGenerator;
+import haiku.top.model.generator.ThemeSMS;
 import haiku.top.model.generator.Theme_ThreadID_Tuple;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.model.smshandler.ShowSMSESThread;
@@ -315,12 +316,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			themeObjects.add(themeObject);
 			themeList.addView(themeObject);
 			themeObject.setOnLongClickListener(this);
-			if(HaikuGenerator.getThemes().contains(themes.get(i))){
-				themeObject.setAlpha(OPACITY_USED);
-			}
-			else{
-				themeObject.setAlpha(OPACITY_DEFAULT);
-			}
 //			themeObject.setOnClickListener(this);
 			themeObject.setOnTouchListener(this); // overrides the scroll function!
 //			height += themeObject.getHeightOfView();
@@ -499,6 +494,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			}
 		}
 		return null;
+	}
+	
+	public ArrayList<ConversationObjectView> getConversations(){
+		return conversations;
 	}
 	
 	private static final int BOLD_CONTACTS = 5;
@@ -906,12 +905,18 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		if(isShowingSMS()){
 			for(int i = 0; i < themeObjects.size(); i++){
 				themeObjects.get(i).setAlpha(OPACITY_DEFAULT);
-				for(Theme_ThreadID_Tuple t : HaikuGenerator.getThemes()){
-					if(t.getThemeID() == themeObjects.get(i).getTheme().getID() && t.getThreadID() == getSelectedConvoThreadID()){
+				for(ThemeSMS ts : HaikuGenerator.getThemesAdded()){
+					if(getSelectedConvoThreadID() == ts.getConversationID() && ts.getThemeID() == themeObjects.get(i).getId()){
 						themeObjects.get(i).setAlpha(OPACITY_USED);
 						break;
 					}
 				}
+//				for(Theme_ThreadID_Tuple t : HaikuGenerator.getThemes()){
+//					if(t.getThemeID() == themeObjects.get(i).getTheme().getID() && t.getThreadID() == getSelectedConvoThreadID()){
+//						themeObjects.get(i).setAlpha(OPACITY_USED);
+//						break;
+//					}
+//				}
 			}
 		}
 //		for(int i = 0; i < themeObjects.size(); i++){

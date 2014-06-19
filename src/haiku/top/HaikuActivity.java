@@ -9,17 +9,22 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 import haiku.top.model.CreateSamplesContact;
 import haiku.top.model.Theme;
+import haiku.top.model.date.Month;
+import haiku.top.model.date.YearMonth;
 import haiku.top.model.generator.Haiku;
 import haiku.top.model.generator.HaikuGenerator;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.model.sql.DatabaseHandler;
 import haiku.top.view.CreateSamplesView;
 import haiku.top.view.binview.BinView;
+import haiku.top.view.date.DateView;
 import haiku.top.view.main.ConversationObjectView;
 import haiku.top.view.main.MainView;
 import android.app.Activity;
@@ -54,6 +59,7 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -66,6 +72,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.widget.Toast;
 
 public class HaikuActivity extends Activity {
 	private static HaikuActivity ha;
@@ -143,6 +150,37 @@ public class HaikuActivity extends Activity {
         	//Log.i("TAG", "CLOSE DB!!!!!!!!!!!!!!!");
         	databaseHandler.close();
         }
+    }
+    
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM");
+    
+    public boolean isFutureDate(YearMonth yearMonth){
+    	Calendar cal = Calendar.getInstance();
+    	String date = dateFormat.format(cal.getTime());
+    	int year = Integer.parseInt(date.substring(0, date.indexOf('/')));
+    	if(yearMonth.getYear() > year){
+    		return true;
+    	}
+    	if(yearMonth.getYear() < year){
+    		return false;
+    	}
+    	// yearMonth.getYear() == year
+    	int currentMonthIndex = Integer.parseInt(date.substring(date.indexOf('/')+1)) - 1;
+    	int selectedMonthIndex = 0;
+    	for(int i = 0; i < DateView.MONTHS_NAME.length; i++){
+    		if(DateView.MONTHS_NAME[i].equals(yearMonth.getMonth())){
+    			selectedMonthIndex = i;
+    			break;
+    		}
+    	}
+    	return selectedMonthIndex > currentMonthIndex;
+    }
+    
+    public boolean isFutureYear(int year){
+    	Calendar cal = Calendar.getInstance();
+    	String date = dateFormat.format(cal.getTime());
+    	int currentYear = Integer.parseInt(date.substring(0, date.indexOf('/')));
+    	return year > currentYear;
     }
     
     /**
@@ -234,6 +272,15 @@ public class HaikuActivity extends Activity {
 //        }
 
         ed.commit();
+    }
+    
+    public void showMaxSMSView(){
+    	HaikuActivity.getInstance().runOnUiThread(new Runnable(){           
+	        @Override
+	        public void run(){
+	        	Toast.makeText(HaikuActivity.getInstance(), "Haiku bin is full",Toast.LENGTH_LONG).show();
+	        }
+	    });
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
