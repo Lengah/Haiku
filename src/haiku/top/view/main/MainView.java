@@ -800,6 +800,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		
 		smsObjects.add(smsObject);
 		smsObjects.get(smsObjects.size()-1).setOnLongClickListener(this);
+		smsObjects.get(smsObjects.size()-1).setOnClickListener(this);
 		smsObjects.get(smsObjects.size()-1).setOnTouchListener(this);
 		
 //		smsObjects.add(smsObject.getBottomBox());
@@ -973,10 +974,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 				namesListIsEnlarged = true;
 			}
 		}
+		else if(lookingAtHaikus && v instanceof SMSObject){
+			// The user wants to share one of his haikus
+		    HaikuActivity.getInstance().shareMessage(((SMSObject)v).getSMS().getMessage());
+		}
 	}
 
 	@Override
-	public boolean onLongClick(View v) { //TODO
+	public boolean onLongClick(View v) {
 		// Code for drag
 //		if(v.getAlpha() == OPACITY_USED){
 //			// The view is already in the bin

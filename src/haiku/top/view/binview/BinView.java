@@ -486,19 +486,20 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		int dateMarginTop = (int)(((double)DATE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
 		dateScroll = new ScrollView(context);
+		dateScroll.setVerticalScrollBarEnabled(false);
 		dateList = new LinearLayout(context);
 		dateList.setOrientation(LinearLayout.VERTICAL);
-		dateList.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-		LayoutParams dateScrollParams = new RelativeLayout.LayoutParams(dateWidth, dateHeight);
+//		dateList.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//		LayoutParams dateScrollParams = new RelativeLayout.LayoutParams(dateWidth, dateHeight);
+		dateList.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dateHeight));
+		LayoutParams dateScrollParams = new RelativeLayout.LayoutParams(dateWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
 		dateScrollParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		dateScrollParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		dateScrollParams.setMargins(dateMarginLeft, dateMarginTop, 0, 0);
+		dateScrollParams.setMargins(dateMarginLeft, dateMarginTop, 0, screenHeight-dateMarginTop-dateHeight);
 		dateScroll.setLayoutParams(dateScrollParams);
 		dateScroll.setRotation(DATE_ROTATION);
 		dateScroll.addView(dateList);
 		addView(dateScroll);
-		
-		
 		
 		// THEME
 		themeViews = new ArrayList<LinearLayout>();
