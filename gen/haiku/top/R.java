@@ -1128,23 +1128,28 @@ containing a value of this type.
         public static final int abc_textfield_searchview_right_holo_light=0x7f020056;
         public static final int contact_bg_default=0x7f020057;
         public static final int contact_fg=0x7f020058;
-        public static final int delete_by_haiku_logo=0x7f020059;
-        public static final int haiku_contact_image=0x7f02005a;
-        public static final int haiku_demomode=0x7f02005b;
-        public static final int haikubin_extended=0x7f02005c;
-        public static final int haikubin_small=0x7f02005d;
-        public static final int rounded_corners=0x7f02005e;
-        public static final int rounded_corners_sent=0x7f02005f;
-        public static final int save_button=0x7f020060;
-        public static final int save_button_default=0x7f020061;
-        public static final int save_button_over=0x7f020062;
-        public static final int save_button_pressed=0x7f020063;
-        public static final int share_button=0x7f020064;
-        public static final int share_button_default=0x7f020065;
-        public static final int share_button_over=0x7f020066;
-        public static final int share_button_pressed=0x7f020067;
-        public static final int slider_dot=0x7f020068;
-        public static final int slider_line=0x7f020069;
+        public static final int delete_button=0x7f020059;
+        public static final int delete_button_default=0x7f02005a;
+        public static final int delete_button_over=0x7f02005b;
+        public static final int delete_button_pressed=0x7f02005c;
+        public static final int delete_by_haiku_logo=0x7f02005d;
+        public static final int haiku_contact_image=0x7f02005e;
+        public static final int haiku_demomode=0x7f02005f;
+        public static final int haikubin_extended=0x7f020060;
+        public static final int haikubin_small=0x7f020061;
+        public static final int rounded_corners=0x7f020062;
+        public static final int rounded_corners_sent=0x7f020063;
+        public static final int save_button=0x7f020064;
+        public static final int save_button_default=0x7f020065;
+        public static final int save_button_over=0x7f020066;
+        public static final int save_button_pressed=0x7f020067;
+        public static final int share_button=0x7f020068;
+        public static final int share_button_default=0x7f020069;
+        public static final int share_button_over=0x7f02006a;
+        public static final int share_button_pressed=0x7f02006b;
+        public static final int slider_dot=0x7f02006c;
+        public static final int slider_line=0x7f02006d;
+        public static final int splash_screen=0x7f02006e;
     }
     public static final class id {
         public static final int ContactLayout=0x7f050048;
@@ -1567,6 +1572,7 @@ containing a value of this type.
         public static final int Widget_AppCompat_ProgressBar=0x7f0b000a;
         public static final int Widget_AppCompat_ProgressBar_Horizontal=0x7f0b0009;
         public static final int Widget_AppCompat_Spinner_DropDown_ActionBar=0x7f0b0022;
+        public static final int splashScreenTheme=0x7f0b008d;
     }
     public static final class styleable {
         /**  ============================================ 

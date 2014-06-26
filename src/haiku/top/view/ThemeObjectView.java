@@ -35,7 +35,7 @@ public class ThemeObjectView extends LinearLayout{
 		themeText = new TextView(context);
 		
 		if(bin){
-			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		}
 		else{
 			setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));

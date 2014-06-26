@@ -907,7 +907,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 			for(int i = 0; i < themeObjects.size(); i++){
 				themeObjects.get(i).setAlpha(OPACITY_DEFAULT);
 				for(ThemeSMS ts : HaikuGenerator.getThemesAdded()){
-					if(getSelectedConvoThreadID() == ts.getConversationID() && ts.getThemeID() == themeObjects.get(i).getId()){
+					if(getSelectedConvoThreadID() == ts.getConversationID() && ts.getThemeID() == themeObjects.get(i).getTheme().getID()){
 						themeObjects.get(i).setAlpha(OPACITY_USED);
 						break;
 					}

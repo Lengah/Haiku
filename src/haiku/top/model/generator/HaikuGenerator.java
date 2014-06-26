@@ -438,6 +438,7 @@ public class HaikuGenerator {
 				}
 			}
 			BinView.getInstance().addTheme(theme);
+			smsAddedByTheme.add(new ThemeSMS(theme.getID(), threadID)); // Still need to add for the theme view to update properly even if no SMS were added
 			if(binDates.isEmpty()){
 				// add all valid SMS
 				Uri uri = Uri.parse(HaikuActivity.ALLBOXES);
@@ -481,7 +482,6 @@ public class HaikuGenerator {
 							}
 						}
 					}
-					smsAddedByTheme.add(new ThemeSMS(theme.getID(), threadID)); // Still need to add for the theme view to update properly even though no SMS were added
 					ArrayList<SMS> validSMS = FindValidSMSWithTheme.calculateSMS(smsToFilter, getAllAddedThemesWithConversationID(threadID));
 					boolean exists;
 					for(int i = smsToFilter.size()-1; i >= 0; i--){

@@ -27,8 +27,14 @@ public class HaikuRow extends Row{
 	}
 	
 	public HaikuRowWord getWordAtXPos(int xPos){
+		float extraForShortText;
 		for(int i = 0; i < words.size(); i++){
-			if(words.get(i).getStartPos() + words.get(i).getLength() > xPos){
+			extraForShortText = 0;
+			if(words.get(i).getText().length() == 1){
+				// hard to "hit", let the space after be a part of the word
+				extraForShortText = parent.getLengthOfSpace();
+			}
+			if(words.get(i).getStartPos() + words.get(i).getLength() + extraForShortText > xPos){
 				return words.get(i);
 			}
 		}

@@ -74,7 +74,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private ScrollView dateScroll;
 	private LinearLayout dateList;
 	
-	private ArrayList<LinearLayout> themeViews;
+//	private ArrayList<LinearLayout> themeViews;
+	
+	private ScrollView themeScroll;
+	private LinearLayout themeList;
 	
 	private TextView contactName;
 	private ScrollView textScroll;
@@ -85,6 +88,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private Button saveButton;
 	private Button shareButton;
+	private Button deleteButton;
 	
 	private HaikuView haikuView;
 	private HaikuExtraRow haikuRestView;
@@ -204,34 +208,51 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	private int haikuMarginTop;
 	
 	// the save button
-	private static final Position SAVE_UPPER_LEFT = new Position(448, 1010);
-	private static final int SAVE_WIDTH = 175;
-	private static final int SAVE_HEIGHT = (int) (SAVE_WIDTH * (259.0/265.0)); // the actual image file is 265x259 px
+	private static final Position SAVE_UPPER_LEFT = new Position(350, 1010); // 448, 1010
+	private static final int SAVE_WIDTH = 180; // 175
 	
 	// the share button
-	private static final Position SHARE_UPPER_LEFT = new Position(168, 960);
-	private static final int SHARE_WIDTH = 250;
-	private static final int SHARE_HEIGHT = SHARE_WIDTH; // the actual image file is a square
+	private static final Position SHARE_UPPER_LEFT = new Position(130, 1000); // 168, 960
+	private static final int SHARE_WIDTH = 200; // 250
+	
+	// the delete button
+	private static final Position DELETE_UPPER_LEFT = new Position(550, 1025); 
+	private static final int DELETE_WIDTH = 150;
 	
 	// the date list
 	private static final Position DATE_UPPER_LEFT = new Position(20, 400); // 70, 870
 	private static final int DATE_WIDTH = 130; // 130
-	private static final int DATE_HEIGHT = 600; // 280s
+	private static final int DATE_HEIGHT = 600; // 280
 	private static final int DATE_OBJECT_HEIGHT = 70; // 70  // The width is the same
 	private static final int DATE_ROTATION = 0; // -5
 	private int dateWidth;
 	private int dateObjectHeight;
 	
 	// The themes
-	private static final int THEME_OBJECT_WIDTH = 120;
-	private static final int THEME_OBJECT_HEIGHT = 60;
-	private static final Position THEME1_UPPER_LEFT = new Position(280, 230);
-	private static final int THEME_PADDING = 10;
-	private static final int THEME_BOTTOM_MARGIN_LEFT = 70;
-	private static final int THEME_BOTTOM_MARGIN_TOP = 20;
-	private static final int THEME_ROTATION = -45;
-	private static int themeObjectWidth;
-	private static int themeObjectHeight;
+	private static final Position THEME_UPPER_LEFT = new Position(350, 20);
+	private static final int THEME_WIDTH = 120;
+	private static final int THEME_HEIGHT = 300;
+	private static final int THEME_ROTATION2 = 45;
+	private static final int THEME_OBJECT_HEIGHT2 = 60;
+	
+	/**
+	 * In % of the objects' height
+	 */
+	private static final int THEME_MARGIN = 20;
+	private int themeObjectMargin;
+	
+	private static int themeWidth;
+	private static int themeObjectHeight2;
+	
+//	private static final int THEME_OBJECT_WIDTH = 120;
+//	private static final int THEME_OBJECT_HEIGHT = 60;
+//	private static final Position THEME1_UPPER_LEFT = new Position(280, 230);
+//	private static final int THEME_PADDING = 10;
+//	private static final int THEME_BOTTOM_MARGIN_LEFT = 70;
+//	private static final int THEME_BOTTOM_MARGIN_TOP = 20;
+//	private static final int THEME_ROTATION = -45;
+//	private static int themeObjectWidth;
+//	private static int themeObjectHeight;
 	
 	private View viewBeingDragged = null;
 	
@@ -252,8 +273,10 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	
 	private ProgressDialog threadProgressBar;
 	private ProgressDialog saveProgressBar;
+	private ProgressDialog loadingProgressBar;
 	private static Semaphore endProgress = new Semaphore(1);
-	
+	private static final String SAVING_MESSAGE = "Saving...";
+	private static final String LOADING_MESSAGE = "Loading...";
 	/**
 	 * If the user has initiated deletion (if the SMSes has been combined)
 	 */
@@ -295,14 +318,19 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		
 		threadProgressBar = new ProgressDialog(context);
-		threadProgressBar.setMessage("Loading...");
+		threadProgressBar.setMessage(LOADING_MESSAGE);
 		threadProgressBar.setCancelable(false);
 		threadProgressBar.setIndeterminate(true);
 		
 		saveProgressBar = new ProgressDialog(context);
-		saveProgressBar.setMessage("Saving...");
+		saveProgressBar.setMessage(SAVING_MESSAGE);
 		saveProgressBar.setCancelable(false);
 		saveProgressBar.setIndeterminate(true);
+		
+		loadingProgressBar = new ProgressDialog(context);
+		loadingProgressBar.setMessage(LOADING_MESSAGE);
+		loadingProgressBar.setCancelable(false);
+		loadingProgressBar.setIndeterminate(true);
 		
 		pointerView = new LinearLayout(context);
 		pointerView.setBackgroundColor(Color.BLACK);
@@ -430,7 +458,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		int saveWidth = (int)(((double)SAVE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
 //		int saveHeight = (int)(((double)SAVE_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		int saveHeight = (int) (saveWidth * (259.0/265.0));
+		int saveHeight = saveWidth;
 		
 		int saveMarginLeft = (int)(((double)SAVE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
 		int saveMarginTop = (int)(((double)SAVE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
@@ -466,7 +494,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		LayoutParams shareParams = new RelativeLayout.LayoutParams(shareWidth, shareHeight);
 		shareParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		shareParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		shareParams.setMargins(shareMarginLeft, shareMarginTop, 0, 0); // same margin top as save
+		shareParams.setMargins(shareMarginLeft, shareMarginTop, 0, 0);
 		shareButton.setLayoutParams(shareParams);
 		addView(shareButton);
 		shareButton.setBackgroundResource(R.drawable.share_button);
@@ -476,6 +504,25 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 //		int sharedMaxSize = Math.min(saveButtonMaxSize, shareButtonMaxSize);
 //		saveButton.setTextSize(sharedMaxSize);
 //		shareButton.setTextSize(sharedMaxSize);
+		
+		// DELETE BUTTON
+		int deleteWidth = (int)(((double)DELETE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		int deleteHeight = deleteWidth;
+		
+		
+		int deleteMarginLeft = (int)(((double)DELETE_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		int deleteMarginTop = (int)(((double)DELETE_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
+		
+		deleteButton = new Button(context);
+		LayoutParams deleteParams = new RelativeLayout.LayoutParams(deleteWidth, deleteHeight);
+		deleteParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		deleteParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		deleteParams.setMargins(deleteMarginLeft, deleteMarginTop, 0, 0);
+		deleteButton.setLayoutParams(deleteParams);
+		addView(deleteButton);
+		deleteButton.setBackgroundResource(R.drawable.delete_button);
+		deleteButton.setVisibility(GONE);
+		deleteButton.setOnClickListener(this);
 		
 		// DATE
 		dateWidth = (int)(((double)DATE_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
@@ -502,103 +549,140 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		addView(dateScroll);
 		
 		// THEME
-		themeViews = new ArrayList<LinearLayout>();
-		for(int i = 0; i < 8; i++){
-			themeViews.add(new LinearLayout(context));
-			addView(themeViews.get(i));
-//			themeViews.get(i).setVisibility(GONE);
-		}
-		int theme1MarginLeft = (int)(((double)THEME1_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
-		int theme1MarginTop = (int)(((double)THEME1_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		themeObjectWidth = (int)(((double)THEME_OBJECT_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
-		themeObjectHeight = (int)(((double)THEME_OBJECT_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
-		int themePadding = (int)(((double)THEME_PADDING)/BIN_IMAGE_WIDTH*screenWidth);
+//		private static final Position THEME_UPPER_LEFT = new Position(20, 400);
+//		private static final int THEME_WIDTH = 130;
+//		private static final int THEME_HEIGHT = 600;
+//		private static final int THEME_ROTATION2 = -45;
+//		private static final int THEME_OBJECT_HEIGHT2 = 60;
+//		
+//		private int themeWidth;
+//		private int themeObjectHeight2;
+//		
+//		private ScrollView themeScroll;
+//		private LinearLayout themeList;
 		
-		int lowerOffsetLeft = (int)(((double)THEME_BOTTOM_MARGIN_LEFT)/BIN_IMAGE_WIDTH*screenWidth);
-		int lowerOffsetTop  = (int)(((double)THEME_BOTTOM_MARGIN_TOP)/BIN_IMAGE_HEIGHT*screenHeight);
-		double themeRotationAbs = Math.abs(THEME_ROTATION);
+		themeWidth = (int)(((double)THEME_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+		int themeHeight = (int)(((double)THEME_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+		themeObjectHeight2 = (int)(((double)THEME_OBJECT_HEIGHT2)/BIN_IMAGE_HEIGHT*screenHeight);
+		themeObjectMargin = (int) (themeObjectHeight2*((double)THEME_MARGIN/100.0));
 		
-		LayoutParams theme1Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme1Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme1Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme1Params.setMargins(theme1MarginLeft, theme1MarginTop, 0, 0);
-		themeViews.get(0).setLayoutParams(theme1Params);
-		themeViews.get(0).setRotation(THEME_ROTATION);
+		int themeMarginLeft = (int)(((double)THEME_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+		int themeMarginTop = (int)(((double)THEME_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
 		
-		int theme2MarginLeft = (int) (theme1MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
-		int theme2MarginTop = (int) (theme1MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme2Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme2Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme2Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme2Params.setMargins(theme2MarginLeft, theme2MarginTop, 0, 0);
-		themeViews.get(1).setLayoutParams(theme2Params);
-		themeViews.get(1).setRotation(THEME_ROTATION);
+		themeScroll = new ScrollView(context);
+		themeScroll.setVerticalScrollBarEnabled(false);
+		themeList = new LinearLayout(context);
+		themeList.setOrientation(LinearLayout.VERTICAL);
+		themeList.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		LayoutParams themeScrollParams = new RelativeLayout.LayoutParams(themeWidth, themeHeight);
+//		themeList.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, themeHeight));
+//		LayoutParams themeScrollParams = new RelativeLayout.LayoutParams(themeWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
+		themeScrollParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		themeScrollParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		themeScrollParams.setMargins(themeMarginLeft, themeMarginTop, 0, screenHeight-themeMarginTop-themeHeight);
+		themeScroll.setLayoutParams(themeScrollParams);
+		themeScroll.setRotation(THEME_ROTATION2);
+		themeScroll.addView(themeList);
+		addView(themeScroll);
 		
-		int theme3MarginLeft = (int) (theme2MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
-		int theme3MarginTop = (int) (theme2MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme3Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme3Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme3Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme3Params.setMargins(theme3MarginLeft, theme3MarginTop, 0, 0);
-		themeViews.get(2).setLayoutParams(theme3Params);
-		themeViews.get(2).setRotation(THEME_ROTATION);
-		
-		double angleToNextRow = 90 - themeRotationAbs;
-		
-		int theme4MarginLeft = (int) (theme1MarginLeft + (themeObjectHeight+lowerOffsetTop)*Math.cos(angleToNextRow/180*Math.PI));
-		int theme4MarginTop = (int) (theme1MarginTop + (themeObjectHeight+lowerOffsetTop)*Math.sin(angleToNextRow/180*Math.PI));
-		// Also needs to offset it to the right so it doesn't cover the smses
-		theme4MarginLeft = (int) (theme4MarginLeft + (lowerOffsetLeft)*Math.cos(themeRotationAbs/180*Math.PI));
-		theme4MarginTop = (int) (theme4MarginTop - (lowerOffsetLeft)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme4Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme4Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme4Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme4Params.setMargins(theme4MarginLeft, theme4MarginTop, 0, 0);
-		themeViews.get(3).setLayoutParams(theme4Params);
-		themeViews.get(3).setRotation(THEME_ROTATION);
-		
-		int theme5MarginLeft = (int) (theme4MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
-		int theme5MarginTop = (int) (theme4MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme5Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme5Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme5Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme5Params.setMargins(theme5MarginLeft, theme5MarginTop, 0, 0);
-		themeViews.get(4).setLayoutParams(theme5Params);
-		themeViews.get(4).setRotation(THEME_ROTATION);
-		
-		int theme6MarginLeft = (int) (theme4MarginLeft + (themeObjectHeight+lowerOffsetTop)*Math.cos(angleToNextRow/180*Math.PI));
-		int theme6MarginTop = (int) (theme4MarginTop + (themeObjectHeight+lowerOffsetTop)*Math.sin(angleToNextRow/180*Math.PI));
-		// Also needs to offset it to the right so it doesn't cover the smses
-		theme6MarginLeft = (int) (theme6MarginLeft + (lowerOffsetLeft)*Math.cos(themeRotationAbs/180*Math.PI));
-		theme6MarginTop = (int) (theme6MarginTop - (lowerOffsetLeft)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme6Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme6Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme6Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme6Params.setMargins(theme6MarginLeft, theme6MarginTop, 0, 0);
-		themeViews.get(5).setLayoutParams(theme6Params);
-		themeViews.get(5).setRotation(THEME_ROTATION);
-		
-		int theme7MarginLeft = (int) (theme6MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
-		int theme7MarginTop = (int) (theme6MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme7Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme7Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme7Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme7Params.setMargins(theme7MarginLeft, theme7MarginTop, 0, 0);
-		themeViews.get(6).setLayoutParams(theme7Params);
-		themeViews.get(6).setRotation(THEME_ROTATION);
-		
-		int theme8MarginLeft = (int) (theme6MarginLeft + (themeObjectHeight+lowerOffsetTop)*Math.cos(angleToNextRow/180*Math.PI));
-		int theme8MarginTop = (int) (theme6MarginTop + (themeObjectHeight+lowerOffsetTop)*Math.sin(angleToNextRow/180*Math.PI));
-		// Also needs to offset it to the right so it doesn't cover the smses
-		theme8MarginLeft = (int) (theme8MarginLeft + (lowerOffsetLeft)*Math.cos(themeRotationAbs/180*Math.PI));
-		theme8MarginTop = (int) (theme8MarginTop - (lowerOffsetLeft)*Math.sin(themeRotationAbs/180*Math.PI));
-		LayoutParams theme8Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
-		theme8Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-		theme8Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-		theme8Params.setMargins(theme8MarginLeft, theme8MarginTop, 0, 0);
-		themeViews.get(7).setLayoutParams(theme8Params);
-		themeViews.get(7).setRotation(THEME_ROTATION);
+//		themeViews = new ArrayList<LinearLayout>();
+//		for(int i = 0; i < 8; i++){
+//			themeViews.add(new LinearLayout(context));
+//			addView(themeViews.get(i));
+////			themeViews.get(i).setVisibility(GONE);
+//		}
+//		int theme1MarginLeft = (int)(((double)THEME1_UPPER_LEFT.getXPos())/BIN_IMAGE_WIDTH*screenWidth);
+//		int theme1MarginTop = (int)(((double)THEME1_UPPER_LEFT.getYPos())/BIN_IMAGE_HEIGHT*screenHeight);
+//		
+//		themeObjectWidth = (int)(((double)THEME_OBJECT_WIDTH)/BIN_IMAGE_WIDTH*screenWidth);
+//		themeObjectHeight = (int)(((double)THEME_OBJECT_HEIGHT)/BIN_IMAGE_HEIGHT*screenHeight);
+//		int themePadding = (int)(((double)THEME_PADDING)/BIN_IMAGE_WIDTH*screenWidth);
+//		
+//		int lowerOffsetLeft = (int)(((double)THEME_BOTTOM_MARGIN_LEFT)/BIN_IMAGE_WIDTH*screenWidth);
+//		int lowerOffsetTop  = (int)(((double)THEME_BOTTOM_MARGIN_TOP)/BIN_IMAGE_HEIGHT*screenHeight);
+//		double themeRotationAbs = Math.abs(THEME_ROTATION);
+//		
+//		LayoutParams theme1Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme1Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme1Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme1Params.setMargins(theme1MarginLeft, theme1MarginTop, 0, 0);
+//		themeViews.get(0).setLayoutParams(theme1Params);
+//		themeViews.get(0).setRotation(THEME_ROTATION);
+//		
+//		int theme2MarginLeft = (int) (theme1MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
+//		int theme2MarginTop = (int) (theme1MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme2Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme2Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme2Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme2Params.setMargins(theme2MarginLeft, theme2MarginTop, 0, 0);
+//		themeViews.get(1).setLayoutParams(theme2Params);
+//		themeViews.get(1).setRotation(THEME_ROTATION);
+//		
+//		int theme3MarginLeft = (int) (theme2MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
+//		int theme3MarginTop = (int) (theme2MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme3Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme3Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme3Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme3Params.setMargins(theme3MarginLeft, theme3MarginTop, 0, 0);
+//		themeViews.get(2).setLayoutParams(theme3Params);
+//		themeViews.get(2).setRotation(THEME_ROTATION);
+//		
+//		double angleToNextRow = 90 - themeRotationAbs;
+//		
+//		int theme4MarginLeft = (int) (theme1MarginLeft + (themeObjectHeight+lowerOffsetTop)*Math.cos(angleToNextRow/180*Math.PI));
+//		int theme4MarginTop = (int) (theme1MarginTop + (themeObjectHeight+lowerOffsetTop)*Math.sin(angleToNextRow/180*Math.PI));
+//		// Also needs to offset it to the right so it doesn't cover the smses
+//		theme4MarginLeft = (int) (theme4MarginLeft + (lowerOffsetLeft)*Math.cos(themeRotationAbs/180*Math.PI));
+//		theme4MarginTop = (int) (theme4MarginTop - (lowerOffsetLeft)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme4Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme4Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme4Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme4Params.setMargins(theme4MarginLeft, theme4MarginTop, 0, 0);
+//		themeViews.get(3).setLayoutParams(theme4Params);
+//		themeViews.get(3).setRotation(THEME_ROTATION);
+//		
+//		int theme5MarginLeft = (int) (theme4MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
+//		int theme5MarginTop = (int) (theme4MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme5Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme5Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme5Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme5Params.setMargins(theme5MarginLeft, theme5MarginTop, 0, 0);
+//		themeViews.get(4).setLayoutParams(theme5Params);
+//		themeViews.get(4).setRotation(THEME_ROTATION);
+//		
+//		int theme6MarginLeft = (int) (theme4MarginLeft + (themeObjectHeight+lowerOffsetTop)*Math.cos(angleToNextRow/180*Math.PI));
+//		int theme6MarginTop = (int) (theme4MarginTop + (themeObjectHeight+lowerOffsetTop)*Math.sin(angleToNextRow/180*Math.PI));
+//		// Also needs to offset it to the right so it doesn't cover the smses
+//		theme6MarginLeft = (int) (theme6MarginLeft + (lowerOffsetLeft)*Math.cos(themeRotationAbs/180*Math.PI));
+//		theme6MarginTop = (int) (theme6MarginTop - (lowerOffsetLeft)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme6Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme6Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme6Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme6Params.setMargins(theme6MarginLeft, theme6MarginTop, 0, 0);
+//		themeViews.get(5).setLayoutParams(theme6Params);
+//		themeViews.get(5).setRotation(THEME_ROTATION);
+//		
+//		int theme7MarginLeft = (int) (theme6MarginLeft + (themeObjectWidth+themePadding)*Math.cos(themeRotationAbs/180*Math.PI));
+//		int theme7MarginTop = (int) (theme6MarginTop - (themeObjectWidth+themePadding)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme7Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme7Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme7Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme7Params.setMargins(theme7MarginLeft, theme7MarginTop, 0, 0);
+//		themeViews.get(6).setLayoutParams(theme7Params);
+//		themeViews.get(6).setRotation(THEME_ROTATION);
+//		
+//		int theme8MarginLeft = (int) (theme6MarginLeft + (themeObjectHeight+lowerOffsetTop)*Math.cos(angleToNextRow/180*Math.PI));
+//		int theme8MarginTop = (int) (theme6MarginTop + (themeObjectHeight+lowerOffsetTop)*Math.sin(angleToNextRow/180*Math.PI));
+//		// Also needs to offset it to the right so it doesn't cover the smses
+//		theme8MarginLeft = (int) (theme8MarginLeft + (lowerOffsetLeft)*Math.cos(themeRotationAbs/180*Math.PI));
+//		theme8MarginTop = (int) (theme8MarginTop - (lowerOffsetLeft)*Math.sin(themeRotationAbs/180*Math.PI));
+//		LayoutParams theme8Params = new RelativeLayout.LayoutParams(themeObjectWidth, themeObjectHeight);
+//		theme8Params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+//		theme8Params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+//		theme8Params.setMargins(theme8MarginLeft, theme8MarginTop, 0, 0);
+//		themeViews.get(7).setLayoutParams(theme8Params);
+//		themeViews.get(7).setRotation(THEME_ROTATION);
 		
 		
 		setOnClickListener(this);
@@ -733,7 +817,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			}
 		}
 		//should NEVER be null here
-		dateList.removeView(toRemove);
+		dateList.removeView(toRemove); // comparing it directly to ymv doesn't work for some reason
 		datesView.remove(toRemove);
 		MainView.getInstance().getSmallBinView().removeDate(ymv.getYearMonth());
 	}
@@ -843,6 +927,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textScroll.setVisibility(VISIBLE);
 		saveButton.setVisibility(GONE);
 		shareButton.setVisibility(GONE);
+		deleteButton.setVisibility(GONE);
 		haikuFinished = false;
 		showHaiku = false;
 		deletionInProgress = false;
@@ -855,6 +940,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		themesView.clear();
 		textList.removeAllViews();
 		dateList.removeAllViews();
+		themeList.removeAllViews();
 		safeHaiku = null;
 		endHaiku = null;
 //		textScroll.removeAllViews();ssf
@@ -864,7 +950,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		MainView.getInstance().updateConversationsVisibility();
 		MainView.getInstance().updateThemeView();
 		MainView.getInstance().updateSMSView();
-		updateThemeView();
+//		updateThemeView();
 		MainView.getInstance().getSmallBinView().clear();
 	}
 	
@@ -1016,38 +1102,53 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 			}
 		}
 		ThemeObjectView tob = new ThemeObjectView(context, theme, true);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(themeWidth, themeObjectHeight2);
+		params.setMargins(0, themeObjectMargin, 0, 0);
+		tob.setLayoutParams(params);
 		themesView.add(tob);
+		themeList.addView(tob);
 		tob.setOnTouchListener(this);
 		stateChanged = true;
-		updateThemeView();
+//		updateThemeView();
 		MainView.getInstance().getSmallBinView().addTheme(theme);
 	}
 	
 	public void removeTheme(ThemeObjectView tob){
-		themesView.remove(tob);
-		updateThemeView();
-		resetHaikuFinished();
-		HaikuGenerator.updateWordsUsed();
-		HaikuGenerator.createHaikus();
+		ThemeObjectView toRemove = null;
+		for(ThemeObjectView to : themesView){
+			if(to.getTheme().equals(tob.getTheme())){
+				toRemove = to;
+				break;
+			}
+		}
+		themesView.remove(toRemove); // comparing it directly to tob doesn't work for some reason
+		themeList.removeView(toRemove);
 		MainView.getInstance().getSmallBinView().removeTheme(tob);
+		
+//		themesView.remove(tob);
+//		updateThemeView();
+//		resetHaikuFinished();
+//		HaikuGenerator.updateWordsUsed();
+//		HaikuGenerator.createHaikus();
+//		MainView.getInstance().getSmallBinView().removeTheme(tob);
 	}
 	
-	public void updateThemeView(){
-		for(int i = 0; i < themeViews.size(); i++){
-			themeViews.get(i).removeAllViews();
-		}
-		for(int i = 0; i < themesView.size(); i++){
-			themeViews.get(i).addView(themesView.get(i));
-		}
-		MainView.getInstance().getSmallBinView().updateThemeView();
-	}
+//	public void updateThemeView(){
+//		for(int i = 0; i < themeViews.size(); i++){
+//			themeViews.get(i).removeAllViews();
+//		}
+//		for(int i = 0; i < themesView.size(); i++){
+//			themeViews.get(i).addView(themesView.get(i));
+//		}
+//		MainView.getInstance().getSmallBinView().updateThemeView();
+//	}
 	
 	/**
 	 * in px
 	 * @return
 	 */
 	public static int getThemeObjectWidth(){
-		return themeObjectWidth;
+		return themeWidth;
 	}
 	
 	/**
@@ -1055,7 +1156,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	 * @return
 	 */
 	public static int getThemeObjectHeight(){
-		return themeObjectHeight;
+		return themeObjectHeight2;
 	}
 	
 	public int getContactNameHeight(){
@@ -1195,6 +1296,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		textScroll.setVisibility(GONE);
 		saveButton.setVisibility(VISIBLE);
 		shareButton.setVisibility(VISIBLE);
+		deleteButton.setVisibility(VISIBLE);
 		contactName.setVisibility(GONE);
 		showHaiku = true;
 		deletionInProgress = false;//TODO
@@ -1395,8 +1497,8 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				insideHaikuArea = true;
 				return true;
 			}
-			if (event.getX() > haikuRestMarginLeft && event.getX() < haikuRestWidth + haikuRestMarginLeft
-					&& event.getY() > haikuRestMarginTop && event.getY() < haikuRestHeight + haikuRestMarginTop){
+			if (event.getX() >= haikuRestMarginLeft && event.getX() <= haikuRestWidth + haikuRestMarginLeft
+					&& event.getY() >= haikuRestMarginTop && event.getY() <= haikuRestHeight + haikuRestMarginTop){
 				// Inside the haikuRestView -> start word drag
 				HaikuRowWord word = haikuRestView.getWordAtPos(new Position(event.getX() - haikuRestMarginLeft, event.getY() - haikuRestMarginTop));
 				if(word == null){
@@ -1662,19 +1764,20 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 				if(!HaikuActivity.getInstance().isSafeMode()){
 					// safe mode is off!
 					// DELETE
-					ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
-					for(int i = 0; i < smsView.size(); i++){
-						smsToDelete.add(smsView.get(i).getSMS());
-					}
-					HaikuActivity.getInstance().deleteSMS(smsToDelete);
-					HaikuActivity.getInstance().runOnUiThread(new Runnable() {
-				        public void run() {
-				        	MainView.getInstance().updateConversations();
-							if(MainView.getInstance().isShowingSMS()){
-								MainView.getInstance().closeSMSView();
-							}
-				        }
-				    });
+					delete();
+//					ArrayList<SMS> smsToDelete = new ArrayList<SMS>();
+//					for(int i = 0; i < smsView.size(); i++){
+//						smsToDelete.add(smsView.get(i).getSMS());
+//					}
+//					HaikuActivity.getInstance().deleteSMS(smsToDelete);
+//					HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+//				        public void run() {
+//				        	MainView.getInstance().updateConversations();
+//							if(MainView.getInstance().isShowingSMS()){
+//								MainView.getInstance().closeSMSView();
+//							}
+//				        }
+//				    });
 				}
 				HaikuActivity.getInstance().addHaikuSMS(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()));
 				doneSaving();
@@ -1697,6 +1800,50 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	public void share(){
 		HaikuActivity.getInstance().shareMessage(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()).getHaikuPoem());
 	}
+	
+	public void deletePressed(){
+		if(!loadingProgressBar.isShowing()){
+			loadingProgressBar.show();
+		}
+		new Thread(){
+			public void run(){
+				if(!HaikuActivity.getInstance().isSafeMode()){
+					// safe mode is off!
+					// DELETE
+					delete();
+				}
+				doneDeleting();
+			}
+		}.start();
+	}
+	
+	/**
+	 * Deletes all SMS in the HaikuGenerator object and updates the conversations
+	 */
+	public void delete(){
+		ArrayList<SMS> smsToDelete = HaikuGenerator.getAllAddedSMS();
+		HaikuActivity.getInstance().deleteSMS(smsToDelete);
+		HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+	        public void run() {
+	        	MainView.getInstance().updateConversations();
+				if(MainView.getInstance().isShowingSMS()){
+					MainView.getInstance().closeSMSView();
+				}
+	        }
+	    });
+	}
+	
+	public void doneDeleting(){
+		HaikuActivity.getInstance().runOnUiThread(new Runnable() {
+	        public void run() {
+	        	MainView.getInstance().updateConversations();
+	    		reset();
+	    		if(loadingProgressBar.isShowing()){
+	    			loadingProgressBar.dismiss();
+	    		}
+	        }
+	    });
+	}
 
 	@Override
 	public void onClick(View v) {
@@ -1705,6 +1852,9 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 		}
 		else if(v.equals(shareButton)){
 			share();
+		}
+		else if(v.equals(deleteButton)){
+			deletePressed();
 		}
 		else if(v.equals(binCombinedSMSView)){
 			stateChanged = false;
@@ -2024,7 +2174,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	    			resetAddingObjectDuringDeletion();
 		    		removeView(pointerView);
 	    		}
-	    		else if(!inDropRange){
+	    		else if(!inDropRange && viewBeingDragged != null){
 	    			viewBeingDragged.setAlpha(MainView.OPACITY_FULL);
 	    		}
 	    		inDropRange = false;

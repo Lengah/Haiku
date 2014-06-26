@@ -1,6 +1,7 @@
 package haiku.top.model.generator;
 
 
+import haiku.top.model.NonWordText;
 import haiku.top.model.Text;
 import haiku.top.model.Word;
 import haiku.top.model.WordAndNumber;
@@ -185,6 +186,7 @@ public class Haiku {
 		}
 		if(row == 3){
 			row3 = text;
+			row3.add(new NonWordText("."));
 			row3Added = true;
 		}
 		if(row1Added && row2Added && row3Added){

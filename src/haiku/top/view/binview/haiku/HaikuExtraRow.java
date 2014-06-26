@@ -36,6 +36,7 @@ public class HaikuExtraRow extends Row{
 	
 	public void reset(){
 		words.clear();
+		removeAllViews();
 	}
 	
 	public HaikuRowWord getWordAtPos(Position pos){

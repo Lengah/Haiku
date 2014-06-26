@@ -75,6 +75,8 @@ import android.view.Window;
 import android.widget.Toast;
 
 public class HaikuActivity extends Activity {
+	//android:theme="@style/Theme.AppCompat.CompactMenu"
+	//android:theme="@style/splashScreenTheme"
 	private static HaikuActivity ha;
 	private View mainView;
 //	private View createSamplesView; //createSamplesView <item android:id="@+id/samplecontent" android:title="Sample content" /> i options_menu.xml i res/menu
@@ -100,7 +102,7 @@ public class HaikuActivity extends Activity {
         super.onCreate(savedInstanceState);
         calculateHeightAndWidth();
         ha = this;
-//        createSamplesView = new CreateSamplesView(this); // createSamplesView
+//        createSamplesView = new CreateSamplesView(this); //createSamplesView
 //        initContactsAndSMS(this);
 //        vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
         
@@ -140,7 +142,7 @@ public class HaikuActivity extends Activity {
 		HaikuGenerator.init();
 		mainView = new MainView(this);
 		setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//		saveAllHaikuMessages();
+		saveAllHaikuMessages();
     }
     
     @Override
