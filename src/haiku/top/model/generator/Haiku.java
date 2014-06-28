@@ -186,7 +186,9 @@ public class Haiku {
 		}
 		if(row == 3){
 			row3 = text;
-			row3.add(new NonWordText("."));
+			if(row3 != null){
+				row3.add(new NonWordText("."));
+			}
 			row3Added = true;
 		}
 		if(row1Added && row2Added && row3Added){
