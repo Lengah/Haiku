@@ -13,8 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 import haiku.top.model.CreateSamplesContact;
+import haiku.top.model.ShareApp;
 import haiku.top.model.Theme;
 import haiku.top.model.date.Month;
 import haiku.top.model.date.YearMonth;
@@ -38,6 +41,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
+import android.content.pm.LabeledIntent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -59,6 +65,7 @@ import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.text.Html;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -72,6 +79,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
 public class HaikuActivity extends Activity {
@@ -80,7 +88,7 @@ public class HaikuActivity extends Activity {
 	private static HaikuActivity ha;
 	private View mainView;
 //	private View createSamplesView; //createSamplesView <item android:id="@+id/samplecontent" android:title="Sample content" /> i options_menu.xml i res/menu
-	private boolean inCreateSamplesView;
+//	private boolean inCreateSamplesView;
 	public static final String ALLBOXES = "content://sms/";
 	private static final String SORT_ORDER = "date DESC";
     private static final String SORT_ORDER_INV = "date ASC";
@@ -142,7 +150,7 @@ public class HaikuActivity extends Activity {
 		HaikuGenerator.init();
 		mainView = new MainView(this);
 		setContentView(mainView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		saveAllHaikuMessages();
+//		saveAllHaikuMessages();
     }
     
     @Override
@@ -285,6 +293,7 @@ public class HaikuActivity extends Activity {
 	    });
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
@@ -292,6 +301,7 @@ public class HaikuActivity extends Activity {
         return true;
     }
     
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case android.R.id.home:
@@ -402,19 +412,17 @@ public class HaikuActivity extends Activity {
         }
     }
     
-    public void shareMessage(String message){
-		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND); 
-	    sharingIntent.setType("text/plain");
-	    String shareBody = message + "\n";
-	    int spaces = message.length()/3;
-	    for(int i = 0; i < spaces; i++){
-	    	shareBody += " ";
-	    }
-	    shareBody += "-Haiku";
-	    sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
-	    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-	    startActivity(Intent.createChooser(sharingIntent, "Share via"));
+    public ArrayList<ShareApp> getAllShareApplications(){
+    	ArrayList<ShareApp> sas = new ArrayList<ShareApp>();
+    	Intent mainIntent = new Intent(Intent.ACTION_SEND, null);
+		mainIntent.setType("text/plain");
+		List<ResolveInfo> pkgAppsList = getPackageManager().queryIntentActivities( mainIntent, 0);
+		for(ResolveInfo ri : pkgAppsList){
+			sas.add(new ShareApp(ri.activityInfo.loadLabel(getPackageManager()).toString(), ri.activityInfo.loadIcon(getPackageManager()), ri.activityInfo.name, ri.activityInfo.packageName));
+		}
+		return sas;
     }
+    
     
     @Override
     public boolean onKeyDown(int keycode, KeyEvent event ) {
@@ -427,11 +435,16 @@ public class HaikuActivity extends Activity {
     }
     
     private void backPressed(){
-    	if(inCreateSamplesView){
-			setContentView(mainView);
-			inCreateSamplesView = false;
-			return;
-		}
+//    	if(inCreateSamplesView){
+//			setContentView(mainView);
+//			inCreateSamplesView = false;
+//			return;
+//		}
+    	
+    	if(MainView.getInstance().isShowingShare()){
+    		MainView.getInstance().closeShareView();
+    		return;
+    	}
     	 
 		ArrayList<Integer> states = MainView.getInstance().getViewsShown();
 		if (states.isEmpty()) {

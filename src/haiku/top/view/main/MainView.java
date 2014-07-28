@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 
+import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -56,6 +57,7 @@ import haiku.top.view.binview.BinView;
 import haiku.top.view.binview.HaikuProgressBar;
 import haiku.top.view.date.DateView;
 import haiku.top.view.main.sms.SMSObject;
+import haiku.top.view.share.ShareView;
 
 public class MainView extends RelativeLayout implements OnClickListener, OnLongClickListener, OnTouchListener{
 	private static MainView mv;
@@ -158,6 +160,10 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	private static final int THEME_ANIMATION_LENGTH = 200;
 	
+	private static final double SHARE_VIEW_MARGIN_TOP = 5.0;
+	private static final double SHARE_VIEW_MARGIN_SIDES = 5.0;
+	private ShareView shareView;
+	
 	public MainView(Context context) {
 		super(context);
 		this.context = context;
@@ -177,6 +183,16 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		shareTypeface = Typeface.createFromAsset(context.getAssets(), "fonts/AGARAMONDPRO-REGULAR.OTF");
 		
 		setBackgroundColor(BACKGROUND_COLOR_DEFAULT);
+		
+		shareView = new ShareView(context);
+		int shareMargintop = (int) (HaikuActivity.getInstance().getWindowHeight()*SHARE_VIEW_MARGIN_TOP/100.0);
+		int shareMarginSides = (int) (HaikuActivity.getInstance().getWindowWidth()*SHARE_VIEW_MARGIN_SIDES/100.0);
+		LayoutParams shareParams = new RelativeLayout.LayoutParams(HaikuActivity.getInstance().getWindowWidth()-2*shareMarginSides, LayoutParams.WRAP_CONTENT);
+		shareParams.setMargins(shareMarginSides, shareMargintop, shareMarginSides, shareMargintop);
+		shareParams.addRule(ALIGN_PARENT_RIGHT);
+		shareParams.addRule(ALIGN_PARENT_TOP);
+		shareView.setVisibility(View.GONE);
+		addView(shareView, shareParams);
 		
 		rightViewsWidth = HaikuActivity.convertDpToPixel((float) RIGHT_VIEWS_WIDTH);
 		int themeViewHeight = (int) (HaikuActivity.getInstance().getWindowHeight()*THEME_HEIGHT/100.0);
@@ -950,6 +966,24 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		return haikuBinViewSmall;
 	}
 	
+	private boolean isShowingShare = false;
+	
+	public void shareMessage(String message){
+		isShowingShare = true;
+		shareView.onOpen(message);
+		shareView.bringToFront();
+		shareView.setVisibility(View.VISIBLE);
+	}
+	
+	public void closeShareView(){
+		isShowingShare = false;
+		shareView.setVisibility(View.GONE);
+	}
+	
+	public boolean isShowingShare(){
+		return isShowingShare;
+	}
+	
 	private boolean namesListIsEnlarged = false;
 	
 	@Override
@@ -976,7 +1010,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		}
 		else if(lookingAtHaikus && v instanceof SMSObject){
 			// The user wants to share one of his haikus
-		    HaikuActivity.getInstance().shareMessage(((SMSObject)v).getSMS().getMessage());
+		    shareMessage(((SMSObject)v).getSMS().getMessage());
 		}
 	}
 
@@ -995,7 +1029,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		// Code for sharing
 		if(lookingAtHaikus && v instanceof SMSObject){
 			// The user wants to share one of his haikus
-		    HaikuActivity.getInstance().shareMessage(((SMSObject)v).getSMS().getMessage());
+		    shareMessage(((SMSObject)v).getSMS().getMessage());
 		}
 		return false;
 	}

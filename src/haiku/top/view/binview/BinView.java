@@ -1798,7 +1798,7 @@ public class BinView extends RelativeLayout implements OnClickListener, OnLongCl
 	}
 	
 	public void share(){
-		HaikuActivity.getInstance().shareMessage(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()).getHaikuPoem());
+		MainView.getInstance().shareMessage(new Haiku(haikuView.getRows().get(0).getWords(), haikuView.getRows().get(1).getWords(), haikuView.getRows().get(2).getWords()).getHaikuPoem());
 	}
 	
 	public void deletePressed(){

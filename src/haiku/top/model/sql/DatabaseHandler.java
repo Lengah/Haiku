@@ -31,7 +31,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 	private static DatabaseHandler dh;
 	private static String DB_PATH = "/data/data/haiku.top/databases/";
 	private static final String DB_NAME = "deletebyhaiku_db"; //file name
-	private SQLiteDatabase myDataBase;  
+	private SQLiteDatabase myDataBase;
 	private final Context myContext;
 	private static final int DATABASE_VERSION = 1; // Database Version
 	private static final String DATABASE_NAME = "deletebyhaiku_db"; // Database Name
