@@ -2,6 +2,7 @@ package haiku.top.view.share;
 
 import haiku.top.HaikuActivity;
 import haiku.top.model.ShareApp;
+import haiku.top.view.binview.BinView;
 import haiku.top.view.main.MainView;
 
 import java.util.ArrayList;
@@ -86,15 +87,23 @@ public class ShareView extends LinearLayout implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		if(v instanceof ShareElementView){
-			Intent intent = new Intent(Intent.ACTION_SEND);
-			intent.setType("text/plain");
-		    intent.putExtra(android.content.Intent.EXTRA_SUBJECT, SHARE_SUBJECT);
-		    intent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
-		    intent.setClassName(((ShareElementView)v).getShareApp().getPackageName(), ((ShareElementView)v).getShareApp().getActivityInfoName());
-		    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-		    HaikuActivity.getInstance().startActivity(intent);
-		    
+//			if(((ShareElementView)v).getShareApp().getPackageName().contains("facebook")){
+//			}
+//			else{
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("text/plain");
+			    intent.putExtra(android.content.Intent.EXTRA_SUBJECT, SHARE_SUBJECT);
+			    intent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+			    intent.setClassName(((ShareElementView)v).getShareApp().getPackageName(), ((ShareElementView)v).getShareApp().getActivityInfoName());
+			    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+			    HaikuActivity.getInstance().startActivity(intent);
+//			}
+				
 		    MainView.getInstance().closeShareView();
+		    
+		    if(BinView.getInstance().isShowingHaiku()){
+		    	BinView.getInstance().save();
+		    }
 		}
 	}
 	
