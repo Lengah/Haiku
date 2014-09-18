@@ -1137,19 +1137,24 @@ containing a value of this type.
         public static final int haiku_demomode=0x7f02005f;
         public static final int haikubin_extended=0x7f020060;
         public static final int haikubin_small=0x7f020061;
-        public static final int rounded_corners=0x7f020062;
-        public static final int rounded_corners_sent=0x7f020063;
-        public static final int save_button=0x7f020064;
-        public static final int save_button_default=0x7f020065;
-        public static final int save_button_over=0x7f020066;
-        public static final int save_button_pressed=0x7f020067;
-        public static final int share_button=0x7f020068;
-        public static final int share_button_default=0x7f020069;
-        public static final int share_button_over=0x7f02006a;
-        public static final int share_button_pressed=0x7f02006b;
-        public static final int slider_dot=0x7f02006c;
-        public static final int slider_line=0x7f02006d;
-        public static final int splash_screen=0x7f02006e;
+        public static final int instructions_pic_01=0x7f020062;
+        public static final int instructions_pic_02=0x7f020063;
+        public static final int instructions_pic_03=0x7f020064;
+        public static final int instructions_pic_04=0x7f020065;
+        public static final int instructions_pic_05=0x7f020066;
+        public static final int rounded_corners=0x7f020067;
+        public static final int rounded_corners_sent=0x7f020068;
+        public static final int save_button=0x7f020069;
+        public static final int save_button_default=0x7f02006a;
+        public static final int save_button_over=0x7f02006b;
+        public static final int save_button_pressed=0x7f02006c;
+        public static final int share_button=0x7f02006d;
+        public static final int share_button_default=0x7f02006e;
+        public static final int share_button_over=0x7f02006f;
+        public static final int share_button_pressed=0x7f020070;
+        public static final int slider_dot=0x7f020071;
+        public static final int slider_line=0x7f020072;
+        public static final int splash_screen=0x7f020073;
     }
     public static final class id {
         public static final int ContactLayout=0x7f050048;
@@ -1184,6 +1189,7 @@ containing a value of this type.
         public static final int end=0x7f050013;
         public static final int expand_activities_button=0x7f050026;
         public static final int expanded_menu=0x7f05002c;
+        public static final int help=0x7f05005c;
         public static final int home=0x7f050014;
         public static final int homeAsUp=0x7f050005;
         public static final int icon=0x7f05002a;

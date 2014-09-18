@@ -1,4 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
         
 <item android:id="@+id/safemode" android:title="Safe mode" />
+<item android:id="@+id/help" android:title="Instructions" />
 </menu>

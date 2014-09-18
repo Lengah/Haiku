@@ -86,7 +86,7 @@ public class HaikuActivity extends Activity {
 	//android:theme="@style/Theme.AppCompat.CompactMenu"
 	//android:theme="@style/splashScreenTheme"
 	private static HaikuActivity ha;
-	private View mainView;
+	private MainView mainView;
 //	private View createSamplesView; //createSamplesView <item android:id="@+id/samplecontent" android:title="Sample content" /> i options_menu.xml i res/menu
 //	private boolean inCreateSamplesView;
 	public static final String ALLBOXES = "content://sms/";
@@ -292,6 +292,10 @@ public class HaikuActivity extends Activity {
 	        }
 	    });
     }
+    
+    public void showHelpWindow(){
+    	mainView.showHelpView();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -311,102 +315,105 @@ public class HaikuActivity extends Activity {
 //       	 setContentView(createSamplesView);
 //       	 inCreateSamplesView = true;
 //       	 return true;
+        case R.id.help:
+        	showHelpWindow();
+        	return true;
         case R.id.safemode:
         
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-		alertDialogBuilder.setTitle("Safe mode");
-			
-		if (safeMode) {
-		alertDialogBuilder
-			.setMessage("No SMS will be deleted if Safe mode is ON, but will be deleted if it is OFF.\n\nSafe mode is currently ON. Turn it OFF?")
-			.setCancelable(false)
-			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					safeMode = false;
-					
-					AlertDialog.Builder builder = new AlertDialog.Builder(HaikuActivity.getInstance());
-					builder.setMessage("Safe mode is now OFF, SMS will be deleted.")
-					       .setCancelable(false)
-					       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					           public void onClick(DialogInterface dialog, int id) {
-					        	   dialog.cancel();
-					           }
-					       });
-					AlertDialog alert = builder.create();
-					alert.show();
-					
-					dialog.cancel();
-				}
-			  })
-			.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
-			}
-		else {
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+			alertDialogBuilder.setTitle("Safe mode");
+				
+			if (safeMode) {
 			alertDialogBuilder
-			.setMessage("No SMS will be deleted if Safe mode is ON, but will be deleted if it is OFF.\n\nSafe mode is currently OFF. Turn it ON?")
-			.setCancelable(false)
-			.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					safeMode = true;
-					
-					AlertDialog.Builder builder = new AlertDialog.Builder(HaikuActivity.getInstance());
-					builder.setMessage("Safe mode is now ON, SMS will NOT be deleted.")
-					       .setCancelable(false)
-					       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					           public void onClick(DialogInterface dialog, int id) {
-					        	   dialog.cancel();
-					           }
-					       });
-					AlertDialog alert = builder.create();
-					alert.show();
-					
-					dialog.cancel();
-				}
-			  })
-			.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+				.setMessage("No SMS will be deleted if Safe mode is ON, but will be deleted if it is OFF.\n\nSafe mode is currently ON. Turn it OFF?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						safeMode = false;
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(HaikuActivity.getInstance());
+						builder.setMessage("Safe mode is now OFF, SMS will be deleted.")
+						       .setCancelable(false)
+						       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						           public void onClick(DialogInterface dialog, int id) {
+						        	   dialog.cancel();
+						           }
+						       });
+						AlertDialog alert = builder.create();
+						alert.show();
+						
 						dialog.cancel();
 					}
-				});	
-		}
- 
-		AlertDialog alertDialog = alertDialogBuilder.create();
-		alertDialog.show();
-        return true;
-        //----------------------------------------------------------------------------------------------------------------------
-       	 //test database
-/*       	 if (databaseHandler.getWord("upplands-väsb") != null) 
-           	 //Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
-       	 else
-       		 //Log.i("test", "upplands-väsb not found in dictionary"); //this happens
-       	 
-       	 if (databaseHandler.getWord("upplands-väsby") != null)
-           	 //Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
-       	 else
-       		 //Log.i("test", "upplands-väsby not found in dictionary");
-       	 
-       	 if (databaseHandler.getWord("asks") != null)
-       	 {
-       		//Log.i("test", "partofspeech in word \"asks\":");
-           	ArrayList<String> wordtypes = new ArrayList<String>(databaseHandler.getWord("asks").getwordTypes()); //get partofspeechs from a word
-           	for (String s : wordtypes)
-           		//Log.i("test", s);
-       	 }
-       	 	 
-          	ArrayList<String> wordsids = databaseHandler.getWordsInSMS("2327");
-          	//Log.i("wordinsms", wordsids.size() + "");
-          	for (String id : wordsids)
-          		//Log.i("wordsinsms", databaseHandler.getWordTextFromID(id));
-          	
-          	ArrayList<Theme> themes = databaseHandler.getAllThemes();
-          	for (Theme t : themes)
-          		//Log.i("themes", t.getName());
-          	 
-   //----------------------------------------------------------------------------------------------------------------------	
-        */
+				  })
+				.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+				}
+			else {
+				alertDialogBuilder
+				.setMessage("No SMS will be deleted if Safe mode is ON, but will be deleted if it is OFF.\n\nSafe mode is currently OFF. Turn it ON?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						safeMode = true;
+						
+						AlertDialog.Builder builder = new AlertDialog.Builder(HaikuActivity.getInstance());
+						builder.setMessage("Safe mode is now ON, SMS will NOT be deleted.")
+						       .setCancelable(false)
+						       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						           public void onClick(DialogInterface dialog, int id) {
+						        	   dialog.cancel();
+						           }
+						       });
+						AlertDialog alert = builder.create();
+						alert.show();
+						
+						dialog.cancel();
+					}
+				  })
+				.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});	
+			}
+	 
+			AlertDialog alertDialog = alertDialogBuilder.create();
+			alertDialog.show();
+	        return true;
+	        //----------------------------------------------------------------------------------------------------------------------
+	       	 //test database
+	/*       	 if (databaseHandler.getWord("upplands-väsb") != null) 
+	           	 //Log.i("test", databaseHandler.getWord("upplands-väsb").getNumberOfSyllables() + "");
+	       	 else
+	       		 //Log.i("test", "upplands-väsb not found in dictionary"); //this happens
+	       	 
+	       	 if (databaseHandler.getWord("upplands-väsby") != null)
+	           	 //Log.i("test", databaseHandler.getWord("upplands-väsby").getNumberOfSyllables() + ""); //this happens
+	       	 else
+	       		 //Log.i("test", "upplands-väsby not found in dictionary");
+	       	 
+	       	 if (databaseHandler.getWord("asks") != null)
+	       	 {
+	       		//Log.i("test", "partofspeech in word \"asks\":");
+	           	ArrayList<String> wordtypes = new ArrayList<String>(databaseHandler.getWord("asks").getwordTypes()); //get partofspeechs from a word
+	           	for (String s : wordtypes)
+	           		//Log.i("test", s);
+	       	 }
+	       	 	 
+	          	ArrayList<String> wordsids = databaseHandler.getWordsInSMS("2327");
+	          	//Log.i("wordinsms", wordsids.size() + "");
+	          	for (String id : wordsids)
+	          		//Log.i("wordsinsms", databaseHandler.getWordTextFromID(id));
+	          	
+	          	ArrayList<Theme> themes = databaseHandler.getAllThemes();
+	          	for (Theme t : themes)
+	          		//Log.i("themes", t.getName());
+	          	 
+	   //----------------------------------------------------------------------------------------------------------------------	
+	        */
         default:
         return super.onOptionsItemSelected(item);
         }
@@ -443,6 +450,11 @@ public class HaikuActivity extends Activity {
     	
     	if(MainView.getInstance().isShowingShare()){
     		MainView.getInstance().closeShareView();
+    		return;
+    	}
+    	
+    	if(MainView.getInstance().isShowingInstructions()){
+    		MainView.getInstance().closeHelpView();
     		return;
     	}
     	 

@@ -52,6 +52,7 @@ import haiku.top.model.generator.Theme_ThreadID_Tuple;
 import haiku.top.model.smshandler.SMS;
 import haiku.top.model.smshandler.ShowSMSESThread;
 import haiku.top.model.sql.DatabaseHandler;
+import haiku.top.view.HelpView;
 import haiku.top.view.ThemeObjectView;
 import haiku.top.view.binview.BinView;
 import haiku.top.view.binview.HaikuProgressBar;
@@ -163,6 +164,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private static final double SHARE_VIEW_MARGIN_TOP = 5.0;
 	private static final double SHARE_VIEW_MARGIN_SIDES = 5.0;
 	private ShareView shareView;
+	private HelpView helpView;
 	
 	public MainView(Context context) {
 		super(context);
@@ -193,6 +195,14 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		shareParams.addRule(ALIGN_PARENT_TOP);
 		shareView.setVisibility(View.GONE);
 		addView(shareView, shareParams);
+		
+		helpView = new HelpView(context, this);
+		LayoutParams helpParams = new RelativeLayout.LayoutParams(HaikuActivity.getInstance().getWindowWidth()-2*shareMarginSides, LayoutParams.WRAP_CONTENT);
+		helpParams.setMargins(shareMarginSides, shareMargintop, shareMarginSides, shareMargintop);
+		helpParams.addRule(ALIGN_PARENT_RIGHT);
+		helpParams.addRule(ALIGN_PARENT_TOP);
+		helpView.setVisibility(View.GONE);
+		addView(helpView, helpParams);
 		
 		rightViewsWidth = HaikuActivity.convertDpToPixel((float) RIGHT_VIEWS_WIDTH);
 		int themeViewHeight = (int) (HaikuActivity.getInstance().getWindowHeight()*THEME_HEIGHT/100.0);
@@ -439,6 +449,24 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public static synchronized MainView getInstance(){
 		return mv;
+	}
+	
+	private boolean isShowingInstructions = false;
+	
+	public void showHelpView(){
+		isShowingInstructions = true;
+		helpView.bringToFront();
+		helpView.onOpen();
+		helpView.setVisibility(View.VISIBLE);
+	}
+	
+	public void closeHelpView(){
+		isShowingInstructions = false;
+		helpView.setVisibility(View.GONE);
+	}
+	
+	public boolean isShowingInstructions(){
+		return isShowingInstructions;
 	}
 	
 	public Typeface getHaikuTypeface(){
