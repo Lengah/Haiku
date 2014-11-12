@@ -155,7 +155,6 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	private LayoutParams fillerParams;
 	private float fillerHeight;
 	
-	//TODO
 	private TranslateAnimation themeCloseAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, (float) 0.0, Animation.RELATIVE_TO_SELF, (float) (1-THEME_SMALL_WIDTH/100.0), Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
 	private TranslateAnimation themeOpenAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, (float) (1-THEME_SMALL_WIDTH/100.0), Animation.RELATIVE_TO_SELF, (float) 0.0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0);
 	
@@ -196,8 +195,11 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		shareView.setVisibility(View.GONE);
 		addView(shareView, shareParams);
 		
-		helpView = new HelpView(context, this);
-		LayoutParams helpParams = new RelativeLayout.LayoutParams(HaikuActivity.getInstance().getWindowWidth()-2*shareMarginSides, LayoutParams.WRAP_CONTENT);
+		int helpViewWidth = HaikuActivity.getInstance().getWindowWidth()-2*shareMarginSides;
+		int helpViewHeight = HaikuActivity.getInstance().getWindowHeight()-2*shareMargintop;
+		
+		helpView = new HelpView(context, this, helpViewWidth, helpViewHeight);
+		LayoutParams helpParams = new RelativeLayout.LayoutParams(helpViewWidth, helpViewHeight);
 		helpParams.setMargins(shareMarginSides, shareMargintop, shareMarginSides, shareMargintop);
 		helpParams.addRule(ALIGN_PARENT_RIGHT);
 		helpParams.addRule(ALIGN_PARENT_TOP);
@@ -364,6 +366,9 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 		dateView.bringToFront();
 
 		haikuBinViewExtended.bringToFront();
+		helpView.bringToFront();
+//		openBinView();
+//		closeBinView();
 		
 		
 		// Needed for when the user closes the program and then later opens it
@@ -455,7 +460,7 @@ public class MainView extends RelativeLayout implements OnClickListener, OnLongC
 	
 	public void showHelpView(){
 		isShowingInstructions = true;
-		helpView.bringToFront();
+//		helpView.bringToFront();
 		helpView.onOpen();
 		helpView.setVisibility(View.VISIBLE);
 	}

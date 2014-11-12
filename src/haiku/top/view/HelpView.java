@@ -56,21 +56,25 @@ public class HelpView extends LinearLayout implements OnClickListener{
 	private static final double RATIO_4 = 1066.0/1500.0; 
 	private static final double RATIO_5 = 1248.0/1500.0; 
 
-	public HelpView(Context context, MainView mainView) {
+	public HelpView(Context context, MainView mainView, int width, int height) {
 		super(context);
 		this.mainView = mainView;
 		setOrientation(VERTICAL);
 		setBackgroundColor(COLOR_BACKGROUND);
 		
-		addOnLayoutChangeListener(new OnLayoutChangeListener() {
-			
-			@Override
-			public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-				viewWidth = v.getWidth();
-				viewHeight = v.getHeight();
-				update();
-			}
-		});
+//		addOnLayoutChangeListener(new OnLayoutChangeListener() {
+//			
+//			@Override
+//			public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+//				viewWidth = v.getWidth();
+//				viewHeight = v.getHeight();
+//				update();
+//			}
+//		});
+		
+		viewWidth = width;
+		viewHeight = height;
+		update();
 	}
 	
 	public void onOpen(){
