@@ -39,7 +39,9 @@ public class LetterSpacingTextView extends TextView {
 
     @Override
     public void setText(CharSequence text, BufferType type) {
-        originalText = text;
+    	if(text != null){
+    		originalText = text;
+    	}
         applyLetterSpacing();
     }
 
@@ -50,6 +52,9 @@ public class LetterSpacingTextView extends TextView {
     
     private void applyLetterSpacing() {
         StringBuilder builder = new StringBuilder();
+        if(originalText == null){
+        	originalText = "";
+        }
         for(int i = 0; i < originalText.length(); i++) {
             builder.append(originalText.charAt(i));
             if(i+1 < originalText.length()) {
